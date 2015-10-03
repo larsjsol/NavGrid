@@ -16,6 +16,8 @@ ANavGrid::ANavGrid()
 
 	SceneComponent = CreateDefaultSubobject<USceneComponent>("RootComponent");
 	RootComponent = SceneComponent;
+
+	AssignDefaultAssets();
 }
 
 // Called when the game starts or when spawned
@@ -40,14 +42,14 @@ void ANavGrid::OnConstruction(const FTransform &Transform)
 	AdjustNumberOfTiles();
 
 	// apply the default mesh if it is set
-	if (DefaultMesh)
+
+	for (ATile *Tile : Tiles)
 	{
-		for (ATile *Tile : Tiles)
+		if (Tile)
 		{
-			if (Tile)
-			{
-				Tile->Mesh->SetStaticMesh(DefaultMesh);
-			}
+			if (DefaultTileMesh) { Tile->Mesh->SetStaticMesh(DefaultTileMesh); }
+			if (DefaultHoverCursor) { Tile->HoverCursor->SetStaticMesh(DefaultHoverCursor); }
+			if (DefaultSelectCursor) { Tile->SelectCursor->SetStaticMesh(DefaultSelectCursor); }
 		}
 	}
 }
@@ -123,11 +125,50 @@ void ANavGrid::AdjustNumberOfTiles()
 
 void ANavGrid::TileClicked(ATile *Tile)
 {
-
+	if (SelectedTile)
+	{
+		SelectedTile->SelectCursor->SetVisibility(false);
+	}
+	Tile->SelectCursor->SetVisibility(true);
+	SelectedTile = Tile;
 }
-
 
 void ANavGrid::TileCursorOver(ATile *Tile)
 {
-	
+	if (HoveredTile)
+	{
+		HoveredTile->HoverCursor->SetVisibility(false);
+	}
+	Tile->HoverCursor->SetVisibility(true);
+	HoveredTile = Tile;
+}
+
+void ANavGrid::AssignDefaultAssets()
+{
+	// FIXME: DRY this up
+
+	if (!DefaultTileMesh)
+	{
+		auto TM = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_Square.SM_Tile_Square'"));
+		if (TM.Succeeded())
+		{
+			DefaultTileMesh = TM.Object;
+		}
+	}
+	if (!DefaultHoverCursor)
+	{
+		auto HC = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Frame_Hover.SM_Frame_Hover'"));
+		if (HC.Succeeded())
+		{
+			DefaultHoverCursor = HC.Object;
+		}
+	}
+	if (!DefaultSelectCursor)
+	{
+		auto SC = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Frame_Current_Unit.SM_Frame_Current_Unit'"));
+		if (SC.Succeeded())
+		{
+			DefaultSelectCursor = SC.Object;
+		}
+	}
 }

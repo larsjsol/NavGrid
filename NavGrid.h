@@ -35,11 +35,11 @@ public:
 	virtual FVector LocalPosition(int32 X, int32 Y);
 
 	/* Default tile mesh */
-	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultMesh = NULL;
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultTileMesh = NULL;
 	/* Shown when the mouse cursor hovers a tile */
-	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *HoverCursor = NULL;
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultHoverCursor = NULL;
 	/* Shown when a tile is selected */
-	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *SelectCursor = NULL;
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultSelectCursor = NULL;
 
 	/* Sceene Coponent (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
@@ -51,9 +51,16 @@ public:
 	UFUNCTION() virtual void TileClicked(ATile *Tile);
 	UFUNCTION() virtual void TileCursorOver(ATile *Tile);
 
-private:
+protected:
 	/* Holds the actual tiles */
 	UPROPERTY() TArray<ATile *> Tiles;
 	/* Create or destroy tiles so we have XSize * YSize */
 	virtual void AdjustNumberOfTiles();
+	/* Assign default assests to the tiles and ui elemtents, they remain NULL pointers if they are not found */
+	virtual void AssignDefaultAssets();
+
+	/* Last tile that was hovered */
+	UPROPERTY() ATile *HoveredTile = NULL;
+	/* Last tile that was selected */
+	UPROPERTY() ATile *SelectedTile = NULL;
 };

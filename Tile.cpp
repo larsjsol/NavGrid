@@ -12,6 +12,20 @@ ATile::ATile()
 	RootComponent = SceneComponent;
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
 	Mesh->AttachParent = SceneComponent;
+	HoverCursor = CreateDefaultSubobject<UStaticMeshComponent>("HoverCursor");
+	HoverCursor->AttachParent = SceneComponent;
+	SelectCursor = CreateDefaultSubobject<UStaticMeshComponent>("SelectCursor");
+	SelectCursor->AttachParent = SceneComponent;
+
+	// position and hide ui elements
+	FTransform UIOffset;
+	UIOffset.SetLocation(FVector(0, 0, 10));
+	HoverCursor->AddLocalTransform(UIOffset);
+	SelectCursor->AddLocalTransform(UIOffset);
+	HoverCursor->SetVisibility(false);
+	SelectCursor->SetVisibility(false);
+	
+	// bind click events
 	OnClicked.AddDynamic(this, &ATile::Clicked);
 	OnBeginCursorOver.AddDynamic(this, &ATile::CursorOver);
 }
@@ -40,4 +54,9 @@ void ATile::CursorOver()
 	{
 		UE_LOG(NavGrid, Error, TEXT("%s.CursorOver(): Unable to find owning NavGrid"), *GetName());
 	}
+}
+
+void ATile::Highlight(UStaticMesh *HighlightMesh)
+{
+	
 }

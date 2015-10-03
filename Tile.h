@@ -26,9 +26,18 @@ public:
 	/* Scene component (root) */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	USceneComponent *SceneComponent = NULL;
-	/* The mesh */
+	/* The tile mesh */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UStaticMeshComponent *Mesh = NULL;
+	/* Cursor for highlighting the selected tile */
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
+	UStaticMeshComponent *SelectCursor = NULL;
+	/* Cursor for highlighting the hovered tile */
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
+	UStaticMeshComponent *HoverCursor = NULL;
+
+	/* Draw a mesh hovering this tile */
+	void Highlight(UStaticMesh *HighlightMesh);
 private:
 	UFUNCTION() void Clicked();
 	UFUNCTION() void CursorOver();
