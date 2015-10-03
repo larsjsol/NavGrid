@@ -31,7 +31,7 @@ public:
 	/* Height in tiles */
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Tiles") int32 YSize = 3;
 
-	/* Convert NavGrid space coords to offset from actorlocation */
+	/* Convert NavGrid space coords to an offset from actorlocation */
 	virtual FVector LocalPosition(int32 X, int32 Y);
 
 	/* Default tile mesh */
@@ -41,7 +41,7 @@ public:
 	/* Shown when a tile is selected */
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultSelectCursor = NULL;
 
-	/* Sceene Coponent (root) */
+	/* Scene Component (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
 
 	/* Get tile from coords, may return NULL */
@@ -56,7 +56,9 @@ protected:
 	UPROPERTY() TArray<ATile *> Tiles;
 	/* Create or destroy tiles so we have XSize * YSize */
 	virtual void AdjustNumberOfTiles();
-	/* Assign default assests to the tiles and ui elemtents, they remain NULL pointers if they are not found */
+	/* 
+	Assign default assests to the tiles and ui elemtents, they remain unchanged if the assets are not found 
+	*/
 	virtual void AssignDefaultAssets();
 
 	/* Last tile that was hovered */
