@@ -16,14 +16,26 @@ ATile::ATile()
 	HoverCursor->AttachParent = SceneComponent;
 	SelectCursor = CreateDefaultSubobject<UStaticMeshComponent>("SelectCursor");
 	SelectCursor->AttachParent = SceneComponent;
+	MovableHighlight = CreateDefaultSubobject<UStaticMeshComponent>("MovableHighlight");
+	MovableHighlight->AttachParent = SceneComponent;
+	DangerousHighlight = CreateDefaultSubobject<UStaticMeshComponent>("DangerousHighlight");
+	DangerousHighlight->AttachParent = SceneComponent;
+	SpecialHighlight = CreateDefaultSubobject<UStaticMeshComponent>("SpecialHighlight");
+	SpecialHighlight->AttachParent = SceneComponent;
 
 	// position and hide ui elements
 	FTransform UIOffset;
 	UIOffset.SetLocation(FVector(0, 0, 10));
 	HoverCursor->AddLocalTransform(UIOffset);
 	SelectCursor->AddLocalTransform(UIOffset);
+	MovableHighlight->AddLocalTransform(UIOffset);
+	DangerousHighlight->AddLocalTransform(UIOffset);
+	SpecialHighlight->AddLocalTransform(UIOffset);
 	HoverCursor->SetVisibility(false);
 	SelectCursor->SetVisibility(false);
+	MovableHighlight->SetVisibility(false);
+	DangerousHighlight->SetVisibility(false);
+	SpecialHighlight->SetVisibility(false);
 	
 	// bind click events
 	OnClicked.AddDynamic(this, &ATile::Clicked);

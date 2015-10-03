@@ -50,6 +50,9 @@ void ANavGrid::OnConstruction(const FTransform &Transform)
 			if (DefaultTileMesh) { Tile->Mesh->SetStaticMesh(DefaultTileMesh); }
 			if (DefaultHoverCursor) { Tile->HoverCursor->SetStaticMesh(DefaultHoverCursor); }
 			if (DefaultSelectCursor) { Tile->SelectCursor->SetStaticMesh(DefaultSelectCursor); }
+			if (DefaultMovableHighlight) { Tile->MovableHighlight->SetStaticMesh(DefaultMovableHighlight); }
+			if (DefaultDangerousHighlight) { Tile->DangerousHighlight->SetStaticMesh(DefaultDangerousHighlight); }
+			if (DefaultSpecialHighlight) { Tile->SpecialHighlight->SetStaticMesh(DefaultSpecialHighlight); }
 		}
 	}
 }
@@ -131,6 +134,21 @@ void ANavGrid::TileClicked(ATile *Tile)
 	}
 	Tile->SelectCursor->SetVisibility(true);
 	SelectedTile = Tile;
+
+	//remove all existing highlisghts and highlight the neihbours
+	for (ATile *T : Tiles)
+	{
+		if (T)
+		{
+			T->MovableHighlight->SetVisibility(false);
+		}
+	}
+	TArray<ATile *> N;
+	Neighbours(Tile, N);
+	for (ATile *T : N)
+	{
+		T->MovableHighlight->SetVisibility(true);
+	}
 }
 
 void ANavGrid::TileCursorOver(ATile *Tile)
@@ -143,32 +161,39 @@ void ANavGrid::TileCursorOver(ATile *Tile)
 	HoveredTile = Tile;
 }
 
+void ANavGrid::Neighbours(ATile *Tile, TArray<ATile*> &OutArray)
+{
+	OutArray.Empty();
+	if (Tile)
+	{
+		for (int X = Tile->X - 1; X <= Tile->X + 1; X++)
+		{
+			for (int Y = Tile->Y - 1; Y <= Tile->Y + 1; Y++)
+			{
+				// skip the starting tile
+				if (X != Tile->X || Y != Tile->Y)
+				{
+					ATile *N = GetTile(X, Y);
+					if (N) { OutArray.Add(N); }
+				}
+			}
+		}
+	}
+}
+
 void ANavGrid::AssignDefaultAssets()
 {
-	// FIXME: DRY this up
+	SetSM(&DefaultTileMesh, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_Square.SM_Tile_Square'"));
+	SetSM(&DefaultHoverCursor, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Frame_Hover.SM_Frame_Hover'"));
+	SetSM(&DefaultSelectCursor, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Frame_Current_Unit.SM_Frame_Current_Unit'"));
+	SetSM(&DefaultMovableHighlight, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_In_Move_Range_Square.SM_Tile_In_Move_Range_Square'"));
+	SetSM(&DefaultDangerousHighlight, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_In_Sight_Range_Square.SM_Tile_In_Sight_Range_Square'"));
+	SetSM(&DefaultSpecialHighlight, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_In_Long_Move_Range.SM_Tile_In_Long_Move_Range'"));
+}
 
-	if (!DefaultTileMesh)
-	{
-		auto TM = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_Square.SM_Tile_Square'"));
-		if (TM.Succeeded())
-		{
-			DefaultTileMesh = TM.Object;
-		}
-	}
-	if (!DefaultHoverCursor)
-	{
-		auto HC = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Frame_Hover.SM_Frame_Hover'"));
-		if (HC.Succeeded())
-		{
-			DefaultHoverCursor = HC.Object;
-		}
-	}
-	if (!DefaultSelectCursor)
-	{
-		auto SC = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Frame_Current_Unit.SM_Frame_Current_Unit'"));
-		if (SC.Succeeded())
-		{
-			DefaultSelectCursor = SC.Object;
-		}
-	}
+void ANavGrid::SetSM(UStaticMesh **Meshptr, const TCHAR* AssetReference)
+{
+	
+	auto OF = ConstructorHelpers::FObjectFinder<UStaticMesh>(AssetReference);
+	if (OF.Succeeded()) { *Meshptr = OF.Object;  }
 }

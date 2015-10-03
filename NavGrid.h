@@ -40,6 +40,12 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultHoverCursor = NULL;
 	/* Shown when a tile is selected */
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultSelectCursor = NULL;
+	/* Highlight for movable tiles */
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultMovableHighlight = NULL;
+	/* Highlight for dangerous tiles*/
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultDangerousHighlight = NULL;
+	/* Special highlight */
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultSpecialHighlight = NULL;
 
 	/* Scene Component (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
@@ -51,6 +57,8 @@ public:
 	UFUNCTION() virtual void TileClicked(ATile *Tile);
 	UFUNCTION() virtual void TileCursorOver(ATile *Tile);
 
+	/* Find all tiles adjacent to Tile */
+	virtual void Neighbours(ATile *Tile, TArray<ATile*> &OutArray);
 protected:
 	/* Holds the actual tiles */
 	UPROPERTY() TArray<ATile *> Tiles;
@@ -60,6 +68,8 @@ protected:
 	Assign default assests to the tiles and ui elemtents, they remain unchanged if the assets are not found 
 	*/
 	virtual void AssignDefaultAssets();
+	/* Assign assetreference to Meshpointer, do nothing if the asset is not found */
+	void SetSM(UStaticMesh **Meshptr, const TCHAR* AssetReference);
 
 	/* Last tile that was hovered */
 	UPROPERTY() ATile *HoveredTile = NULL;

@@ -35,9 +35,16 @@ public:
 	/* Cursor for highlighting the hovered tile */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UStaticMeshComponent *HoverCursor = NULL;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
+	UStaticMeshComponent *MovableHighlight = NULL;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
+	UStaticMeshComponent *DangerousHighlight = NULL;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
+	UStaticMeshComponent *SpecialHighlight = NULL;
 
 	/* Draw a mesh hovering this tile */
 	void Highlight(UStaticMesh *HighlightMesh);
+
 private:
 	UFUNCTION() void Clicked();
 	UFUNCTION() void CursorOver();
