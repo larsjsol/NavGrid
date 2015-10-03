@@ -36,6 +36,10 @@ public:
 
 	/* Default tile mesh */
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultMesh = NULL;
+	/* Shown when the mouse cursor hovers a tile */
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *HoverCursor = NULL;
+	/* Shown when a tile is selected */
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *SelectCursor = NULL;
 
 	/* Sceene Coponent (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
@@ -43,6 +47,9 @@ public:
 	/* Get tile from coords, may return NULL */
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "Tiles")
 	virtual ATile *GetTile(int32 X, int32 Y);
+
+	UFUNCTION() virtual void TileClicked(ATile *Tile);
+	UFUNCTION() virtual void TileCursorOver(ATile *Tile);
 
 private:
 	/* Holds the actual tiles */

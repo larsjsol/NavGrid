@@ -29,4 +29,7 @@ public:
 	/* The mesh */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UStaticMeshComponent *Mesh = NULL;
+private:
+	UFUNCTION() void Clicked();
+	UFUNCTION() void CursorOver();
 };

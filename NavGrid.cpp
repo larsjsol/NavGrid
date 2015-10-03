@@ -120,3 +120,14 @@ void ANavGrid::AdjustNumberOfTiles()
 		}
 	}
 }
+
+void ANavGrid::TileClicked(ATile *Tile)
+{
+
+}
+
+
+void ANavGrid::TileCursorOver(ATile *Tile)
+{
+	
+}
