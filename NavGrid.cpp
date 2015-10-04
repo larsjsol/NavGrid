@@ -204,7 +204,7 @@ void ANavGrid::TilesInRange(ATile *Tile, TArray<ATile *> &OutArray, float Range)
 	while (Current)
 	{
 		Neighbours(Current, NeighbouringTiles);
-		for (UPROPERTY() ATile *N : NeighbouringTiles)
+		for (ATile *N : NeighbouringTiles)
 		{
 			if (!N->Visited)
 			{
@@ -241,7 +241,7 @@ void ANavGrid::TilesInRange(ATile *Tile, TArray<ATile *> &OutArray, float Range)
 		}
 		Current->Visited = true;
 		TentativeSet.Remove(Current);
-		OutArray.Add(Current);
+		if (Current != Tile) { OutArray.Add(Current); } // dont include the starting tile
 		if (TentativeSet.Num())
 		{
 			Current = TentativeSet[0];
