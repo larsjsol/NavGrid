@@ -60,6 +60,9 @@ public:
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "Tiles")
 	virtual ATile *GetTile(int32 X, int32 Y);
 
+	/* Tile height */
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Tiles") bool ShowHoverCursor = true;
+
 	void TileClicked(ATile &Tile);
 	void TileCursorOver(ATile &Tile);
 

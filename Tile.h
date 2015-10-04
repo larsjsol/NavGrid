@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "Tile.generated.h"
 
+class ANavGrid;
 /**
  * 
  */
@@ -12,9 +13,11 @@ UCLASS()
 class BOARDGAME_API ATile : public AActor
 {
 	GENERATED_BODY()
-	
+
 public:
 	ATile();
+
+	virtual void BeginPlay() override;
 
 	/* Cost of moving into this tile*/
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Tile") float Cost = 1;
@@ -50,14 +53,18 @@ public:
 	UStaticMeshComponent *DangerousHighlight = NULL;
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UStaticMeshComponent *SpecialHighlight = NULL;
-	/*  */
+	/* Backpointer arrow */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UStaticMeshComponent *BackpointerMesh = NULL;
 
 	UFUNCTION(BlueprintCallable, Category = "Visualization")
 	void SetBackpointerVisibility(bool Visible);
 
+	/* The grid this tile is part of */
+	UPROPERTY(BlueprintReadOnly, Category = "Tile") ANavGrid *Grid = NULL;
+
 private:
 	UFUNCTION() void Clicked();
 	UFUNCTION() void CursorOver();
+	UFUNCTION() void EndCursorOver();
 };

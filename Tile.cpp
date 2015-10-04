@@ -49,6 +49,20 @@ ATile::ATile()
 	// bind click events
 	OnClicked.AddDynamic(this, &ATile::Clicked);
 	OnBeginCursorOver.AddDynamic(this, &ATile::CursorOver);
+	OnEndCursorOver.AddDynamic(this, &ATile::EndCursorOver);
+}
+
+void ATile::BeginPlay()
+{
+	Grid = CastChecked<ANavGrid>(GetOwner());
+	if (Grid)
+	{
+		Grid->TileClicked(*this);
+	}
+	else
+	{
+		UE_LOG(NavGrid, Error, TEXT("%s.BeginPlay: Unable to find owning NavGrid"), *GetName());
+	}
 }
 
 void ATile::ResetPath()
@@ -72,27 +86,24 @@ void ATile::SetBackpointerVisibility(bool Visible)
 
 void ATile::Clicked()
 {
-	ANavGrid *Grid = CastChecked<ANavGrid>(GetOwner());
-	if (Grid)
-	{
-		Grid->TileClicked(*this);
-	}
-	else
-	{
-		UE_LOG(NavGrid, Error, TEXT("%s.Clicked(): Unable to find owning NavGrid"), *GetName());
-	}
+	if (Grid) { Grid->TileClicked(*this); }
 }
 
 void ATile::CursorOver()
 {
-	ANavGrid *Grid = CastChecked<ANavGrid>(GetOwner());
 	if (Grid)
 	{
+		// leave the visibility alone if are not responsible for it
+		if (Grid->ShowHoverCursor) { HoverCursor->SetVisibility(true); } 
 		Grid->TileCursorOver(*this);
-	}
-	else
-	{
-		UE_LOG(NavGrid, Error, TEXT("%s.CursorOver(): Unable to find owning NavGrid"), *GetName());
 	}
 }
 
+void ATile::EndCursorOver()
+{
+	if (Grid)
+	{
+		// leave the visibility alone if are not responsible for it
+		if (Grid->ShowHoverCursor) { HoverCursor->SetVisibility(false); }
+	}
+}
