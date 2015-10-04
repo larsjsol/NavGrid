@@ -6,6 +6,8 @@
 
 #include "Editor.h"
 
+#include <limits>
+
 DEFINE_LOG_CATEGORY(NavGrid);
 
 // Sets default values
@@ -207,13 +209,32 @@ void ANavGrid::TilesInRange(ATile *Tile, TArray<ATile *> &OutArray, float Range)
 			if (!N->Visited)
 			{
 				float TentativeDistance = N->Cost + Current->Distance;
-				if (TentativeDistance < N->Distance)
+				if (TentativeDistance <= N->Distance)
 				{
-					N->Distance = TentativeDistance;
-					N->Backpointer = Current;
-					if (TentativeDistance <= Range)
+					/*
+						Prioritize straight paths by using the world distance as a tiebreaker
+						when TentativeDistance is equal N->Dinstance
+					*/
+					float OldDistance = std::numeric_limits<float>::infinity();
+					float NewDistance = 0;
+					if (TentativeDistance == N->Distance)
 					{
-						TentativeSet.AddUnique(N);
+						NewDistance = (Current->GetActorLocation() - N->GetActorLocation()).Size();
+						if (N->Backpointer)
+						{
+							OldDistance = (N->Backpointer->GetActorLocation() - N->GetActorLocation()).Size();
+						}
+					}
+
+					if (NewDistance < OldDistance) // Always true if TentativeDistance < N->Distance
+					{
+						N->Distance = TentativeDistance;
+						N->Backpointer = Current;
+
+						if (TentativeDistance <= Range)
+						{
+							TentativeSet.AddUnique(N);
+						}
 					}
 				}
 			}
