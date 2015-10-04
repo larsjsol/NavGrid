@@ -42,7 +42,6 @@ void ANavGrid::OnConstruction(const FTransform &Transform)
 	AdjustNumberOfTiles();
 
 	// apply the default mesh if it is set
-
 	for (ATile *Tile : Tiles)
 	{
 		if (Tile)
@@ -53,6 +52,7 @@ void ANavGrid::OnConstruction(const FTransform &Transform)
 			if (DefaultMovableHighlight) { Tile->MovableHighlight->SetStaticMesh(DefaultMovableHighlight); }
 			if (DefaultDangerousHighlight) { Tile->DangerousHighlight->SetStaticMesh(DefaultDangerousHighlight); }
 			if (DefaultSpecialHighlight) { Tile->SpecialHighlight->SetStaticMesh(DefaultSpecialHighlight); }
+			if (DefaultBackpointerArrow) { Tile->BackpointerMesh->SetStaticMesh(DefaultBackpointerArrow); }
 		}
 	}
 }
@@ -63,7 +63,7 @@ void ANavGrid::Destroyed()
 
 	for (ATile *Tile : Tiles)
 	{
-		Tile->Destroy();
+		if (Tile && Tile->IsValidLowLevel()) { Tile->Destroy(); }
 	}
 	Tiles.Empty();
 }
@@ -135,19 +135,22 @@ void ANavGrid::TileClicked(ATile *Tile)
 	Tile->SelectCursor->SetVisibility(true);
 	SelectedTile = Tile;
 
-	//remove all existing highlisghts and highlight the neihbours
+	//remove all existing highlights
 	for (ATile *T : Tiles)
 	{
 		if (T)
 		{
 			T->MovableHighlight->SetVisibility(false);
+			T->SetBackpointerVisibility(false);
 		}
 	}
-	TArray<ATile *> N;
-	Neighbours(Tile, N);
-	for (ATile *T : N)
+	// highlight tiles in range
+	TArray<ATile *> R;
+	TilesInRange(Tile, R, 4);
+	for (ATile *T : R)
 	{
 		T->MovableHighlight->SetVisibility(true);
+		T->SetBackpointerVisibility(true);
 	}
 }
 
@@ -181,6 +184,54 @@ void ANavGrid::Neighbours(ATile *Tile, TArray<ATile*> &OutArray)
 	}
 }
 
+void ANavGrid::TilesInRange(ATile *Tile, TArray<ATile *> &OutArray, float Range)
+{
+	OutArray.Empty();
+	for (ATile *T : Tiles)
+	{
+		if (T) { T->ResetPath(); }
+	}
+
+	ATile *Current = Tile;
+	Current->Distance = 0;
+
+	TArray<ATile *> NeighbouringTiles;
+	Neighbours(Current, NeighbouringTiles);
+	TArray<ATile *> TentativeSet(NeighbouringTiles);
+
+	while (Current)
+	{
+		Neighbours(Current, NeighbouringTiles);
+		for (UPROPERTY() ATile *N : NeighbouringTiles)
+		{
+			if (!N->Visited)
+			{
+				float TentativeDistance = N->Cost + Current->Distance;
+				if (TentativeDistance < N->Distance)
+				{
+					N->Distance = TentativeDistance;
+					N->Backpointer = Current;
+					if (TentativeDistance <= Range)
+					{
+						TentativeSet.AddUnique(N);
+					}
+				}
+			}
+		}
+		Current->Visited = true;
+		TentativeSet.Remove(Current);
+		OutArray.Add(Current);
+		if (TentativeSet.Num())
+		{
+			Current = TentativeSet[0];
+		}
+		else
+		{
+			Current = NULL;
+		}
+	}
+}
+
 void ANavGrid::AssignDefaultAssets()
 {
 	SetSM(&DefaultTileMesh, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_Square.SM_Tile_Square'"));
@@ -189,11 +240,11 @@ void ANavGrid::AssignDefaultAssets()
 	SetSM(&DefaultMovableHighlight, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_In_Move_Range_Square.SM_Tile_In_Move_Range_Square'"));
 	SetSM(&DefaultDangerousHighlight, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_In_Sight_Range_Square.SM_Tile_In_Sight_Range_Square'"));
 	SetSM(&DefaultSpecialHighlight, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_In_Long_Move_Range.SM_Tile_In_Long_Move_Range'"));
+	SetSM(&DefaultBackpointerArrow, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Arrow.SM_Arrow'"));
 }
 
 void ANavGrid::SetSM(UStaticMesh **Meshptr, const TCHAR* AssetReference)
-{
-	
+{	
 	auto OF = ConstructorHelpers::FObjectFinder<UStaticMesh>(AssetReference);
 	if (OF.Succeeded()) { *Meshptr = OF.Object;  }
 }

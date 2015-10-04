@@ -46,6 +46,8 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultDangerousHighlight = NULL;
 	/* Special highlight */
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultSpecialHighlight = NULL;
+	/* Backpointer visualization */
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultBackpointerArrow = NULL;
 
 	/* Scene Component (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
@@ -58,7 +60,11 @@ public:
 	UFUNCTION() virtual void TileCursorOver(ATile *Tile);
 
 	/* Find all tiles adjacent to Tile */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	virtual void Neighbours(ATile *Tile, TArray<ATile*> &OutArray);
+	/* Find all tiles in range */
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	virtual void TilesInRange(ATile *Tile, TArray<ATile *> &OutArray, float Range);
 protected:
 	/* Holds the actual tiles */
 	UPROPERTY() TArray<ATile *> Tiles;

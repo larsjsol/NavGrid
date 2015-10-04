@@ -4,6 +4,8 @@
 #include "Tile.h"
 #include "NavGrid.h"
 
+#include <limits>
+
 ATile::ATile()
 	:Super()
 {
@@ -22,24 +24,50 @@ ATile::ATile()
 	DangerousHighlight->AttachParent = SceneComponent;
 	SpecialHighlight = CreateDefaultSubobject<UStaticMeshComponent>("SpecialHighlight");
 	SpecialHighlight->AttachParent = SceneComponent;
+	BackpointerMesh = CreateDefaultSubobject<UStaticMeshComponent>("BackpointerArrow");
+	BackpointerMesh->AttachParent = SceneComponent;
 
 	// position and hide ui elements
+	FTransform HighlightOffset;
+	HighlightOffset.SetLocation(FVector(0, 0, 10));
 	FTransform UIOffset;
-	UIOffset.SetLocation(FVector(0, 0, 10));
+	UIOffset.SetLocation(FVector(0, 0, 15));
+
 	HoverCursor->AddLocalTransform(UIOffset);
 	SelectCursor->AddLocalTransform(UIOffset);
-	MovableHighlight->AddLocalTransform(UIOffset);
-	DangerousHighlight->AddLocalTransform(UIOffset);
-	SpecialHighlight->AddLocalTransform(UIOffset);
+	MovableHighlight->AddLocalTransform(HighlightOffset);
+	DangerousHighlight->AddLocalTransform(HighlightOffset);
+	SpecialHighlight->AddLocalTransform(HighlightOffset);
+	BackpointerMesh->AddLocalTransform(UIOffset);
 	HoverCursor->SetVisibility(false);
 	SelectCursor->SetVisibility(false);
 	MovableHighlight->SetVisibility(false);
 	DangerousHighlight->SetVisibility(false);
 	SpecialHighlight->SetVisibility(false);
-	
+	BackpointerMesh->SetVisibility(false);
+
 	// bind click events
 	OnClicked.AddDynamic(this, &ATile::Clicked);
 	OnBeginCursorOver.AddDynamic(this, &ATile::CursorOver);
+}
+
+void ATile::ResetPath()
+{
+	Distance = std::numeric_limits<float>::infinity();
+	Backpointer = NULL;
+	Visited = false;
+}
+
+void ATile::SetBackpointerVisibility(bool Visible)
+{
+	/* rotate the arrow mesh */
+	if (Backpointer && Visible)
+	{
+		FVector Direction = Backpointer->GetActorLocation() - GetActorLocation();
+		Direction.Z = 0; // ignore height differences 
+		BackpointerMesh->SetRelativeRotation(Direction.Rotation().Quaternion());
+	}
+	BackpointerMesh->SetVisibility(Visible);
 }
 
 void ATile::Clicked()
@@ -68,7 +96,3 @@ void ATile::CursorOver()
 	}
 }
 
-void ATile::Highlight(UStaticMesh *HighlightMesh)
-{
-	
-}

@@ -17,11 +17,20 @@ public:
 	ATile();
 
 	/* Cost of moving into this tile*/
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Tile") int32 Cost = 1;
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Tile") float Cost = 1;
 	/* X Coordinate in NavGrid space */
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Tile") int32 X;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Tile") int32 X;
 	/* Y Coordinate in NavGrid space */
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Tile") int32 Y;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Tile") int32 Y;
+	
+	/* Distance from starting point of path */
+	float Distance;
+	/* Previous tile in path */
+	ATile *Backpointer = NULL;
+	/* Is this node in the 'visited' set? - Helper var for pathfinding */
+	bool Visited;
+	/* Reset variables used in pathfinding */
+	virtual void ResetPath();
 
 	/* Scene component (root) */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
@@ -41,9 +50,12 @@ public:
 	UStaticMeshComponent *DangerousHighlight = NULL;
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UStaticMeshComponent *SpecialHighlight = NULL;
+	/*  */
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
+	UStaticMeshComponent *BackpointerMesh = NULL;
 
-	/* Draw a mesh hovering this tile */
-	void Highlight(UStaticMesh *HighlightMesh);
+	UFUNCTION(BlueprintCallable, Category = "Visualization")
+	void SetBackpointerVisibility(bool Visible);
 
 private:
 	UFUNCTION() void Clicked();
