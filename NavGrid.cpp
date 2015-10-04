@@ -128,42 +128,14 @@ void ANavGrid::AdjustNumberOfTiles()
 	}
 }
 
-void ANavGrid::TileClicked(ATile *Tile)
+void ANavGrid::TileClicked(ATile &Tile)
 {
-	if (SelectedTile)
-	{
-		SelectedTile->SelectCursor->SetVisibility(false);
-	}
-	Tile->SelectCursor->SetVisibility(true);
-	SelectedTile = Tile;
-
-	//remove all existing highlights
-	for (ATile *T : Tiles)
-	{
-		if (T)
-		{
-			T->MovableHighlight->SetVisibility(false);
-			T->SetBackpointerVisibility(false);
-		}
-	}
-	// highlight tiles in range
-	TArray<ATile *> R;
-	TilesInRange(Tile, R, 4);
-	for (ATile *T : R)
-	{
-		T->MovableHighlight->SetVisibility(true);
-		T->SetBackpointerVisibility(true);
-	}
+	OnTileClickedEvent.Broadcast(Tile);
 }
 
-void ANavGrid::TileCursorOver(ATile *Tile)
+void ANavGrid::TileCursorOver(ATile &Tile)
 {
-	if (HoveredTile)
-	{
-		HoveredTile->HoverCursor->SetVisibility(false);
-	}
-	Tile->HoverCursor->SetVisibility(true);
-	HoveredTile = Tile;
+	OnTileCursorOverEvent.Broadcast(Tile);
 }
 
 void ANavGrid::Neighbours(ATile *Tile, TArray<ATile*> &OutArray)

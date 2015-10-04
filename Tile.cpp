@@ -75,7 +75,7 @@ void ATile::Clicked()
 	ANavGrid *Grid = CastChecked<ANavGrid>(GetOwner());
 	if (Grid)
 	{
-		Grid->TileClicked(this);
+		Grid->TileClicked(*this);
 	}
 	else
 	{
@@ -88,7 +88,7 @@ void ATile::CursorOver()
 	ANavGrid *Grid = CastChecked<ANavGrid>(GetOwner());
 	if (Grid)
 	{
-		Grid->TileCursorOver(this);
+		Grid->TileCursorOver(*this);
 	}
 	else
 	{

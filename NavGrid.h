@@ -60,8 +60,8 @@ public:
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "Tiles")
 	virtual ATile *GetTile(int32 X, int32 Y);
 
-	UFUNCTION() virtual void TileClicked(ATile *Tile);
-	UFUNCTION() virtual void TileCursorOver(ATile *Tile);
+	void TileClicked(ATile &Tile);
+	void TileCursorOver(ATile &Tile);
 
 	/* Find all tiles adjacent to Tile */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
@@ -69,6 +69,20 @@ public:
 	/* Find all tiles in range */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	virtual void TilesInRange(ATile *Tile, TArray<ATile *> &OutArray, float Range);
+
+	//Event delegates
+	DECLARE_EVENT_OneParam(ANavGrid, FOnTileClicked, const ATile& );
+	DECLARE_EVENT_OneParam(ANavGrid, FOnTileCursorOver, const ATile&);
+
+	/* Triggered by mouse clicks on tiles*/
+	FOnTileClicked& OnTileClicked() { return OnTileClickedEvent; }	
+	/* Triggered when the cursor enters a tile */
+	FOnTileCursorOver& OnTileCursorOver() { return OnTileCursorOverEvent;  }
+
+private:
+	FOnTileClicked OnTileClickedEvent;
+	FOnTileCursorOver OnTileCursorOverEvent;
+
 protected:
 	/* Holds the actual tiles */
 	UPROPERTY() TArray<ATile *> Tiles;
