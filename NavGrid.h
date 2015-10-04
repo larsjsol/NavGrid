@@ -30,6 +30,10 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Tiles") int32 XSize = 3;
 	/* Height in tiles */
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Tiles") int32 YSize = 3;
+	/* Tile width */
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Tiles") float TileWidth = 200;
+	/* Tile height */
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Tiles") float TileHeight = 200;
 
 	/* Convert NavGrid space coords to an offset from actorlocation */
 	virtual FVector LocalPosition(int32 X, int32 Y);

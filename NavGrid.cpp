@@ -73,7 +73,7 @@ void ANavGrid::Destroyed()
 
 FVector ANavGrid::LocalPosition(int32 X, int32 Y)
 {
-	return FVector(X * 200.0, Y * 200.0, 0);
+	return FVector(X * TileWidth, Y * TileHeight, 0);
 }
 
 ATile *ANavGrid::GetTile(int32 X, int32 Y)
