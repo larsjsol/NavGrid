@@ -19,7 +19,12 @@ public:
 	ANavGridExamplePC(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 
-	/* Handle mouse events*/
+	/*
+	Called when a tile is clicked
+
+	- Highlight all tiles in range when we click on the character tile
+	- Clear highlights when any other tile is clicked
+	*/
 	void OnTileClicked(const ATile &Tile);
 	void OnTileCursorOver(const ATile &Tile);
 

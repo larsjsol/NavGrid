@@ -39,12 +39,6 @@ void ANavGridExamplePC::BeginPlay()
 
 void ANavGridExamplePC::OnTileClicked(const ATile &Tile)
 {
-	/* 
-	Highlight all tiles in range when we click on the character tile
-	Clear highlights when any other tile is clicked	
-	*/
-
-
 	/* Get the tile the character is standing on and its movementcomponent*/
 	ATile *CharacterLocation = Grid->GetTile(Character->GetActorLocation());
 	UGridMovementComponent *MovementComponent = Character->FindComponentByClass<UGridMovementComponent>();
@@ -66,7 +60,12 @@ void ANavGridExamplePC::OnTileClicked(const ATile &Tile)
 			/* hide the movable highlight on the entire grid */
 			for (ATile *T : Grid->Tiles)
 			{
-				T->MovableHighlight->SetVisibility(false);
+				/* It's possible to delete tiles from the level in order to make inaccessible 
+				areas so we need to check for that */
+				if (T)
+				{
+					T->MovableHighlight->SetVisibility(false);
+				}
 			}
 		}
 	}
