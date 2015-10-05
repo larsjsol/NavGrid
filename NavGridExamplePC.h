@@ -24,4 +24,5 @@ public:
 	void OnTileCursorOver(const ATile &Tile);
 
 	ANavGrid *Grid = NULL;
+	ACharacter *Character = NULL;
 };

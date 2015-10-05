@@ -88,6 +88,12 @@ ATile *ANavGrid::GetTile(int32 X, int32 Y)
 	}
 }
 
+ATile *ANavGrid::GetTile(const FVector &WorldLocation)
+{
+	FVector LocalCoord = WorldLocation - GetActorLocation();
+	return GetTile((int) (LocalCoord.X / TileWidth), (int) (LocalCoord.Y / TileHeight));
+}
+
 void ANavGrid::AdjustNumberOfTiles()
 {
 	int32 PrevSize = Tiles.Num();
