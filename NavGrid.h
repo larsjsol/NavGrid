@@ -62,6 +62,9 @@ public:
 	/* Get tile from world location, may return NULL */
 	virtual ATile *GetTile(const FVector &WorldLocation);
 
+	/* Get a list containing all tiles */
+	void GetTiles(TArray<ATile *> &OutTiles);
+
 	/* Tile height */
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Tiles") bool ShowHoverCursor = true;
 
@@ -84,14 +87,14 @@ public:
 	/* Triggered when the cursor enters a tile */
 	FOnTileCursorOver& OnTileCursorOver() { return OnTileCursorOverEvent;  }
 
-	/* Holds the actual tiles */
-	UPROPERTY() TArray<ATile *> Tiles;
-
 private:
 	FOnTileClicked OnTileClickedEvent;
 	FOnTileCursorOver OnTileCursorOverEvent;
 
 protected:
+	/* Holds the actual tiles */
+	UPROPERTY() TArray<ATile *> Tiles;
+
 	/* Create or destroy tiles so we have XSize * YSize */
 	virtual void AdjustNumberOfTiles();
 	/* 

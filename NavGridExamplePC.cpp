@@ -50,23 +50,14 @@ void ANavGridExamplePC::OnTileClicked(const ATile &Tile)
 			/* find tiles in movement range and highlight them */
 			TArray<ATile *> Tiles;
 			Grid->TilesInRange(CharacterLocation, Tiles, MovementComponent->MovementRange);
-			for (ATile *T : Tiles)
-			{
-				T->MovableHighlight->SetVisibility(true);
-			}
+			for (ATile *T : Tiles) { T->MovableHighlight->SetVisibility(true); }
 		}
 		else
 		{
 			/* hide the movable highlight on the entire grid */
-			for (ATile *T : Grid->Tiles)
-			{
-				/* It's possible to delete tiles from the level in order to make inaccessible 
-				areas so we need to check for that */
-				if (T)
-				{
-					T->MovableHighlight->SetVisibility(false);
-				}
-			}
+			TArray<ATile *> Tiles;
+			Grid->GetTiles(Tiles);
+			for (ATile *T : Tiles) { T->MovableHighlight->SetVisibility(false); }
 		}
 	}
 }

@@ -94,6 +94,16 @@ ATile *ANavGrid::GetTile(const FVector &WorldLocation)
 	return GetTile((int) (LocalCoord.X / TileWidth), (int) (LocalCoord.Y / TileHeight));
 }
 
+void ANavGrid::GetTiles(TArray<ATile *> &OutTiles)
+{
+	OutTiles.Empty();
+
+	for (ATile *T : Tiles)
+	{
+		if (T) { OutTiles.Add(T); }
+	}
+}
+
 void ANavGrid::AdjustNumberOfTiles()
 {
 	int32 PrevSize = Tiles.Num();
