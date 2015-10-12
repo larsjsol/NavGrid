@@ -28,20 +28,28 @@ void ANavGridExamplePC::BeginPlay()
 	}
 	else
 	{
-		UE_LOG(NavGrid, Error, TEXT("Unable to get reference to Navgrid. Have you forgotten to place it in the level?"));
+		UE_LOG(NavGrid, Fatal, TEXT("Unable to get reference to Navgrid. Have you forgotten to place it in the level?"));
 	}
 
-	/* Grab the first character we find in the level */
+	/* Grab the first character we find in the level and find its gridmovementcomponent */
 	TActorIterator<ACharacter> CharItr(GetWorld());
 	Character = *CharItr;
-	if (!Character) { UE_LOG(NavGrid, Error, TEXT("No character found. A CharacterBP with a GridMovementComponent should be placed in the level.")); }
+	if (!Character)
+	{
+		UE_LOG(NavGrid, Fatal, TEXT("No character found. A CharacterBP with a GridMovementComponent should be placed in the level."));
+	}
+	MovementComponent = Character->FindComponentByClass<UGridMovementComponent>();
+	if (!MovementComponent)
+	{
+			UE_LOG(NavGrid, Fatal, TEXT("No GridMovementComponent found. A CharacterBP with a GridMovementComponent should be placed in the level."));
+	}
+
 }
 
 void ANavGridExamplePC::OnTileClicked(const ATile &Tile)
 {
 	/* Get the tile the character is standing on and its movementcomponent*/
 	ATile *CharacterLocation = Grid->GetTile(Character->GetActorLocation());
-	UGridMovementComponent *MovementComponent = Character->FindComponentByClass<UGridMovementComponent>();
 
 	if (CharacterLocation && MovementComponent)
 	{
@@ -64,5 +72,10 @@ void ANavGridExamplePC::OnTileClicked(const ATile &Tile)
 
 void ANavGridExamplePC::OnTileCursorOver(const ATile &Tile)
 {
-	// Do something cool
+	/* Hide the previously shown path */
+	MovementComponent->HidePath();
+	if (MovementComponent->CreatePath(Tile))
+	{
+		MovementComponent->ShowPath();
+	}
 }

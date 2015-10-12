@@ -7,6 +7,7 @@
 
 class ATile;
 class ANavGrid;
+class UGridMovementComponent;
 
 /**
  * 
@@ -30,4 +31,5 @@ public:
 
 	ANavGrid *Grid = NULL;
 	ACharacter *Character = NULL;
+	UGridMovementComponent *MovementComponent = NULL;
 };
