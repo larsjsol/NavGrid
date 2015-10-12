@@ -65,7 +65,7 @@ void UGridMovementComponent::ShowPath()
 {
 	if (PathMesh)
 	{
-		float Distance = 0;
+		float Distance = HorizontalOffset;
 		FBoxSphereBounds Bounds = PathMesh->GetBounds();
 		float MeshLength = FMath::Abs(Bounds.BoxExtent.X);
 		float SplineLength = Spline->GetSplineLength();
