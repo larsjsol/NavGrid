@@ -21,6 +21,49 @@ void UGridMovementComponent::BeginPlay()
 	if (!Grid) { UE_LOG(NavGrid, Error, TEXT("%st: Unable to get reference to Navgrid."), *GetName()); }
 }
 
+void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (Moving)
+	{
+		/* Find the next location */
+		float RemainingDistance = Spline->GetSplineLength();
+		Distance = FMath::Min(Spline->GetSplineLength(), Distance + (MaxSpeed * DeltaTime));
+		
+		/* Move and rotate the actor */
+		AActor *Owner = GetOwner();
+		ACharacter *Char = Cast<ACharacter>(Owner);
+
+		FTransform OldTransform = Owner->GetTransform();
+		FTransform NewTransform = Spline->GetTransformAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::World);
+
+		if (Char)
+		{
+			// Adjust location by looking at capsuleheight 
+			FVector Location = NewTransform.GetLocation();
+			Location.Z += Char->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+			NewTransform.SetLocation(Location);
+		}
+		Owner->SetActorTransform(NewTransform);
+
+		/* Check if we're reached our destination*/
+		if (Distance == Spline->GetSplineLength())
+		{
+			Moving = false;
+			Distance = 0;
+			Velocity = FVector::ZeroVector;
+		}
+		else
+		{
+			Velocity = NewTransform.GetLocation() - OldTransform.GetLocation();
+		}
+
+		// update velocity so it can be fetced by the pawn 
+		UpdateComponentVelocity();
+	}
+}
+
 bool UGridMovementComponent::CreatePath(const ATile &Target)
 {
 	Spline->ClearSplinePoints();
@@ -51,7 +94,8 @@ bool UGridMovementComponent::CreatePath(const ATile &Target)
 
 void UGridMovementComponent::FollowPath()
 {
-
+	/* Set the Moving flag, the real work is done in TickComponent() */
+	Moving = true;
 }
 
 bool UGridMovementComponent::MoveTo(const ATile &Target)

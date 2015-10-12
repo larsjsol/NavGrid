@@ -52,29 +52,24 @@ void ANavGridExamplePC::OnTileClicked(const ATile &Tile)
 	/* Get the tile the character is standing on and its movementcomponent*/
 	ATile *CharacterLocation = Grid->GetTile(Character->GetActorLocation());
 
-	if (CharacterLocation && MovementComponent)
+	if (CharacterLocation && MovementComponent && Grid)
 	{
-		if (CharacterLocation == &Tile)
+		if (CharacterLocation != &Tile && MovementComponent->Velocity.Size() == 0)
 		{
-			/* find tiles in movement range and highlight them */
-			TArray<ATile *> Tiles;
-			Grid->TilesInRange(CharacterLocation, Tiles, MovementComponent->MovementRange);
-			for (ATile *T : Tiles) { T->MovableHighlight->SetVisibility(true); }
-		}
-		else
-		{
-			/* hide the movable highlight on the entire grid */
-			TArray<ATile *> Tiles;
-			Grid->GetTiles(Tiles);
-			for (ATile *T : Tiles) { T->MovableHighlight->SetVisibility(false); }
+			TArray<ATile *> InRange;
+			Grid->TilesInRange(CharacterLocation, InRange, MovementComponent->MovementRange);
+			if (InRange.Contains(&Tile))
+			{
+				MovementComponent->MoveTo(Tile);
+			}
 		}
 	}
 }
 
 void ANavGridExamplePC::OnTileCursorOver(const ATile &Tile)
 {
-	/* Try to reate path to the hovered tile and show it */
-	if (MovementComponent->CreatePath(Tile))
+	/* If the character is not moving, try to create a path to the hovered tile and show it */
+	if (MovementComponent->Velocity.Size() == 0 && MovementComponent->CreatePath(Tile))
 	{
 		MovementComponent->ShowPath();
 	}

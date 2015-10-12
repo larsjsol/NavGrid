@@ -55,11 +55,7 @@ ATile::ATile()
 void ATile::BeginPlay()
 {
 	Grid = CastChecked<ANavGrid>(GetOwner());
-	if (Grid)
-	{
-		Grid->TileClicked(*this);
-	}
-	else
+	if (!Grid)
 	{
 		UE_LOG(NavGrid, Error, TEXT("%s.BeginPlay: Unable to find owning NavGrid"), *GetName());
 	}
