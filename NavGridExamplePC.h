@@ -28,6 +28,7 @@ public:
 	*/
 	void OnTileClicked(const ATile &Tile);
 	void OnTileCursorOver(const ATile &Tile);
+	void OnEndTileCursorOver(const ATile &Tile);
 
 	ANavGrid *Grid = NULL;
 	ACharacter *Character = NULL;

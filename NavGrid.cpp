@@ -154,6 +154,11 @@ void ANavGrid::TileCursorOver(ATile &Tile)
 	OnTileCursorOverEvent.Broadcast(Tile);
 }
 
+void ANavGrid::EndTileCursorOver(ATile &Tile)
+{
+	OnEndTileCursorOverEvent.Broadcast(Tile);
+}
+
 void ANavGrid::Neighbours(ATile *Tile, TArray<ATile*> &OutArray)
 {
 	OutArray.Empty();

@@ -105,5 +105,6 @@ void ATile::EndCursorOver()
 	{
 		// leave the visibility alone if are not responsible for it
 		if (Grid->ShowHoverCursor) { HoverCursor->SetVisibility(false); }
+		Grid->EndTileCursorOver(*this);
 	}
 }

@@ -70,6 +70,7 @@ public:
 
 	void TileClicked(ATile &Tile);
 	void TileCursorOver(ATile &Tile);
+	void EndTileCursorOver(ATile &Tile);
 
 	/* Find all tiles adjacent to Tile */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
@@ -81,15 +82,19 @@ public:
 	//Event delegates
 	DECLARE_EVENT_OneParam(ANavGrid, FOnTileClicked, const ATile& );
 	DECLARE_EVENT_OneParam(ANavGrid, FOnTileCursorOver, const ATile&);
+	DECLARE_EVENT_OneParam(ANavGrid, FOnEndTileCursorOver, const ATile&);
 
 	/* Triggered by mouse clicks on tiles*/
 	FOnTileClicked& OnTileClicked() { return OnTileClickedEvent; }	
 	/* Triggered when the cursor enters a tile */
-	FOnTileCursorOver& OnTileCursorOver() { return OnTileCursorOverEvent;  }
+	FOnTileCursorOver& OnTileCursorOver() { return OnTileCursorOverEvent; }
+	/* Triggered when the cursor leaves a tile */
+	FOnEndTileCursorOver& OnEndTileCursorOver() { return OnEndTileCursorOverEvent; }
 
 private:
 	FOnTileClicked OnTileClickedEvent;
 	FOnTileCursorOver OnTileCursorOverEvent;
+	FOnEndTileCursorOver OnEndTileCursorOverEvent;
 
 protected:
 	/* Holds the actual tiles */

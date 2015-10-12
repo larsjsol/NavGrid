@@ -25,6 +25,7 @@ void ANavGridExamplePC::BeginPlay()
 	{
 		Grid->OnTileClicked().AddUObject(this, &ANavGridExamplePC::OnTileClicked);
 		Grid->OnTileCursorOver().AddUObject(this, &ANavGridExamplePC::OnTileCursorOver);
+		Grid->OnEndTileCursorOver().AddUObject(this, &ANavGridExamplePC::OnEndTileCursorOver);
 	}
 	else
 	{
@@ -72,10 +73,15 @@ void ANavGridExamplePC::OnTileClicked(const ATile &Tile)
 
 void ANavGridExamplePC::OnTileCursorOver(const ATile &Tile)
 {
-	/* Hide the previously shown path */
-	MovementComponent->HidePath();
+	/* Try to reate path to the hovered tile and show it */
 	if (MovementComponent->CreatePath(Tile))
 	{
 		MovementComponent->ShowPath();
 	}
+}
+
+void ANavGridExamplePC::OnEndTileCursorOver(const ATile &Tile)
+{
+	/* Hide the previously shown path */
+	MovementComponent->HidePath();
 }
