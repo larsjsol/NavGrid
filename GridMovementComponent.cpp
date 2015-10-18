@@ -33,22 +33,14 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		
 		/* Move and rotate the actor */
 		AActor *Owner = GetOwner();
-		ACharacter *Char = Cast<ACharacter>(Owner);
-
 		FTransform OldTransform = Owner->GetTransform();
-		FTransform NewTransform = Spline->GetTransformAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::World);
+		FTransform NewTransform = Spline->GetTransformAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::Local);
+		FVector OldLocation = Owner->GetActorLocation();
 
-		if (Char)
-		{
-			// Adjust location by looking at capsuleheight 
-			FVector Location = NewTransform.GetLocation();
-			Location.Z += Char->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-			NewTransform.SetLocation(Location);
-		}
 		Owner->SetActorTransform(NewTransform);
 
 		/* Check if we're reached our destination*/
-		if (Distance == Spline->GetSplineLength())
+		if (Distance >= Spline->GetSplineLength())
 		{
 			Moving = false;
 			Distance = 0;
@@ -56,10 +48,10 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		}
 		else
 		{
-			Velocity = NewTransform.GetLocation() - OldTransform.GetLocation();
+			Velocity = (NewTransform.GetLocation() - OldTransform.GetLocation()) * (1 / DeltaTime);
 		}
 
-		// update velocity so it can be fetced by the pawn 
+		// update velocity so it can be fetched by the pawn 
 		UpdateComponentVelocity();
 	}
 }
@@ -85,7 +77,7 @@ bool UGridMovementComponent::CreatePath(const ATile &Target)
 
 		for (int32 Idx = Path.Num() - 1; Idx >= 0; Idx--)
 		{
-			Spline->AddSplineWorldPoint(Path[Idx]->GetActorLocation());
+			Spline->AddSplinePoint(Path[Idx]->GetActorLocation(), ESplineCoordinateSpace::Local);
 		}
 		return true;
 	}
@@ -114,8 +106,6 @@ void UGridMovementComponent::ShowPath()
 		float MeshLength = FMath::Abs(Bounds.BoxExtent.X);
 		float SplineLength = Spline->GetSplineLength();
 
-		Spline->SetRelativeLocation(FVector::ZeroVector);
-
 		while (Distance < SplineLength)
 		{
 			AddSplineMesh(Distance, FMath::Min(Distance + MeshLength, SplineLength));
@@ -136,12 +126,12 @@ void UGridMovementComponent::HidePath()
 void UGridMovementComponent::AddSplineMesh(float From, float To)
 {
 	float TanScale = 25;
-	FVector StartPos = Spline->GetWorldLocationAtDistanceAlongSpline(From);
+	FVector StartPos = Spline->GetLocationAtDistanceAlongSpline(From, ESplineCoordinateSpace::Local);
 	StartPos.Z += VerticalOffest;
-	FVector StartTan = Spline->GetWorldDirectionAtDistanceAlongSpline(From) * TanScale;
-	FVector EndPos = Spline->GetWorldLocationAtDistanceAlongSpline(To);
+	FVector StartTan = Spline->GetDirectionAtDistanceAlongSpline(From, ESplineCoordinateSpace::Local) * TanScale;
+	FVector EndPos = Spline->GetLocationAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local);
 	EndPos.Z += VerticalOffest;
-	FVector EndTan = Spline->GetWorldDirectionAtDistanceAlongSpline(To) * TanScale;
+	FVector EndTan = Spline->GetDirectionAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local) * TanScale;
 
 	UPROPERTY() USplineMeshComponent *SplineMesh = NewObject<USplineMeshComponent>(this);
 	SplineMesh->RegisterComponentWithWorld(GetWorld());

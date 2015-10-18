@@ -4,6 +4,7 @@
 #include "NavGridExamplePC.h"
 
 #include "NavGrid.h"
+#include "GridPawn.h"
 #include "GridMovementComponent.h"
 
 
@@ -32,32 +33,27 @@ void ANavGridExamplePC::BeginPlay()
 		UE_LOG(NavGrid, Fatal, TEXT("Unable to get reference to Navgrid. Have you forgotten to place it in the level?"));
 	}
 
-	/* Grab the first character we find in the level and find its gridmovementcomponent */
-	TActorIterator<ACharacter> CharItr(GetWorld());
-	Character = *CharItr;
-	if (!Character)
+	/* Grab the first GridPawn we find in the level */
+	TActorIterator<AGridPawn>PawnItr(GetWorld());
+	Pawn = *PawnItr;
+	if (!Pawn)
 	{
-		UE_LOG(NavGrid, Fatal, TEXT("No character found. A CharacterBP with a GridMovementComponent should be placed in the level."));
+		UE_LOG(NavGrid, Fatal, TEXT("No GridPawn found"));
 	}
-	MovementComponent = Character->FindComponentByClass<UGridMovementComponent>();
-	if (!MovementComponent)
-	{
-			UE_LOG(NavGrid, Fatal, TEXT("No GridMovementComponent found. A CharacterBP with a GridMovementComponent should be placed in the level."));
-	}
-
+	MovementComponent = Pawn->FindComponentByClass<UGridMovementComponent>();
 }
 
 void ANavGridExamplePC::OnTileClicked(const ATile &Tile)
 {
-	/* Get the tile the character is standing on and its movementcomponent*/
-	ATile *CharacterLocation = Grid->GetTile(Character->GetActorLocation());
+	/* Get the tile the pawn is standing on and its movementcomponent*/
+	ATile *Location = Grid->GetTile(Pawn->GetActorLocation());
 
-	if (CharacterLocation && MovementComponent && Grid)
+	if (Location && MovementComponent && Grid)
 	{
-		if (CharacterLocation != &Tile && MovementComponent->Velocity.Size() == 0)
+		if (Location != &Tile && MovementComponent->Velocity.Size() == 0)
 		{
 			TArray<ATile *> InRange;
-			Grid->TilesInRange(CharacterLocation, InRange, MovementComponent->MovementRange);
+			Grid->TilesInRange(Location, InRange, MovementComponent->MovementRange);
 			if (InRange.Contains(&Tile))
 			{
 				MovementComponent->MoveTo(Tile);
@@ -68,7 +64,7 @@ void ANavGridExamplePC::OnTileClicked(const ATile &Tile)
 
 void ANavGridExamplePC::OnTileCursorOver(const ATile &Tile)
 {
-	/* If the character is not moving, try to create a path to the hovered tile and show it */
+	/* If the pawn is not moving, try to create a path to the hovered tile and show it */
 	if (MovementComponent->Velocity.Size() == 0 && MovementComponent->CreatePath(Tile))
 	{
 		MovementComponent->ShowPath();

@@ -7,6 +7,7 @@
 
 class ATile;
 class ANavGrid;
+class AGridPawn;
 class UGridMovementComponent;
 
 /**
@@ -31,6 +32,6 @@ public:
 	void OnEndTileCursorOver(const ATile &Tile);
 
 	ANavGrid *Grid = NULL;
-	ACharacter *Character = NULL;
+	AGridPawn *Pawn = NULL;
 	UGridMovementComponent *MovementComponent = NULL;
 };

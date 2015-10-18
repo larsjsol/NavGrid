@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "GameFramework/MovementComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
 #include "GridMovementComponent.generated.h"
 
 class ATile;
@@ -15,7 +15,7 @@ class UStaticMesh;
  * 
  */
 UCLASS(ClassGroup = Movement, meta = (BlueprintSpawnableComponent))
-class BOARDGAME_API UGridMovementComponent : public UMovementComponent
+class BOARDGAME_API UGridMovementComponent : public UPawnMovementComponent
 {
 	GENERATED_BODY()
 public:
@@ -30,7 +30,12 @@ public:
 	/* How fast can the actor move */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxSpeed = 450;
 
-	/* Spline used to visualize the path */
+	/*
+	Spline that is used as a path. The points are in word coords.
+	
+	We use ESplineCoordinateSpace::Local in the getters and setters to avoid translation issues that we stems from this
+	being a sceenecomponent that maintains a relataive location to the owning actor
+	*/
 	UPROPERTY(BlueprintReadOnly, Category = "Visualization") USplineComponent *Spline = NULL;
 	/* Mesh used to visualize the path */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") UStaticMesh *PathMesh = NULL;
