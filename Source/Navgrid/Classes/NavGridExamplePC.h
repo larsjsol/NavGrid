@@ -11,7 +11,8 @@ class AGridPawn;
 class UGridMovementComponent;
 
 /**
- * 
+ * An example PlayerController that lets you move a single GridPawn by
+ * clicking on a NavGrid
  */
 UCLASS()
 class ANavGridExamplePC : public APlayerController

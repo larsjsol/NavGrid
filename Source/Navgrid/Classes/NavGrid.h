@@ -11,6 +11,10 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(NavGrid, Log, All);
 
+/**
+ * A grid that pawns can move around on.
+ *
+ */
 UCLASS()
 class ANavGrid : public AActor
 {

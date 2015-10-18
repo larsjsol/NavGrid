@@ -6,7 +6,11 @@
 #include "GridPawn.generated.h"
 
 class UGridMovementComponent;
-
+/**
+ * A pawn that can move around on a NavGrid.
+ *
+ * Currently simply a pawn with a GridMovementComponent.
+ */
 UCLASS()
 class AGridPawn : public APawn
 {

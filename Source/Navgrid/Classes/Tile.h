@@ -7,7 +7,9 @@
 
 class ANavGrid;
 /**
- * 
+ * A single 'space' in a navigation grid.
+ *
+ * It should usually not be neccacery to manually place these in the level.
  */
 UCLASS()
 class ATile : public AActor
