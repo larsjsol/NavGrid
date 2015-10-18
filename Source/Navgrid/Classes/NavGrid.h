@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Engine.h"
 #include "GameFramework/Actor.h"
 
 #include "Tile.h"
@@ -10,9 +11,8 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(NavGrid, Log, All);
 
-
 UCLASS()
-class BOARDGAME_API ANavGrid : public AActor
+class ANavGrid : public AActor
 {
 	GENERATED_BODY()
 	

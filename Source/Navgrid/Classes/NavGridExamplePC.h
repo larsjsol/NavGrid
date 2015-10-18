@@ -14,7 +14,7 @@ class UGridMovementComponent;
  * 
  */
 UCLASS()
-class BOARDGAME_API ANavGridExamplePC : public APlayerController
+class ANavGridExamplePC : public APlayerController
 {
 	GENERATED_BODY()
 public:

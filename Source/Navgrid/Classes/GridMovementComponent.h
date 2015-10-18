@@ -15,7 +15,7 @@ class UStaticMesh;
  * 
  */
 UCLASS(ClassGroup = Movement, meta = (BlueprintSpawnableComponent))
-class BOARDGAME_API UGridMovementComponent : public UPawnMovementComponent
+class UGridMovementComponent : public UPawnMovementComponent
 {
 	GENERATED_BODY()
 public:

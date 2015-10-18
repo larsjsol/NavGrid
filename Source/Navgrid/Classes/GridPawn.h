@@ -8,7 +8,7 @@
 class UGridMovementComponent;
 
 UCLASS()
-class BOARDGAME_API AGridPawn : public APawn
+class AGridPawn : public APawn
 {
 	GENERATED_BODY()
 

@@ -10,7 +10,7 @@ class ANavGrid;
  * 
  */
 UCLASS()
-class BOARDGAME_API ATile : public AActor
+class ATile : public AActor
 {
 	GENERATED_BODY()
 

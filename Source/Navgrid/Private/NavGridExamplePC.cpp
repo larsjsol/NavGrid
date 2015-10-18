@@ -1,9 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "BoardGame.h"
-#include "NavGridExamplePC.h"
-
 #include "NavGrid.h"
+#include "NavGridExamplePC.h"
 #include "GridPawn.h"
 #include "GridMovementComponent.h"
 
