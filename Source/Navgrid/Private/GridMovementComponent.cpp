@@ -10,6 +10,7 @@ UGridMovementComponent::UGridMovementComponent(const FObjectInitializer &ObjectI
 	:Super(ObjectInitializer)
 {
 	Spline = ObjectInitializer.CreateDefaultSubobject<USplineComponent>(this, "PathSpline");
+	PathMesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Path.NavGrid_Path'")).Object;
 }
 
 void UGridMovementComponent::BeginPlay()

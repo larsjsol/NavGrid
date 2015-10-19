@@ -106,10 +106,6 @@ protected:
 
 	/* Create or destroy tiles so we have XSize * YSize */
 	virtual void AdjustNumberOfTiles();
-	/* 
-	Assign default assests to the tiles and ui elemtents, they remain unchanged if the assets are not found 
-	*/
-	virtual void AssignDefaultAssets();
 	/* Assign assetreference to Meshpointer, do nothing if the asset is not found */
 	void SetSM(UStaticMesh **Meshptr, const TCHAR* AssetReference);
 

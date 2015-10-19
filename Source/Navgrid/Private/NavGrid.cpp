@@ -18,7 +18,13 @@ ANavGrid::ANavGrid()
 	SceneComponent = CreateDefaultSubobject<USceneComponent>("RootComponent");
 	RootComponent = SceneComponent;
 
-	AssignDefaultAssets();
+	SetSM(&DefaultTileMesh, TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Tile.NavGrid_Tile'"));
+	SetSM(&DefaultHoverCursor, TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Cursor.NavGrid_Cursor'"));
+	SetSM(&DefaultSelectCursor, TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Cursor.NavGrid_Cursor'"));
+	SetSM(&DefaultMovableHighlight, TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Movable.NavGrid_Movable'"));
+	SetSM(&DefaultDangerousHighlight, TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Dangerous.NavGrid_Dangerous'"));
+	SetSM(&DefaultSpecialHighlight, TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Special.NavGrid_Special'"));
+	//SetSM(&DefaultBackpointerArrow, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Arrow.SM_Arrow'"));
 }
 
 // Called when the game starts or when spawned
@@ -243,17 +249,6 @@ void ANavGrid::TilesInRange(ATile *Tile, TArray<ATile *> &OutArray, float Range)
 			Current = NULL;
 		}
 	}
-}
-
-void ANavGrid::AssignDefaultAssets()
-{
-	SetSM(&DefaultTileMesh, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_Square.SM_Tile_Square'"));
-	SetSM(&DefaultHoverCursor, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Frame_Hover.SM_Frame_Hover'"));
-	SetSM(&DefaultSelectCursor, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Frame_Current_Unit.SM_Frame_Current_Unit'"));
-	SetSM(&DefaultMovableHighlight, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_In_Move_Range_Square.SM_Tile_In_Move_Range_Square'"));
-	SetSM(&DefaultDangerousHighlight, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_In_Sight_Range_Square.SM_Tile_In_Sight_Range_Square'"));
-	SetSM(&DefaultSpecialHighlight, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Tile_In_Long_Move_Range.SM_Tile_In_Long_Move_Range'"));
-	SetSM(&DefaultBackpointerArrow, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Arrow.SM_Arrow'"));
 }
 
 void ANavGrid::SetSM(UStaticMesh **Meshptr, const TCHAR* AssetReference)
