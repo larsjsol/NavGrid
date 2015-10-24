@@ -45,7 +45,11 @@ void ANavGrid::OnConstruction(const FTransform &Transform)
 {
 	Super::OnConstruction(Transform);
 
-	// adjust tile count
+	// Ensure that dimentions are > 0
+	XSize = FPlatformMath::Max<int32>(1, XSize);
+	YSize = FPlatformMath::Max<int32>(1, YSize);
+
+	// update tiles
 	AdjustNumberOfTiles();
 
 	// apply the default mesh if it is set
