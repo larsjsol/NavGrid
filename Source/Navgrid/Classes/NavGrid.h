@@ -16,7 +16,7 @@ DECLARE_LOG_CATEGORY_EXTERN(NavGrid, Log, All);
  *
  */
 UCLASS()
-class ANavGrid : public AActor
+class NAVGRID_API ANavGrid : public AActor
 {
 	GENERATED_BODY()
 	

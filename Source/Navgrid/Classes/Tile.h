@@ -12,7 +12,7 @@ class ANavGrid;
  * It should usually not be neccacery to manually place these in the level.
  */
 UCLASS()
-class ATile : public AActor
+class NAVGRID_API ATile : public AActor
 {
 	GENERATED_BODY()
 

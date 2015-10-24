@@ -12,7 +12,7 @@ class UGridMovementComponent;
  * Currently simply a pawn with a GridMovementComponent.
  */
 UCLASS()
-class AGridPawn : public APawn
+class NAVGRID_API AGridPawn : public APawn
 {
 	GENERATED_BODY()
 

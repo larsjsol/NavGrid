@@ -15,7 +15,7 @@ class UGridMovementComponent;
  * clicking on a NavGrid
  */
 UCLASS()
-class ANavGridExamplePC : public APlayerController
+class NAVGRID_API ANavGridExamplePC : public APlayerController
 {
 	GENERATED_BODY()
 public:

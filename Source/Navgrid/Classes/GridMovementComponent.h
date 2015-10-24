@@ -15,7 +15,7 @@ class UStaticMesh;
  * A movement component that operates on a NavGrid
  */
 UCLASS(ClassGroup = Movement, meta = (BlueprintSpawnableComponent))
-class UGridMovementComponent : public UPawnMovementComponent
+class NAVGRID_API UGridMovementComponent : public UPawnMovementComponent
 {
 	GENERATED_BODY()
 public:
