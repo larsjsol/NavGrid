@@ -113,4 +113,7 @@ protected:
 	UPROPERTY() ATile *HoveredTile = NULL;
 	/* Last tile that was selected */
 	UPROPERTY() ATile *SelectedTile = NULL;
+
+	UPROPERTY() int32 PrevXSize = 0;
+	UPROPERTY() int32 PrevYSize = 0;
 };

@@ -49,8 +49,13 @@ void ANavGrid::OnConstruction(const FTransform &Transform)
 	XSize = FPlatformMath::Max<int32>(1, XSize);
 	YSize = FPlatformMath::Max<int32>(1, YSize);
 
-	// update tiles
-	AdjustNumberOfTiles();
+	if (XSize != PrevXSize || YSize != PrevYSize)
+	{
+		// create or destroy tiles to the fill the grid
+		AdjustNumberOfTiles();
+		PrevXSize = XSize;
+		PrevYSize = YSize;
+	}
 
 	// apply the default mesh if it is set
 	for (ATile *Tile : Tiles)
@@ -115,42 +120,47 @@ void ANavGrid::GetTiles(TArray<ATile *> &OutTiles)
 
 void ANavGrid::AdjustNumberOfTiles()
 {
-	int32 PrevSize = Tiles.Num();
 	int32 NewSize = XSize * YSize;
+	int32 OldSize = PrevXSize * PrevYSize;
 
-
-	// rebuild all tiles if the dimensions have changed
-	if (NewSize != PrevSize)
+	UPROPERTY() TArray<ATile *> NewTiles;
+	NewTiles.SetNum(NewSize, true);
+	
+	// create the new grid
+	for (int32 X = 0; X < XSize; X++)
 	{
-		for (ATile *Tile : Tiles)
+		for (int32 Y = 0; Y < YSize; Y++)
 		{
-			if (Tile)
+			if (X < PrevXSize && Y < PrevYSize)
 			{
-				Tile->Destroy();
+				NewTiles[Y * XSize + X] = Tiles[Y * PrevXSize + X];
+				Tiles[Y * PrevXSize + X] = NULL; // all remaining pointers are destroy()ed later 
+			}
+			else
+			{
+				FActorSpawnParameters fp;
+				fp.bAllowDuringConstructionScript = true;
+				UPROPERTY() ATile *Tile = GetWorld()->SpawnActor<ATile>(ATile::StaticClass(), fp);
+				Tile->SetOwner(this);
+				GEditor->ParentActors(this, Tile, NAME_None);
+
+				//set position
+				Tile->X = X;
+				Tile->Y = Y;
+				FVector Position = GetActorLocation() + LocalPosition(Tile->X, Tile->Y);
+				Tile->SetActorLocation(Position);
+
+				NewTiles[Y * XSize + X] = Tile;
 			}
 		}
-
-		Tiles.SetNum(NewSize, true);
-
-		for (int32 Idx = 0; Idx < NewSize; Idx++)
-		{
-			// Spawn a new tile
-			FActorSpawnParameters fp;
-			fp.bAllowDuringConstructionScript = true;
-			UPROPERTY() ATile *Tile = GetWorld()->SpawnActor<ATile>(ATile::StaticClass(), fp);
-			Tile->SetOwner(this);
-			GEditor->ParentActors(this, Tile, NAME_None);
-
-			Tiles[Idx] = Tile;
-
-			//set position
-			Tile->X = Idx % XSize;
-			Tile->Y = Idx / XSize;
-
-			FVector Position = GetActorLocation() + LocalPosition(Tile->X, Tile->Y);
-			Tile->SetActorLocation(Position);
-		}
 	}
+	// clean up the old grid, 
+	for (ATile *Tile : Tiles)
+	{
+		if (Tile) Tile->Destroy();
+	}
+
+	Tiles = NewTiles;
 }
 
 void ANavGrid::TileClicked(ATile &Tile)
