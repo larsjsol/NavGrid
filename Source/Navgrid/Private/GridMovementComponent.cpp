@@ -101,10 +101,11 @@ void UGridMovementComponent::ShowPath()
 {
 	if (PathMesh)
 	{
-		float Distance = HorizontalOffset;
+		float Distance = HorizontalOffset; // Get some distance between the actor and the path
 		FBoxSphereBounds Bounds = PathMesh->GetBounds();
 		float MeshLength = FMath::Abs(Bounds.BoxExtent.X);
 		float SplineLength = Spline->GetSplineLength();
+		SplineLength -= HorizontalOffset; // Get some distance between the cursor and the path
 
 		while (Distance < SplineLength)
 		{
@@ -134,11 +135,10 @@ void UGridMovementComponent::AddSplineMesh(float From, float To)
 	FVector EndTan = Spline->GetDirectionAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local) * TanScale;
 
 	UPROPERTY() USplineMeshComponent *SplineMesh = NewObject<USplineMeshComponent>(this);
+	SplineMesh->SetStaticMesh(PathMesh);
 	SplineMesh->RegisterComponentWithWorld(GetWorld());
 	SplineMesh->SetMobility(EComponentMobility::Movable);
 
-	SplineMesh->SetStaticMesh(PathMesh);
 	SplineMesh->SetStartAndEnd(StartPos, StartTan, EndPos, EndTan);
-
 	SplineMeshes.Add(SplineMesh);
 }

@@ -40,9 +40,9 @@ public:
 	/* Mesh used to visualize the path */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") UStaticMesh *PathMesh = NULL;
 	/* Vertical offset between Path and visualization */
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") float VerticalOffest = 30;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") float VerticalOffest = 0;
 	/* Distance between actor and where we start showing the path */
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") float HorizontalOffset = 30;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") float HorizontalOffset = 87.5;
 
 	/* Create a path to Target, return false if no path is found */
 	bool CreatePath(const ATile &Target);

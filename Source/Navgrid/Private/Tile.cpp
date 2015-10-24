@@ -29,7 +29,7 @@ ATile::ATile()
 	FTransform HighlightOffset;
 	HighlightOffset.SetLocation(FVector(0, 0, 10));
 	FTransform UIOffset;
-	UIOffset.SetLocation(FVector(0, 0, 15));
+	UIOffset.SetLocation(FVector(0, 0, 0));
 
 	HoverCursor->AddLocalTransform(UIOffset);
 	SelectCursor->AddLocalTransform(UIOffset);
