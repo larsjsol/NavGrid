@@ -55,6 +55,12 @@ public:
 	/* Hide path */
 	void HidePath();
 
+	DECLARE_EVENT(UGridMovementComponent, FOnMovementDone);
+	/* Triggered when movement ends */
+	FOnMovementDone& OnMovementEnd() { return OnMovementEndEvent; }
+private:
+	FOnMovementDone OnMovementEndEvent;
+
 protected:
 	UPROPERTY() TArray<USplineMeshComponent *> SplineMeshes;
 

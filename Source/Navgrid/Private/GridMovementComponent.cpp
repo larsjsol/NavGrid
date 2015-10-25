@@ -45,6 +45,7 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 			Moving = false;
 			Distance = 0;
 			Velocity = FVector::ZeroVector;
+			OnMovementEndEvent.Broadcast();
 		}
 		else
 		{
