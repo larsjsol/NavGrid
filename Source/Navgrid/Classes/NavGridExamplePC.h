@@ -7,8 +7,9 @@
 
 class ATile;
 class ANavGrid;
+class ATurnManager;
+class UTurnComponent;
 class AGridPawn;
-class UGridMovementComponent;
 
 /**
  * An example PlayerController that lets you move a single GridPawn by
@@ -21,6 +22,7 @@ class NAVGRID_API ANavGridExamplePC : public APlayerController
 public:
 	ANavGridExamplePC(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
+	virtual void OnConstruction(const FTransform &Transform) override;
 
 	/*
 	Called when a tile is clicked
@@ -32,7 +34,13 @@ public:
 	void OnTileCursorOver(const ATile &Tile);
 	void OnEndTileCursorOver(const ATile &Tile);
 
-	ANavGrid *Grid = NULL;
+	/* Called when a new turn starts*/
+	void OnTurnStart(const UTurnComponent &Component);
+	/* Called when the current pawn is done moving*/
+	void OnMovementEnd();
+	
+	/* The pawn we're currently controlling */
 	AGridPawn *Pawn = NULL;
-	UGridMovementComponent *MovementComponent = NULL;
+	ANavGrid *Grid = NULL;
+	UPROPERTY() ATurnManager *TurnManager = NULL;
 };
