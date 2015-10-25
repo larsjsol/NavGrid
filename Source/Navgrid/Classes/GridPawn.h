@@ -6,6 +6,7 @@
 #include "GridPawn.generated.h"
 
 class UGridMovementComponent;
+class UTurnComponent;
 /**
  * A pawn that can move around on a NavGrid.
  *
@@ -20,6 +21,10 @@ public:
 	// Sets default values for this pawn's properties
 	AGridPawn();
 
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") USceneComponent *Scene = NULL;
+
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UGridMovementComponent *MovementComponent = NULL;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
+	UTurnComponent *TurnComponent = NULL;	
 };
