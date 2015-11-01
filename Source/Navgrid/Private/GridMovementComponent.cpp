@@ -147,10 +147,10 @@ void UGridMovementComponent::AddSplineMesh(float From, float To)
 	FVector EndTan = Spline->GetDirectionAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local) * TanScale;
 
 	UPROPERTY() USplineMeshComponent *SplineMesh = NewObject<USplineMeshComponent>(this);
+	SplineMesh->SetMobility(EComponentMobility::Movable);
+	SplineMesh->SetStartAndEnd(StartPos, StartTan, EndPos, EndTan);
 	SplineMesh->SetStaticMesh(PathMesh);
 	SplineMesh->RegisterComponentWithWorld(GetWorld());
-	SplineMesh->SetMobility(EComponentMobility::Movable);
 
-	SplineMesh->SetStartAndEnd(StartPos, StartTan, EndPos, EndTan);
 	SplineMeshes.Add(SplineMesh);
 }
