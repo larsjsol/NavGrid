@@ -14,16 +14,22 @@ ATile::ATile()
 	Mesh->AttachParent = SceneComponent;
 	HoverCursor = CreateDefaultSubobject<UStaticMeshComponent>("HoverCursor");
 	HoverCursor->AttachParent = SceneComponent;
+	HoverCursor->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SelectCursor = CreateDefaultSubobject<UStaticMeshComponent>("SelectCursor");
 	SelectCursor->AttachParent = SceneComponent;
+	SelectCursor->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	MovableHighlight = CreateDefaultSubobject<UStaticMeshComponent>("MovableHighlight");
 	MovableHighlight->AttachParent = SceneComponent;
+	MovableHighlight->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	DangerousHighlight = CreateDefaultSubobject<UStaticMeshComponent>("DangerousHighlight");
 	DangerousHighlight->AttachParent = SceneComponent;
+	DangerousHighlight->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SpecialHighlight = CreateDefaultSubobject<UStaticMeshComponent>("SpecialHighlight");
 	SpecialHighlight->AttachParent = SceneComponent;
+	SpecialHighlight->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	BackpointerMesh = CreateDefaultSubobject<UStaticMeshComponent>("BackpointerArrow");
 	BackpointerMesh->AttachParent = SceneComponent;
+	BackpointerMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
 	// position and hide ui elements
 	FTransform HighlightOffset;

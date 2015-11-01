@@ -301,5 +301,5 @@ bool ANavGrid::Obstructed(ATile *From, ATile *To, UCapsuleComponent *CollisionCa
 void ANavGrid::SetSM(UStaticMesh **Meshptr, const TCHAR* AssetReference)
 {	
 	auto OF = ConstructorHelpers::FObjectFinder<UStaticMesh>(AssetReference);
-	if (OF.Succeeded()) { *Meshptr = OF.Object;  }
+	if (OF.Succeeded()) { *Meshptr = OF.Object; }
 }
