@@ -29,6 +29,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MovementRange = 4;
 	/* How fast can the actor move */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxSpeed = 450;
+	/* Should we ignore rotation over the X axis */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool LockRoll = true;
+	/* Should we ignore rotation over the Y axis */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool LockPitch = true;
+	/* Should we ignore rotation over the Z axis */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool LockYaw = false;
 
 	/*
 	Spline that is used as a path. The points are in word coords.

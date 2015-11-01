@@ -38,6 +38,13 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		FTransform NewTransform = Spline->GetTransformAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::Local);
 		FVector OldLocation = Owner->GetActorLocation();
 
+		/* Restrain rotation axis */
+		FRotator Rotation = NewTransform.Rotator();
+		Rotation.Roll = LockRoll ? 0 : Rotation.Roll;
+		Rotation.Pitch = LockPitch ? 0 : Rotation.Pitch; 
+		Rotation.Yaw = LockYaw ? 0 : Rotation.Yaw;
+		NewTransform.SetRotation(Rotation.Quaternion());
+
 		Owner->SetActorTransform(NewTransform);
 
 		/* Check if we're reached our destination*/
