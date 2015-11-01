@@ -1,5 +1,5 @@
 # NavGrid
-An Unreal Engine 4 plugin for grid based navigation
+An Unreal Engine 4 plugin for navigation on a agrid for turn based games
 
 ## Quickstart
 1. Save/clone into the `Plugins/` directory at the project root
