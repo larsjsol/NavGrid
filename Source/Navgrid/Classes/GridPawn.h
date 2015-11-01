@@ -30,4 +30,12 @@ public:
 	/* Used to test if thre's room for pawn on a tile*/
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UCapsuleComponent *CapsuleComponent = NULL;
+	/* Shown when the pawn is selected/has its turn */
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
+	UStaticMeshComponent *SelectedHighlight = NULL;
+
+	/* Called on turn start */
+	virtual void OnTurnStart();
+	/* Called on turn end */
+	virtual void OnTurnEnd();
 };
