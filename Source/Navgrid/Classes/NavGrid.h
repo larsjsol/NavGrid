@@ -78,10 +78,15 @@ public:
 
 	/* Find all tiles adjacent to Tile */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
-	virtual void Neighbours(ATile *Tile, TArray<ATile*> &OutArray);
+	virtual void Neighbours(ATile *Tile, TArray<ATile*> &OutArray, bool DoCollisionTests = false, UCapsuleComponent *Capsule = NULL);
 	/* Find all tiles in range */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	virtual void TilesInRange(ATile *Tile, TArray<ATile *> &OutArray, float Range);
+	virtual void TilesInRange(ATile *Tile, TArray<ATile *> &OutArray, float Range, 
+		bool DoCollisionTests = false, UCapsuleComponent *Capsule = NULL);
+
+	/* Check if there are any obstructions between two tiles */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
+	bool Obstructed(ATile *From, ATile *To, UCapsuleComponent *CollisionCapsule);
 
 	//Event delegates
 	DECLARE_EVENT_OneParam(ANavGrid, FOnTileClicked, const ATile& );

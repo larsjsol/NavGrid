@@ -26,5 +26,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UGridMovementComponent *MovementComponent = NULL;
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
-	UTurnComponent *TurnComponent = NULL;	
+	UTurnComponent *TurnComponent = NULL;
+	/* Used to test if thre's room for pawn on a tile*/
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
+	UCapsuleComponent *CapsuleComponent = NULL;
 };

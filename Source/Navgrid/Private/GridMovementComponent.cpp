@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NavGrid.h"
+#include "GridPawn.h"
 #include "GridMovementComponent.h"
 
 #include "Components/SplineComponent.h"
@@ -61,11 +62,21 @@ bool UGridMovementComponent::CreatePath(const ATile &Target)
 {
 	Spline->ClearSplinePoints();
 
-	ATile *Location = Grid->GetTile(GetOwner()->GetActorLocation());
-	if (!Location) { UE_LOG(NavGrid, Error, TEXT("%s: Not on grid"), *GetOwner()->GetName()); return false; }
+	AActor *Owner = GetOwner();
+	AGridPawn *GridPawnOwner = Cast<AGridPawn>(Owner);
+
+	ATile *Location = Grid->GetTile(Owner->GetActorLocation());
+	if (!Location) { UE_LOG(NavGrid, Error, TEXT("%s: Not on grid"), *Owner->GetName()); return false; }
 
 	TArray<ATile *> InRange;
-	Grid->TilesInRange(Location, InRange, MovementRange);
+	if (GridPawnOwner) {
+		Grid->TilesInRange(Location, InRange, MovementRange, true, GridPawnOwner->CapsuleComponent);
+	}
+	else
+	{
+		Grid->TilesInRange(Location, InRange, MovementRange);
+	}
+
 	if (InRange.Contains(&Target))
 	{
 		TArray<ATile *> Path;

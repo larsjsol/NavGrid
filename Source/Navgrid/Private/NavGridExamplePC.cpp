@@ -69,7 +69,7 @@ void ANavGridExamplePC::OnTileClicked(const ATile &Tile)
 			if (Location != &Tile && MovementComponent->Velocity.Size() == 0)
 			{
 				TArray<ATile *> InRange;
-				Grid->TilesInRange(Location, InRange, MovementComponent->MovementRange);
+				Grid->TilesInRange(Location, InRange, MovementComponent->MovementRange, true, Pawn->CapsuleComponent);
 				if (InRange.Contains(&Tile))
 				{
 					MovementComponent->MoveTo(Tile);

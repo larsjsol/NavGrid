@@ -181,7 +181,7 @@ void ANavGrid::EndTileCursorOver(ATile &Tile)
 	OnEndTileCursorOverEvent.Broadcast(Tile);
 }
 
-void ANavGrid::Neighbours(ATile *Tile, TArray<ATile*> &OutArray)
+void ANavGrid::Neighbours(ATile *Tile, TArray<ATile*> &OutArray, bool DoCollisionTests, UCapsuleComponent *Capsule)
 {
 	OutArray.Empty();
 	if (Tile)
@@ -194,14 +194,20 @@ void ANavGrid::Neighbours(ATile *Tile, TArray<ATile*> &OutArray)
 				if (X != Tile->X || Y != Tile->Y)
 				{
 					ATile *N = GetTile(X, Y);
-					if (N) { OutArray.Add(N); }
+					if (N)
+					{ 
+						if (!DoCollisionTests || !Obstructed(Tile, N, Capsule))
+						{
+							OutArray.Add(N);
+						}
+					}
 				}
 			}
 		}
 	}
 }
 
-void ANavGrid::TilesInRange(ATile *Tile, TArray<ATile *> &OutArray, float Range)
+void ANavGrid::TilesInRange(ATile *Tile, TArray<ATile *> &OutArray, float Range, bool DoCollisionTests, UCapsuleComponent *Capsule)
 {
 	OutArray.Empty();
 	for (ATile *T : Tiles)
@@ -213,12 +219,12 @@ void ANavGrid::TilesInRange(ATile *Tile, TArray<ATile *> &OutArray, float Range)
 	Current->Distance = 0;
 
 	TArray<ATile *> NeighbouringTiles;
-	Neighbours(Current, NeighbouringTiles);
+	Neighbours(Current, NeighbouringTiles, DoCollisionTests, Capsule);
 	TArray<ATile *> TentativeSet(NeighbouringTiles);
 
 	while (Current)
 	{
-		Neighbours(Current, NeighbouringTiles);
+		Neighbours(Current, NeighbouringTiles, DoCollisionTests, Capsule);
 		for (ATile *N : NeighbouringTiles)
 		{
 			if (!N->Visited)
@@ -266,6 +272,30 @@ void ANavGrid::TilesInRange(ATile *Tile, TArray<ATile *> &OutArray, float Range)
 			Current = NULL;
 		}
 	}
+}
+
+bool ANavGrid::Obstructed(ATile *From, ATile *To, UCapsuleComponent *CollisionCapsule)
+{
+	if (!From || !To || !CollisionCapsule)
+	{
+		UE_LOG(NavGrid, Error, TEXT("ANavGrid::Obstructed() called with NULL argument: From:%p, To:%p, CollisionCapsule:%p"), (void *)From, (void *)To, (void *)CollisionCapsule);
+		return false; //I guess...
+	}
+	else
+	{
+		FHitResult OutHit;
+		FVector Start = From->GetActorLocation() + CollisionCapsule->RelativeLocation;
+		FVector End = To->GetActorLocation() + CollisionCapsule->RelativeLocation;
+		FQuat Rot = FQuat::Identity;
+		FCollisionShape CollisionShape = CollisionCapsule->GetCollisionShape();
+		FCollisionQueryParams CQP;
+		CQP.AddIgnoredActor(CollisionCapsule->GetOwner());
+		FCollisionResponseParams CRP;
+		bool HitSomething =  GetWorld()->SweepSingleByChannel(OutHit, Start, End, Rot, 
+                                                              ECollisionChannel::ECC_Pawn, CollisionShape, CQP, CRP);
+		return HitSomething;
+	}
+
 }
 
 void ANavGrid::SetSM(UStaticMesh **Meshptr, const TCHAR* AssetReference)
