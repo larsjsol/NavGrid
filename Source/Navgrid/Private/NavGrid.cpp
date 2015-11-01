@@ -105,6 +105,9 @@ ATile *ANavGrid::GetTile(int32 X, int32 Y)
 ATile *ANavGrid::GetTile(const FVector &WorldLocation)
 {
 	FVector LocalCoord = WorldLocation - GetActorLocation();
+	// We're flooring the coord below so add half of a tile to ensure we get the right one 
+	LocalCoord.X += TileWidth / 2; 
+	LocalCoord.Y += TileHeight / 2;
 	return GetTile((int) (LocalCoord.X / TileWidth), (int) (LocalCoord.Y / TileHeight));
 }
 
