@@ -33,6 +33,9 @@ public:
 	/* Shown when the pawn is selected/has its turn */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UStaticMeshComponent *SelectedHighlight = NULL;
+	/* An arrow pointing forward */
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") 
+	UArrowComponent *Arrow = NULL;
 
 	/* Called on turn start */
 	virtual void OnTurnStart();

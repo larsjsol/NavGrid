@@ -22,6 +22,4 @@ public:
 	AExampleGridPawn();
 	/* Just a cone so we can see the pawn */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") UStaticMeshComponent *StaticMesh = NULL;
-	/* An arrow pointing forward */
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") UArrowComponent *Arrow = NULL;
 };

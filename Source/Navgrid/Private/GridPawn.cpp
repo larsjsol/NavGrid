@@ -32,6 +32,9 @@ AGridPawn::AGridPawn()
 
 	TurnComponent->OnTurnStart().AddUObject(this, &AGridPawn::OnTurnStart);
 	TurnComponent->OnTurnEnd().AddUObject(this, &AGridPawn::OnTurnEnd);
+
+	Arrow = CreateDefaultSubobject<UArrowComponent>("Arrow");
+	Arrow->AttachParent = Scene;
 }
 
 void AGridPawn::OnTurnStart()

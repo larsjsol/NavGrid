@@ -15,8 +15,7 @@ AExampleGridPawn::AExampleGridPawn()
 	StaticMesh->SetRelativeLocation(FVector(0, 0, 50));
 	StaticMesh->AttachParent = Scene;
 
-	Arrow = CreateDefaultSubobject<UArrowComponent>("Arrow");
-	Arrow->SetRelativeLocation(FVector(0, 0, 50));
+	/* Show the arrow in game so we can which way the cone is facing */
 	Arrow->SetHiddenInGame(false);
-	Arrow->AttachParent = Scene;
+	Arrow->SetRelativeLocation(FVector(0, 0, 50));
 }
