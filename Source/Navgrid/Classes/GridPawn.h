@@ -20,6 +20,7 @@ class NAVGRID_API AGridPawn : public APawn
 public:
 	// Sets default values for this pawn's properties
 	AGridPawn();
+	virtual void OnConstruction(const FTransform &Transform) override;
 
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") USceneComponent *Scene = NULL;
 
@@ -36,6 +37,10 @@ public:
 	/* An arrow pointing forward */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") 
 	UArrowComponent *Arrow = NULL;
+
+	/* Should this pawn snap to grid when placed */
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Default")
+	bool SnapToGrid = true;
 
 	/* Called on turn start */
 	virtual void OnTurnStart();

@@ -37,6 +37,18 @@ AGridPawn::AGridPawn()
 	Arrow->AttachParent = Scene;
 }
 
+void AGridPawn::OnConstruction(const FTransform &Transform)
+{
+	Super::OnConstruction(Transform);
+
+	TActorIterator<ANavGrid>GridItr(GetWorld());
+	if (SnapToGrid && GridItr)
+	{
+		ATile *Tile = GridItr->GetTile(GetActorLocation());
+		if (Tile) { SetActorLocation(Tile->GetActorLocation()); }
+	}
+}
+
 void AGridPawn::OnTurnStart()
 {
 	SelectedHighlight->SetVisibility(true);
