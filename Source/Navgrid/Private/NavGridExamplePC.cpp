@@ -73,6 +73,7 @@ void ANavGridExamplePC::OnTileClicked(const ATile &Tile)
 				if (InRange.Contains(&Tile))
 				{
 					MovementComponent->MoveTo(Tile);
+					MovementComponent->HidePath();
 				}
 			}
 		}
