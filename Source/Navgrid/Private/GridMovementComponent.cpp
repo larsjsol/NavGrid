@@ -29,14 +29,14 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	if (Moving)
 	{
 		/* Find the next location */
-		float RemainingDistance = Spline->GetSplineLength();
 		Distance = FMath::Min(Spline->GetSplineLength(), Distance + (MaxSpeed * DeltaTime));
 		
-		/* Move and rotate the actor */
+		/* Grab our current transform so we can find the velocity if we need it later */
 		AActor *Owner = GetOwner();
 		FTransform OldTransform = Owner->GetTransform();
+
+		/* Find the next loaction from the spline*/
 		FTransform NewTransform = Spline->GetTransformAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::Local);
-		FVector OldLocation = Owner->GetActorLocation();
 
 		/* Restrain rotation axis */
 		FRotator Rotation = NewTransform.Rotator();
