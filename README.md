@@ -1,6 +1,10 @@
 # NavGrid
 An Unreal Engine 4 plugin for navigation on a agrid for turn based games
 
+[![Video of two pawns moving on a NavGrtid](http://img.youtube.com/vi/w8L-K8WI2do/0.jpg)](http://www.youtube.com/watch?v=w8L-K8WI2do)
+
+The video above shows two pawns from the "Mixamo Anmination Pack" moving on a NavGrid.
+
 ## Quickstart
 1. Save/clone into the `Plugins/` directory at the project root
 2. Compile
