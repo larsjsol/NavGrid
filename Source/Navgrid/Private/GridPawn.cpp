@@ -37,9 +37,9 @@ AGridPawn::AGridPawn()
 	Arrow->AttachParent = Scene;
 }
 
-void AGridPawn::OnConstruction(const FTransform &Transform)
+void AGridPawn::BeginPlay()
 {
-	Super::OnConstruction(Transform);
+	Super::BeginPlay();
 
 	TActorIterator<ANavGrid>GridItr(GetWorld());
 	if (SnapToGrid && GridItr)
