@@ -65,3 +65,7 @@ Useful functions:
 The path preview is thin and changes form and posision from one instance to another. If the antialiasing method is set to `TemporalAA`, Unreal will attempt to make this motion appear smooth. This might not look good if there is some distance between the camera and the path.
 
 There are two possible solutions to this: Either ensure that the camera is close when drawing a path or change the antialiasing method in `Project Settings->Rendering`.
+
+## Changes
+** Version 1.0 08.11.2015 **
+* First version
