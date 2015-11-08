@@ -67,5 +67,5 @@ The path preview is thin and changes form and posision from one instance to anot
 There are two possible solutions to this: Either ensure that the camera is close when drawing a path or change the antialiasing method in `Project Settings->Rendering`.
 
 ## Changes
-** Version 1.0 08.11.2015 **
+**Version 1.0 08.11.2015**
 * First version
