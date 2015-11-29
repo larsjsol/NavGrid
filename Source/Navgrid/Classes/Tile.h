@@ -55,12 +55,6 @@ public:
 	UStaticMeshComponent *DangerousHighlight = NULL;
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UStaticMeshComponent *SpecialHighlight = NULL;
-	/* Backpointer arrow */
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
-	UStaticMeshComponent *BackpointerMesh = NULL;
-
-	UFUNCTION(BlueprintCallable, Category = "Visualization")
-	void SetBackpointerVisibility(bool Visible);
 
 	/* The grid this tile is part of */
 	UPROPERTY(BlueprintReadOnly, Category = "Tile") ANavGrid *Grid = NULL;

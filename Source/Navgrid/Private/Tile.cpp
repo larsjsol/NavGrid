@@ -27,9 +27,6 @@ ATile::ATile()
 	SpecialHighlight = CreateDefaultSubobject<UStaticMeshComponent>("SpecialHighlight");
 	SpecialHighlight->AttachParent = SceneComponent;
 	SpecialHighlight->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	BackpointerMesh = CreateDefaultSubobject<UStaticMeshComponent>("BackpointerArrow");
-	BackpointerMesh->AttachParent = SceneComponent;
-	BackpointerMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
 	// position and hide ui elements
 	FTransform HighlightOffset;
@@ -42,13 +39,11 @@ ATile::ATile()
 	MovableHighlight->AddLocalTransform(HighlightOffset);
 	DangerousHighlight->AddLocalTransform(HighlightOffset);
 	SpecialHighlight->AddLocalTransform(HighlightOffset);
-	BackpointerMesh->AddLocalTransform(UIOffset);
 	HoverCursor->SetVisibility(false);
 	SelectCursor->SetVisibility(false);
 	MovableHighlight->SetVisibility(false);
 	DangerousHighlight->SetVisibility(false);
 	SpecialHighlight->SetVisibility(false);
-	BackpointerMesh->SetVisibility(false);
 
 	// bind click events
 	OnClicked.AddDynamic(this, &ATile::Clicked);
@@ -70,18 +65,6 @@ void ATile::ResetPath()
 	Distance = std::numeric_limits<float>::infinity();
 	Backpointer = NULL;
 	Visited = false;
-}
-
-void ATile::SetBackpointerVisibility(bool Visible)
-{
-	/* rotate the arrow mesh */
-	if (Backpointer && Visible)
-	{
-		FVector Direction = Backpointer->GetActorLocation() - GetActorLocation();
-		Direction.Z = 0; // ignore height differences 
-		BackpointerMesh->SetRelativeRotation(Direction.Rotation().Quaternion());
-	}
-	BackpointerMesh->SetVisibility(Visible);
 }
 
 void ATile::Clicked()

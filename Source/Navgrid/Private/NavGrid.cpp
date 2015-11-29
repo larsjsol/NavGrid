@@ -24,7 +24,6 @@ ANavGrid::ANavGrid()
 	SetSM(&DefaultMovableHighlight, TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Movable.NavGrid_Movable'"));
 	SetSM(&DefaultDangerousHighlight, TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Dangerous.NavGrid_Dangerous'"));
 	SetSM(&DefaultSpecialHighlight, TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Special.NavGrid_Special'"));
-	//SetSM(&DefaultBackpointerArrow, TEXT("StaticMesh'/Game/NavGrid/Meshes/SM_Arrow.SM_Arrow'"));
 }
 
 // Called when the game starts or when spawned
@@ -68,7 +67,6 @@ void ANavGrid::OnConstruction(const FTransform &Transform)
 			if (DefaultMovableHighlight) { Tile->MovableHighlight->SetStaticMesh(DefaultMovableHighlight); }
 			if (DefaultDangerousHighlight) { Tile->DangerousHighlight->SetStaticMesh(DefaultDangerousHighlight); }
 			if (DefaultSpecialHighlight) { Tile->SpecialHighlight->SetStaticMesh(DefaultSpecialHighlight); }
-			if (DefaultBackpointerArrow) { Tile->BackpointerMesh->SetStaticMesh(DefaultBackpointerArrow); }
 		}
 	}
 }

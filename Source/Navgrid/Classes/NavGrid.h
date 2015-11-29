@@ -54,8 +54,6 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultDangerousHighlight = NULL;
 	/* Special highlight */
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultSpecialHighlight = NULL;
-	/* Backpointer visualization */
-	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Appearance") UStaticMesh *DefaultBackpointerArrow = NULL;
 
 	/* Scene Component (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
