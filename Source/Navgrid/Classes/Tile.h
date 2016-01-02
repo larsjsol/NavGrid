@@ -57,7 +57,7 @@ public:
 	UStaticMeshComponent *SpecialHighlight = NULL;
 
 	/* The grid this tile is part of */
-	UPROPERTY(BlueprintReadOnly, Category = "Tile") ANavGrid *Grid = NULL;
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "Tile") ANavGrid *Grid;
 
 private:
 	UFUNCTION() void Clicked();
