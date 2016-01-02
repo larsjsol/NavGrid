@@ -7,7 +7,7 @@ The video above shows two pawns from the "Mixamo Anmination Pack" moving on a Na
 
 ## Quickstart
 1. Save/clone into the `Plugins/` directory at the project root
-2. Compile
+2. Compile. You will need to right click on the `.uproject` in your project and select `Generate Visual Studio project files` so VS is aware of the new source files.
 3. Enable via `Edit->Plugins`
 4. Place a `NavGrid` and a few `ExampleGridPawn`s in you level
 5. Set the PlayerController class to `ANavGridExamplePC`
