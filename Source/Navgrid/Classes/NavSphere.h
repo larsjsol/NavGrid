@@ -24,6 +24,7 @@ struct FTriangle {
 * Holds the geometry for a sphere made up of hexagons and pentagons
 *
 * This code borrows heavily from:
+* https://en.wikipedia.org/wiki/Regular_icosahedron
 * http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
 */
 USTRUCT()
@@ -37,17 +38,30 @@ struct FIcoSphere {
 	UPROPERTY()
 	TArray<FTriangle> Triangles;
 	
+	FIcoSphere()
+	{
+		MakeIcosahedron();
+	}
+
 	/*
-	* Make a twenty sided sphere
+	* Initialize as a icosahedron
 	*/
 	void MakeIcosahedron();
 
 	/*
+	*
+	* Find the point in the middle of A and B with the same distance to the center
+	*/
+	FVector FindMiddle(int32 VertexIdA, int32 VertexIdB);
+
+	void SubDivide(int32 Iterations = 1);
+
+	/*
 	* Convenience function to add a vertex
 	*/
-	void AddVertex(float X, float Y, float Z)
+	int AddVertex(float X, float Y, float Z)
 	{
-		Vertices.Add(FVector(X, Y, Z));
+		return Vertices.AddUnique(FVector(X, Y, Z));
 	}
 
 	/*

@@ -61,7 +61,50 @@ void FIcoSphere::MakeIcosahedron()
 	//expand the sphere so we can see it when debugging
 	for (FVector &Vert : Vertices)
 	{
-		Vert *= 100;
+		Vert *= 1000;
+	}
+}
+
+FVector FIcoSphere::FindMiddle(int32 VertexIdA, int32 VertexIdB)
+{
+	// floating point arithmetic anxiety 
+	int32 Largest = FMath::Max(VertexIdA, VertexIdB);
+	int32 Smallest = FMath::Min(VertexIdA, VertexIdB);
+
+	FVector Middle = (Vertices[Largest] + Vertices[Smallest]) / 2;
+	float Radius = Vertices[Largest].Size();
+
+	return Middle.GetSafeNormal() * Radius;
+}
+
+void FIcoSphere::SubDivide(int32 Iterations/* = 1*/)
+{
+	while (Iterations > 0)
+	{
+		// make a copy of the existing triangles so we can iterate over them
+		TArray<FTriangle> TrianglesCopy(Triangles);
+
+		// make room for our new subdiveded triangles
+		Triangles.Empty();
+
+		for (FTriangle const &Tri : TrianglesCopy)
+		{
+			// find the middle point of the edges
+			FVector A = FindMiddle(Tri.VertexIds[0], Tri.VertexIds[1]);
+			FVector B = FindMiddle(Tri.VertexIds[1], Tri.VertexIds[2]);
+			FVector C = FindMiddle(Tri.VertexIds[2], Tri.VertexIds[0]);
+			int32 VertIdA = AddVertex(A.X, A.Y, A.Z);
+			int32 VertIdB = AddVertex(B.X, B.Y, B.Z);
+			int32 VertIdC = AddVertex(C.X, C.Y, C.Z);
+
+			//generate 4 new triangles
+			AddTriangle(Tri.VertexIds[0], VertIdA, VertIdC);
+			AddTriangle(Tri.VertexIds[1], VertIdB, VertIdA);
+			AddTriangle(Tri.VertexIds[2], VertIdC, VertIdB);
+			AddTriangle(VertIdA, VertIdB, VertIdC);
+		}
+
+		Iterations--;
 	}
 }
 
@@ -110,6 +153,6 @@ void ANavSphere::OnConstruction(const FTransform &Transform)
 {
 	Super::OnConstruction(Transform);
 
-	IcoSphere.MakeIcosahedron();
+	IcoSphere.SubDivide(3);
 	IcoSphere.DrawDebug(GetWorld(), GetActorLocation());
 }
