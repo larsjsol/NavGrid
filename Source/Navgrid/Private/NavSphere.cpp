@@ -57,28 +57,28 @@ void FIcoSphere::MakeIcosahedron()
 	AddTriangle(6, 2, 10);
 	AddTriangle(8, 6, 7);
 	AddTriangle(9, 8, 1);
-
-	//expand the sphere so we can see it when debugging
-	for (FVector &Vert : Vertices)
-	{
-		Vert *= 1000;
-	}
 }
 
 FVector FIcoSphere::FindMiddle(int32 VertexIdA, int32 VertexIdB)
 {
 	// floating point arithmetic anxiety 
-	int32 Largest = FMath::Max(VertexIdA, VertexIdB);
-	int32 Smallest = FMath::Min(VertexIdA, VertexIdB);
+	FVector A = Vertices[FMath::Max(VertexIdA, VertexIdB)];
+	FVector B = Vertices[FMath::Min(VertexIdA, VertexIdB)];
 
-	FVector Middle = (Vertices[Largest] + Vertices[Smallest]) / 2;
-	float Radius = Vertices[Largest].Size();
+	FVector Middle = (A + B) / 2.0;
 
-	return Middle.GetSafeNormal() * Radius;
+	return Middle;
 }
 
 void FIcoSphere::SubDivide(int32 Iterations/* = 1*/)
 {
+	// Rebuild everything. Maybe figure out how to do this better in the future
+	if (CurrentSubdivisions != 0)
+	{
+		MakeIcosahedron();
+	}
+	CurrentSubdivisions = Iterations;
+
 	while (Iterations > 0)
 	{
 		// make a copy of the existing triangles so we can iterate over them
@@ -108,18 +108,20 @@ void FIcoSphere::SubDivide(int32 Iterations/* = 1*/)
 	}
 }
 
-void FIcoSphere::DrawDebug(const UWorld* World, const FVector &Center)
+void FIcoSphere::DrawDebug(const UWorld* World, const FVector &Center/* = FVector(0, 0, 0)*/, const FVector &Scale/* = FVector(1, 1, 1)*/)
 {
 	FlushPersistentDebugLines(World);
 	for (FVector &Vert : Vertices)
 	{
-		DrawDebugPoint(World, Center + Vert, 10, FColor(255, 0, 0), true);
+		DrawDebugPoint(World, Center + (Vert * Scale), 10, FColor(255, 0, 0), true);
 	}
 	for (FTriangle &Tri : Triangles)
 	{
 		for (int32 i = 0; i < 3; i++)
 		{
-			DrawDebugLine(World, Center + Vertices[Tri.VertexIds[i % 3]], Center + Vertices[Tri.VertexIds[(i + 1) % 3]], FColor(0, 0, 255), true);
+			FVector From = Center + (Vertices[Tri.VertexIds[i % 3]] * Scale);
+			FVector To = Center + (Vertices[Tri.VertexIds[(i + 1) % 3]] * Scale);
+			DrawDebugLine(World, From, To, FColor(0, 0, 255), true);
 		}
 	}
 }
@@ -154,5 +156,5 @@ void ANavSphere::OnConstruction(const FTransform &Transform)
 	Super::OnConstruction(Transform);
 
 	IcoSphere.SubDivide(3);
-	IcoSphere.DrawDebug(GetWorld(), GetActorLocation());
+	IcoSphere.DrawDebug(GetWorld(), GetActorLocation(), GetActorScale());
 }

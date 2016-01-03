@@ -26,6 +26,7 @@ struct FTriangle {
 * This code borrows heavily from:
 * https://en.wikipedia.org/wiki/Regular_icosahedron
 * http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
+* https://experilous.com/1/blog/post/procedural-planet-generation
 */
 USTRUCT()
 struct FIcoSphere {
@@ -33,10 +34,14 @@ struct FIcoSphere {
 
 	static const float Phi;
 
+	/* Stored as unit vectors*/
 	UPROPERTY()
 	TArray<FVector> Vertices;
 	UPROPERTY()
 	TArray<FTriangle> Triangles;
+
+	UPROPERTY()
+	int32 CurrentSubdivisions = 0;
 	
 	FIcoSphere()
 	{
@@ -61,7 +66,7 @@ struct FIcoSphere {
 	*/
 	int AddVertex(float X, float Y, float Z)
 	{
-		return Vertices.AddUnique(FVector(X, Y, Z));
+		return Vertices.AddUnique(FVector(X, Y, Z).GetSafeNormal());
 	}
 
 	/*
@@ -72,7 +77,7 @@ struct FIcoSphere {
 		Triangles.Add(FTriangle(A, B, C));
 	}
 
-	void DrawDebug(const UWorld* World, const FVector &Center);
+	void DrawDebug(const UWorld* World, const FVector &Center = FVector(0, 0, 0), const FVector &Scale = FVector(1, 1, 1));
 };
 
 UCLASS()
