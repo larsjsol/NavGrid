@@ -29,7 +29,7 @@ struct FPolygon
 /*
 * Holds the geometry for a sphere made up of hexagons and pentagons
 *
-* Each vertex is 1.0 from the center which is at 0.0, 0.0, 0.0
+* Each vertex is 1.0 from the center which is atq 0.0, 0.0, 0.0
 *
 * This code borrows heavily from:
 * https://en.wikipedia.org/wiki/Regular_icosahedron
@@ -69,10 +69,14 @@ struct FIcoSphere {
 	void MakeDodecahedron();
 
 	/*
-	*
 	* Find the point in the middle of A and B with the same distance to the center
 	*/
 	FVector FindMiddle(int32 VertexIdA, int32 VertexIdB);
+
+	/*
+	* Find the center of a polygon
+	*/
+	FVector FindCenter(const FPolygon &Polygon);
 
 	void SubDivide(int32 Iterations = 1);
 

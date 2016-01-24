@@ -72,7 +72,7 @@ void FIcoSphere::MakeDodecahedron()
 			if (Triangle.VertexIds.Contains(VertId))
 			{
 				// find the center
-				FVector Center = (Vertices[Triangle.VertexIds[0]] + Vertices[Triangle.VertexIds[1]] + Vertices[Triangle.VertexIds[2]]) / 3.0;
+				FVector Center = FindCenter(Triangle);
 				int32 CenterVertId = AddVertex(Center.X, Center.Y, Center.Z);
 				// add it as a vertex to the polygon
 				Polygon.VertexIds.Add(CenterVertId);
@@ -116,6 +116,16 @@ FVector FIcoSphere::FindMiddle(int32 VertexIdA, int32 VertexIdB)
 	FVector Middle = (A + B) / 2.0;
 
 	return Middle;
+}
+
+FVector FIcoSphere::FindCenter(const FPolygon &Polygon)
+{
+	FVector Sum = FVector(0, 0, 0);
+	for (int32 Id : Polygon.VertexIds)
+	{
+		Sum += Vertices[Id];
+	}
+	return Sum / Polygon.VertexIds.Num();
 }
 
 void FIcoSphere::SubDivide(int32 Iterations/* = 1*/)
