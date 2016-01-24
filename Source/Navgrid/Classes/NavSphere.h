@@ -2,26 +2,34 @@
 
 #pragma once
 
+#include <initializer_list>
+
 #include "GameFramework/Actor.h"
 #include "NavSphere.generated.h"
 
 
-
 USTRUCT()
-struct FTriangle {
+struct FPolygon
+{
 	GENERATED_BODY()
-	UPROPERTY() TArray<int32> VertexIds;
-	
-	FTriangle() {}
-	FTriangle(int32 A, int32 B, int32 C)
+
+	UPROPERTY()
+	TArray<int32> VertexIds;
+
+	FPolygon() {}
+	FPolygon(std::initializer_list<int32> VertIds)
 	{
-		VertexIds.Add(A);
-		VertexIds.Add(B);
-		VertexIds.Add(C);
+		for (int32 VertId : VertIds)
+		{
+			VertexIds.Add(VertId);
+		}
 	}
 };
+
 /*
 * Holds the geometry for a sphere made up of hexagons and pentagons
+*
+* Each vertex is 1.0 from the center which is at 0.0, 0.0, 0.0
 *
 * This code borrows heavily from:
 * https://en.wikipedia.org/wiki/Regular_icosahedron
@@ -38,7 +46,9 @@ struct FIcoSphere {
 	UPROPERTY()
 	TArray<FVector> Vertices;
 	UPROPERTY()
-	TArray<FTriangle> Triangles;
+	TArray<FPolygon> Triangles;
+	UPROPERTY()
+	TArray<FPolygon> Polygons;
 
 	UPROPERTY()
 	int32 CurrentSubdivisions = 0;
@@ -52,6 +62,11 @@ struct FIcoSphere {
 	* Initialize as a icosahedron
 	*/
 	void MakeIcosahedron();
+
+	/*
+	* Make a dodecahedron
+	*/
+	void MakeDodecahedron();
 
 	/*
 	*
@@ -74,10 +89,10 @@ struct FIcoSphere {
 	*/
 	void AddTriangle(int32 A, int32 B, int32 C)
 	{
-		Triangles.Add(FTriangle(A, B, C));
+		Triangles.Add(FPolygon({ A, B, C }));
 	}
 
-	void DrawDebug(const UWorld* World, const FVector &Center = FVector(0, 0, 0), const FVector &Scale = FVector(1, 1, 1));
+	void DrawDebug(const UWorld* World, const FTransform &Transform);
 };
 
 UCLASS()

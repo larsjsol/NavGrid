@@ -4,6 +4,7 @@
 #include "NavSphere.h"
 
 #include <cmath>
+#include <limits>
 
 const float FIcoSphere::Phi = (1 + sqrt(5.0)) / 2.0;
 
@@ -59,6 +60,53 @@ void FIcoSphere::MakeIcosahedron()
 	AddTriangle(9, 8, 1);
 }
 
+void FIcoSphere::MakeDodecahedron()
+{
+	int32 CurrentVertexNum = Vertices.Num(); // Don't iterate over the new vertices we add in the loop
+	for (int32 VertId = 0; VertId < CurrentVertexNum; VertId++)
+	{
+		FPolygon Polygon;
+		for (FPolygon &Triangle : Triangles)
+		{
+			// the center for each triangle is a corner for our new polygon
+			if (Triangle.VertexIds.Contains(VertId))
+			{
+				// find the center
+				FVector Center = (Vertices[Triangle.VertexIds[0]] + Vertices[Triangle.VertexIds[1]] + Vertices[Triangle.VertexIds[2]]) / 3.0;
+				int32 CenterVertId = AddVertex(Center.X, Center.Y, Center.Z);
+				// add it as a vertex to the polygon
+				Polygon.VertexIds.Add(CenterVertId);
+			}
+		}
+
+		// order the vertices so the edges are properly defined
+		TArray<int32> OrderedVertices;
+		OrderedVertices.Add(Polygon.VertexIds.Pop());
+		while (Polygon.VertexIds.Num())
+		{
+			int32 ClosestId;
+			float ClosestDistance = std::numeric_limits<float>::infinity();
+			FVector Current = Vertices[OrderedVertices.Last()];
+			for (int32 Id : Polygon.VertexIds)
+			{
+				float Distance = (Current - Vertices[Id]).Size();
+				if (Distance < ClosestDistance)
+				{
+					ClosestDistance = Distance;
+					ClosestId = Id;
+				}
+			}
+
+			OrderedVertices.Add(ClosestId);
+			Polygon.VertexIds.RemoveSingle(ClosestId);
+		}
+		Polygon.VertexIds = OrderedVertices;
+
+		// finaly add the polygon
+		Polygons.Add(Polygon);
+	}
+}
+
 FVector FIcoSphere::FindMiddle(int32 VertexIdA, int32 VertexIdB)
 {
 	// floating point arithmetic anxiety 
@@ -82,12 +130,12 @@ void FIcoSphere::SubDivide(int32 Iterations/* = 1*/)
 	while (Iterations > 0)
 	{
 		// make a copy of the existing triangles so we can iterate over them
-		TArray<FTriangle> TrianglesCopy(Triangles);
+		TArray<FPolygon> TrianglesCopy(Triangles);
 
 		// make room for our new subdiveded triangles
 		Triangles.Empty();
 
-		for (FTriangle const &Tri : TrianglesCopy)
+		for (FPolygon const &Tri : TrianglesCopy)
 		{
 			// find the middle point of the edges
 			FVector A = FindMiddle(Tri.VertexIds[0], Tri.VertexIds[1]);
@@ -108,20 +156,33 @@ void FIcoSphere::SubDivide(int32 Iterations/* = 1*/)
 	}
 }
 
-void FIcoSphere::DrawDebug(const UWorld* World, const FVector &Center/* = FVector(0, 0, 0)*/, const FVector &Scale/* = FVector(1, 1, 1)*/)
+void FIcoSphere::DrawDebug(const UWorld* World, const FTransform &Transform)
 {
+	FVector Center = Transform.GetLocation();
+	FVector Scale = Transform.GetScale3D();
+
 	FlushPersistentDebugLines(World);
 	for (FVector &Vert : Vertices)
 	{
 		DrawDebugPoint(World, Center + (Vert * Scale), 10, FColor(255, 0, 0), true);
 	}
-	for (FTriangle &Tri : Triangles)
+	for (FPolygon &Tri : Triangles)
 	{
 		for (int32 i = 0; i < 3; i++)
 		{
 			FVector From = Center + (Vertices[Tri.VertexIds[i % 3]] * Scale);
 			FVector To = Center + (Vertices[Tri.VertexIds[(i + 1) % 3]] * Scale);
 			DrawDebugLine(World, From, To, FColor(0, 0, 255), true);
+		}
+	}
+	for (FPolygon &Poly : Polygons)
+	{
+		int32 N = Poly.VertexIds.Num();
+		for (int32 i = 0; i < N; i++)
+		{
+			FVector From = Center + (Vertices[Poly.VertexIds[i % N]] * Scale);
+			FVector To = Center + (Vertices[Poly.VertexIds[(i + 1) % N]] * Scale);
+			DrawDebugLine(World, From, To, FColor(0, 255, 0), true);
 		}
 	}
 }
@@ -156,5 +217,6 @@ void ANavSphere::OnConstruction(const FTransform &Transform)
 	Super::OnConstruction(Transform);
 
 	IcoSphere.SubDivide(3);
-	IcoSphere.DrawDebug(GetWorld(), GetActorLocation(), GetActorScale());
+	IcoSphere.MakeDodecahedron();
+	IcoSphere.DrawDebug(GetWorld(), GetTransform());
 }
