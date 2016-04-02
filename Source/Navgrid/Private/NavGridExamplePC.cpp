@@ -21,16 +21,16 @@ void ANavGridExamplePC::BeginPlay()
 {
 	/* Grab a reference to the NavGrid and register handlers for mouse events */
 	TActorIterator<ANavGrid> NavGridItr(GetWorld());
-	Grid = *NavGridItr;
-	if (Grid)
+	if (NavGridItr)
 	{
+		Grid = *NavGridItr;
 		Grid->OnTileClicked().AddUObject(this, &ANavGridExamplePC::OnTileClicked);
 		Grid->OnTileCursorOver().AddUObject(this, &ANavGridExamplePC::OnTileCursorOver);
 		Grid->OnEndTileCursorOver().AddUObject(this, &ANavGridExamplePC::OnEndTileCursorOver);
 	}
 	else
 	{
-		UE_LOG(NavGrid, Fatal, TEXT("Unable to get reference to Navgrid. Have you forgotten to place it in the level?"));
+		UE_LOG(NavGrid, Error, TEXT("Unable to get reference to Navgrid. Have you forgotten to place it in the level?"));
 	}
 
 	/* Grab all gridpawns we find */
