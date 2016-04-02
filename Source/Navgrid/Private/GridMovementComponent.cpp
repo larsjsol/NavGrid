@@ -3,6 +3,7 @@
 #include "NavGrid.h"
 #include "GridPawn.h"
 #include "GridMovementComponent.h"
+#include "NavTileComponent.h"
 
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
@@ -65,29 +66,30 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	}
 }
 
-bool UGridMovementComponent::CreatePath(const ATile &Target)
+bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 {
+	
 	Spline->ClearSplinePoints();
 
 	AActor *Owner = GetOwner();
 	AGridPawn *GridPawnOwner = Cast<AGridPawn>(Owner);
 
-	ATile *Location = Grid->GetTile(Owner->GetActorLocation());
+	UNavTileComponent *Location = Grid->GetTile(Owner->GetActorLocation());
 	if (!Location) { UE_LOG(NavGrid, Error, TEXT("%s: Not on grid"), *Owner->GetName()); return false; }
 
-	TArray<ATile *> InRange;
+	TArray<UNavTileComponent *> InRange;
 	if (GridPawnOwner) {
 		Grid->TilesInRange(Location, InRange, MovementRange, true, GridPawnOwner->CapsuleComponent);
 	}
 	else
 	{
-		Grid->TilesInRange(Location, InRange, MovementRange);
+		Grid->TilesInRange(Location, InRange, MovementRange, false, NULL);
 	}
 
 	if (InRange.Contains(&Target))
 	{
-		TArray<ATile *> Path;
-		ATile *Current = (ATile *) &Target;
+		TArray<UNavTileComponent *> Path;
+		UNavTileComponent *Current = (UNavTileComponent *) &Target;
 		while (Current)
 		{
 			Path.Add(Current);
@@ -96,7 +98,7 @@ bool UGridMovementComponent::CreatePath(const ATile &Target)
 
 		for (int32 Idx = Path.Num() - 1; Idx >= 0; Idx--)
 		{
-			Spline->AddSplinePoint(Path[Idx]->GetActorLocation(), ESplineCoordinateSpace::Local);
+			Spline->AddSplinePoint(Path[Idx]->GetComponentLocation(), ESplineCoordinateSpace::Local);
 		}
 		return true;
 	}
@@ -109,7 +111,7 @@ void UGridMovementComponent::FollowPath()
 	Moving = true;
 }
 
-bool UGridMovementComponent::MoveTo(const ATile &Target)
+bool UGridMovementComponent::MoveTo(const UNavTileComponent &Target)
 {
 	bool PathExists = CreatePath(Target);
 	if (PathExists) { FollowPath(); }

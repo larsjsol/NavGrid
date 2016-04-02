@@ -5,11 +5,11 @@
 #include "GameFramework/PlayerController.h"
 #include "NavGridExamplePC.generated.h"
 
-class ATile;
 class ANavGrid;
 class ATurnManager;
 class UTurnComponent;
 class AGridPawn;
+class UNavTileComponent;
 
 /**
  * An example PlayerController that lets you move a single GridPawn by
@@ -30,9 +30,9 @@ public:
 	- Highlight all tiles in range when we click on the character tile
 	- Clear highlights when any other tile is clicked
 	*/
-	void OnTileClicked(const ATile &Tile);
-	void OnTileCursorOver(const ATile &Tile);
-	void OnEndTileCursorOver(const ATile &Tile);
+	void OnTileClicked(const UNavTileComponent &Tile);
+	void OnTileCursorOver(const UNavTileComponent &Tile);
+	void OnEndTileCursorOver(const UNavTileComponent &Tile);
 
 	/* Called when a new turn starts*/
 	void OnTurnStart(const UTurnComponent &Component);

@@ -5,11 +5,11 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "GridMovementComponent.generated.h"
 
-class ATile;
 class ANavGrid;
 class USplineComponent;
 class USplineMeshComponent;
 class UStaticMesh;
+class UNavTileComponent;
 
 /**
  * A movement component that operates on a NavGrid
@@ -51,11 +51,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") float HorizontalOffset = 87.5;
 
 	/* Create a path to Target, return false if no path is found */
-	bool CreatePath(const ATile &Target);
+	bool CreatePath(const UNavTileComponent &Target);
 	/* Follow an existing path */
 	void FollowPath();
 	/* Create a path and follow it if it exists */
-	bool MoveTo(const ATile &Target);
+	bool MoveTo(const UNavTileComponent &Target);
 	/* Visualize path */
 	void ShowPath();
 	/* Hide path */
