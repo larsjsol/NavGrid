@@ -24,8 +24,6 @@ public:
 	// Sets default values for this actor's properties
 	ANavGrid();
 
-	virtual void OnConstruction(const FTransform &Transform) override;
-
 	/* Scene Component (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
 

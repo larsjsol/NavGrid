@@ -9,7 +9,6 @@ DEFINE_LOG_CATEGORY(NavGrid);
 
 ECollisionChannel ANavGrid::ECC_Walkable = ECollisionChannel::ECC_GameTraceChannel1; //Ugh... Lets hope this isn't used anywhere else
 
-
 // Sets default values
 ANavGrid::ANavGrid()
 {
@@ -19,13 +18,6 @@ ANavGrid::ANavGrid()
 	SceneComponent = CreateDefaultSubobject<USceneComponent>("RootComponent");
 	RootComponent = SceneComponent;
 }
-
-void ANavGrid::OnConstruction(const FTransform &Transform)
-{
-	Super::OnConstruction(Transform);
-
-}
-
 
 UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation)
 {
