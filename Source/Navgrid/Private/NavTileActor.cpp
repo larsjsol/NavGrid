@@ -2,7 +2,8 @@
 #include "NavTileActor.h"
 #include "NavTileComponent.h"
 
-ANavTileActor::ANavTileActor()
+ANavTileActor::ANavTileActor(const FObjectInitializer &ObjectInitializer)
+	:Super(ObjectInitializer)
 {
 	SceneComponent = CreateDefaultSubobject<USceneComponent>("RootComponent");
 	RootComponent = SceneComponent;

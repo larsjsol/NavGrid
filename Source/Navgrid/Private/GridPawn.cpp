@@ -19,7 +19,7 @@ AGridPawn::AGridPawn()
 
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
 	CapsuleComponent->AttachParent = Scene;
-	CapsuleComponent->SetRelativeLocation(FVector(0, 0, 100)); //just above the floor the default height (44 * 2)
+	CapsuleComponent->SetRelativeLocation(FVector(0, 0, 100)); //just above the floor for the default height (44 * 2)
 	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 
 	SelectedHighlight = CreateDefaultSubobject<UStaticMeshComponent>("SelectedHighlight");
@@ -29,6 +29,7 @@ AGridPawn::AGridPawn()
 	SelectedHighlight->SetStaticMesh(Selected);
 	SelectedHighlight->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SelectedHighlight->SetVisibility(false);
+	SelectedHighlight->SetRelativeLocation(FVector(0, 0, 20));
 
 	TurnComponent->OnTurnStart().AddUObject(this, &AGridPawn::OnTurnStart);
 	TurnComponent->OnTurnEnd().AddUObject(this, &AGridPawn::OnTurnEnd);

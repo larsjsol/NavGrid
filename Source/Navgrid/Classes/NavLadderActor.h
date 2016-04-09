@@ -3,21 +3,19 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
-#include "NavTileActor.generated.h"
+#include "NavLadderActor.generated.h"
 
-class UNavTileComponent;
-/**
-* A simple actor with a NavTileComponent and a static mesh
-*/
+class UNavLadderComponent;
+
 UCLASS()
-class NAVGRID_API ANavTileActor : public AActor
+class NAVGRID_API ANavLadderActor : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	ANavTileActor(const FObjectInitializer &ObjectInitializer);
+	ANavLadderActor(const FObjectInitializer &ObjectInitializer);
 
 	UPROPERTY(EditAnyWhere, Category = "Components") USceneComponent *SceneComponent;
-	UPROPERTY(EditAnyWhere, Category = "Components") UNavTileComponent *NavTileComponent;
+	UPROPERTY(EditAnyWhere, Category = "Components") UNavLadderComponent *NavLadderComponent;
 	UPROPERTY(EditAnyWhere, Category = "Components") UStaticMeshComponent *Mesh;
 };

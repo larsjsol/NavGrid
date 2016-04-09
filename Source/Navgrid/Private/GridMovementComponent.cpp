@@ -4,6 +4,7 @@
 #include "GridPawn.h"
 #include "GridMovementComponent.h"
 #include "NavTileComponent.h"
+#include "NavLadderComponent.h"
 
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
@@ -70,6 +71,7 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 {
 	
 	Spline->ClearSplinePoints();
+	UpVectors.Reset();
 
 	AActor *Owner = GetOwner();
 	AGridPawn *GridPawnOwner = Cast<AGridPawn>(Owner);
@@ -95,14 +97,29 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 			Path.Add(Current);
 			Current = Current->Backpointer;
 		}
+		Algo::Reverse(Path);
 
-		for (int32 Idx = Path.Num() - 1; Idx >= 0; Idx--)
+		// first add a spline point at the current location
+		Spline->AddSplinePoint(Location->PawnLocationOffset->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		for (int32 Idx = 1; Idx < Path.Num(); Idx++)
 		{
-			Spline->AddSplinePoint(Path[Idx]->GetComponentLocation(), ESplineCoordinateSpace::Local);
+			// Add all path points from each tile
+			TArray<FVector> Points;
+			TArray<FVector> Ups;
+			Path[Idx]->GetPathPoints(Path[Idx - 1]->PawnLocationOffset->GetComponentLocation(), Points, Ups);
+			for (int32 PIdx = 0; PIdx < Points.Num(); PIdx++)
+			{
+				Spline->AddSplinePoint(Points[PIdx], ESplineCoordinateSpace::Local);
+				UpVectors.AddPoint(Spline->GetSplineLength(), Ups[PIdx]);
+			}
 		}
+
 		return true;
 	}
-	else { return false; }
+	else 
+	{ 
+		return false;
+	}
 }
 
 void UGridMovementComponent::FollowPath()
@@ -156,6 +173,11 @@ void UGridMovementComponent::AddSplineMesh(float From, float To)
 	FVector EndTan = Spline->GetDirectionAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local) * TanScale;
 
 	UPROPERTY() USplineMeshComponent *SplineMesh = NewObject<USplineMeshComponent>(this);
+
+	//SplineMesh->SetSplineUpDir(Spline->GetUpVectorAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local));
+	//FVector UpDir = Spline->GetDirectionAtDistanceAlongSpline(To, ESplineCoordinateSpace::World);
+	SplineMesh->SetSplineUpDir(UpVectors.Eval(To));
+
 	SplineMesh->SetMobility(EComponentMobility::Movable);
 	SplineMesh->SetStartAndEnd(StartPos, StartTan, EndPos, EndTan);
 	SplineMesh->SetStaticMesh(PathMesh);

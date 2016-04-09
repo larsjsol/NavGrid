@@ -46,7 +46,7 @@ public:
 	/* Mesh used to visualize the path */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") UStaticMesh *PathMesh = NULL;
 	/* Vertical offset between Path and visualization */
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") float VerticalOffest = 0;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") float VerticalOffest = 20;
 	/* Distance between actor and where we start showing the path */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") float HorizontalOffset = 87.5;
 
@@ -77,4 +77,7 @@ protected:
 	bool Moving = false;
 	/* How far along the spline are we */
 	float Distance = 0;
+
+	/* Up at points along the spline */
+	FInterpCurveVector UpVectors;
 };

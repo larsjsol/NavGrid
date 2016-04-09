@@ -18,10 +18,15 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	Extent->OnEndCursorOver.AddDynamic(this, &UNavTileComponent::EndCursorOver);
 	Extent->OnClicked.AddDynamic(this, &UNavTileComponent::Clicked);
 
+	PawnLocationOffset = CreateDefaultSubobject<USceneComponent>(TEXT("PawnLocationOffset"));
+	PawnLocationOffset->SetRelativeLocation(FVector::ZeroVector);
+	PawnLocationOffset->AttachParent = this;
+
 	HoverCursor = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, "HoverCursor");
-	HoverCursor->AttachParent = this;
+	HoverCursor->AttachParent = PawnLocationOffset;
 	HoverCursor->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	HoverCursor->ToggleVisibility(false);
+	HoverCursor->SetRelativeLocation(FVector(0, 0, 20));
 	auto HCRef = TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Cursor.NavGrid_Cursor'");
 	auto HCFinder = ConstructorHelpers::FObjectFinder<UStaticMesh>(HCRef);
 	if (HCFinder.Succeeded()) 
@@ -80,8 +85,9 @@ TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 	{
 		for (TObjectIterator<UNavTileComponent> Itr; Itr; ++Itr)
 		{
-			if (Itr->GetWorld() == GetWorld())
+			if (Itr->GetWorld() == GetWorld() && *Itr != this)
 			{
+				bool Added = false; // stop comparing CPs when we know a tile is a neighbour
 				for (const FVector &OtherCP : *Itr->GetContactPoints())
 				{
 					for (const FVector &MyCP : *GetContactPoints())
@@ -89,8 +95,12 @@ TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 						if ((OtherCP - MyCP).Size() < 25)
 						{
 							Neighbours.Add(*Itr);
+							DrawDebugLine(GetWorld(), PawnLocationOffset->GetComponentLocation() + 10, (*Itr)->PawnLocationOffset->GetComponentLocation() + 10, FColor::Green, true, -1, 0, 1);
+							Added = true;
+							break;
 						}
 					}
+					if (Added) { break; }
 				}
 			}
 		}
@@ -98,25 +108,34 @@ TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 	return &Neighbours;
 }
 
-bool UNavTileComponent::Obstructed(const UNavTileComponent &Tile, const UCapsuleComponent &CollisionCapsule)
+bool UNavTileComponent::Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule)
+{
+	return Obstructed(FromPos, PawnLocationOffset->GetComponentLocation(), CollisionCapsule);
+}
+
+bool UNavTileComponent::Obstructed(const FVector & From, const FVector & To, const UCapsuleComponent & CollisionCapsule)
 {
 	FHitResult OutHit;
-	FVector Start = GetComponentLocation() + CollisionCapsule.RelativeLocation;
-	FVector End = Tile.GetComponentLocation() + CollisionCapsule.RelativeLocation;
+	FVector Start = From + CollisionCapsule.RelativeLocation;
+	FVector End = To + CollisionCapsule.RelativeLocation;
 	FQuat Rot = FQuat::Identity;
 	FCollisionShape CollisionShape = CollisionCapsule.GetCollisionShape();
 	FCollisionQueryParams CQP;
 	CQP.AddIgnoredActor(CollisionCapsule.GetOwner());
 	FCollisionResponseParams CRP;
-	bool HitSomething = GetWorld()->SweepSingleByChannel(OutHit, Start, End, Rot, ECollisionChannel::ECC_Pawn, CollisionShape, CQP, CRP);
+	bool HitSomething = CollisionCapsule.GetWorld()->SweepSingleByChannel(OutHit, Start, End, Rot, ECollisionChannel::ECC_Pawn, CollisionShape, CQP, CRP);
 	return HitSomething;
 }
 
 void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours)
 {
+	OutNeighbours.Empty();
 	for (auto N : *GetNeighbours())
 	{
-		if (!Obstructed(*N, CollisionCapsule)) { OutNeighbours.Add(N); }
+		if (!N->Obstructed(PawnLocationOffset->GetComponentLocation(), CollisionCapsule)) 
+		{ 
+			OutNeighbours.Add(N);
+		}
 	}
 }
 
@@ -144,4 +163,12 @@ void UNavTileComponent::EndCursorOver(UPrimitiveComponent* TouchedComponent)
 	{
 		Grid->EndTileCursorOver(*this);
 	}
+}
+
+void UNavTileComponent::GetPathPoints(const FVector &FromPos, TArray<FVector>& OutPathPoints, TArray<FVector> &OutUpVectors)
+{
+	OutPathPoints.Empty();
+	OutPathPoints.Add(PawnLocationOffset->GetComponentLocation());
+	OutUpVectors.Empty();
+	OutUpVectors.Add(GetComponentRotation().RotateVector(FVector(0, 0, 1)));
 }

@@ -38,20 +38,25 @@ public:
 		Nodes are considered neighbours if at least one 
 		of their contact points are close to each other
 	*/
-	TArray<FVector> *GetContactPoints();
+	virtual TArray<FVector> *GetContactPoints();
 protected:
 	TArray<FVector> ContactPoints;
 
 public:
 	/* List of neighbouring tiles */
-	TArray<UNavTileComponent *> *GetNeighbours();
+	virtual TArray<UNavTileComponent *> *GetNeighbours();
 protected:
 	TArray<UNavTileComponent *> Neighbours;
 public:
-	/* Is there anythoing blocking between this tile and the Target tile? Uses the capsule for collision testing */
-	bool Obstructed(const UNavTileComponent &Tile, const UCapsuleComponent &CollisionCapsule);
+	/* is there anything blocking an actor from moving from FromPos to this tile? Uses the capsule for collision testing */
+	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule);
+	/* is there anything blocking an actor from moving between From and To? Uses the capsule for collision testing */
+	bool static Obstructed(const FVector &From, const FVector &To, const UCapsuleComponent &CollisionCapsule);
 	/* Return the neighbours that are not Obstructed() */
-	void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours);
+	virtual void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours);
+
+	/* Placement for any pawn occupying this tile */
+	UPROPERTY() USceneComponent *PawnLocationOffset;
 
 // Visualisation
 public:
@@ -63,4 +68,6 @@ public:
 	UFUNCTION() void Clicked(UPrimitiveComponent* TouchedComponent);
 	UFUNCTION() void CursorOver(UPrimitiveComponent* TouchedComponent);
 	UFUNCTION() void EndCursorOver(UPrimitiveComponent* TouchedComponent);
+	/* Get points for a spline path when entering this tile from OutFromPos */
+	virtual void GetPathPoints(const FVector &FromPos, TArray<FVector> &OutPathPoints, TArray<FVector> &OutUpVectors);
 };
