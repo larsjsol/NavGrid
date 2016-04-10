@@ -18,6 +18,6 @@ public:
 	virtual void GetPathPoints(const FVector &FromPos, TArray<FVector> &OutPathPoints, TArray<FVector> &OutUpVectors) override;
 
 	/* Helpers for determining walkable paths through this tile */
-	UPROPERTY() USceneComponent *BottomPathPoint;
-	UPROPERTY() USceneComponent *TopPathPoint;
+	UPROPERTY(EditAnywhere) USceneComponent *BottomPathPoint;
+	UPROPERTY(EditAnywhere) USceneComponent *TopPathPoint;
 };

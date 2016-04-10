@@ -95,7 +95,7 @@ TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 						if ((OtherCP - MyCP).Size() < 25)
 						{
 							Neighbours.Add(*Itr);
-							DrawDebugLine(GetWorld(), PawnLocationOffset->GetComponentLocation() + 10, (*Itr)->PawnLocationOffset->GetComponentLocation() + 10, FColor::Green, true, -1, 0, 1);
+							DrawDebugLine(GetWorld(), PawnLocationOffset->GetComponentLocation() + FVector(0, 0, 10), (*Itr)->PawnLocationOffset->GetComponentLocation() + FVector(0, 0, 10), FColor::Yellow, true);
 							Added = true;
 							break;
 						}
@@ -124,6 +124,16 @@ bool UNavTileComponent::Obstructed(const FVector & From, const FVector & To, con
 	CQP.AddIgnoredActor(CollisionCapsule.GetOwner());
 	FCollisionResponseParams CRP;
 	bool HitSomething = CollisionCapsule.GetWorld()->SweepSingleByChannel(OutHit, Start, End, Rot, ECollisionChannel::ECC_Pawn, CollisionShape, CQP, CRP);
+/*
+	if (HitSomething)
+	{
+		DrawDebugLine(CollisionCapsule.GetWorld(), Start, End, FColor::Red, true);
+	}
+	else
+	{
+		DrawDebugLine(CollisionCapsule.GetWorld(), Start, End, FColor::Green, true);
+	}
+*/
 	return HitSomething;
 }
 

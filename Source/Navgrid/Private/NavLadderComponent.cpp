@@ -7,15 +7,16 @@ UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitial
 	:Super(ObjectInitializer)
 {
 	Extent->SetBoxExtent(FVector(50, 5, 150));
+	Extent->SetRelativeLocation(FVector(0, 0, 150));
 
-	PawnLocationOffset->SetRelativeLocation(FVector(0, -50, 0));
+	PawnLocationOffset->SetRelativeLocation(FVector(0, -50, 150));
 
 	BottomPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("BottomPathPoint"));
-	BottomPathPoint->SetRelativeLocation(FVector(0, -50, -150));
+	BottomPathPoint->SetRelativeLocation(FVector(0, -50, 0));
 	BottomPathPoint->AttachParent = this;
 
 	TopPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("TopPathPoint"));
-	TopPathPoint->SetRelativeLocation(FVector(0, -50, 120));
+	TopPathPoint->SetRelativeLocation(FVector(0, -50, 270));
 	TopPathPoint->AttachParent = this;
 }
 
@@ -24,9 +25,9 @@ TArray<FVector>* UNavLadderComponent::GetContactPoints()
 	if (!ContactPoints.Num())
 	{
 		int32 ZExtent = Extent->GetScaledBoxExtent().Z;
-		FVector RelativeTop = GetComponentRotation().RotateVector(FVector(0, 0, ZExtent));
+		FVector RelativeTop = GetComponentRotation().RotateVector(FVector(0, 0, 2 * ZExtent));
 		ContactPoints.Add(GetComponentLocation() + RelativeTop);
-		FVector RelativeBottom = GetComponentRotation().RotateVector(FVector(0, 0, -ZExtent));
+		FVector RelativeBottom = GetComponentRotation().RotateVector(FVector(0, 0, 0));
 		ContactPoints.Add(GetComponentLocation() + RelativeBottom);
 	}
 	return &ContactPoints;

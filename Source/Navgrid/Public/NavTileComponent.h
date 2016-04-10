@@ -24,7 +24,7 @@ public:
 	/* Cost of moving into this tile*/
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Pathfinding") float Cost = 1;
 	/* World extent of this tile */
-	UPROPERTY() UBoxComponent *Extent;
+	UPROPERTY(EditAnywhere) UBoxComponent *Extent;
 	/* Distance from starting point of path */
 	float Distance;
 	/* Previous tile in path */
