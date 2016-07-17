@@ -20,8 +20,14 @@ void UGridMovementComponent::BeginPlay()
 {
 	/* Grab a reference to the NavGrid */
 	TActorIterator<ANavGrid> NavGridItr(GetWorld());
-	Grid = *NavGridItr;
-	if (!Grid) { UE_LOG(NavGrid, Error, TEXT("%st: Unable to get reference to Navgrid."), *GetName()); }
+	if (NavGridItr)
+	{
+		Grid = *NavGridItr;
+	}
+	else
+	{
+		UE_LOG(NavGrid, Fatal, TEXT("%st: Unable to get reference to Navgrid."), *GetName());
+	}
 }
 
 void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
