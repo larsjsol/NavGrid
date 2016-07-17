@@ -18,12 +18,12 @@ AGridPawn::AGridPawn()
 	TurnComponent = CreateDefaultSubobject<UTurnComponent>("TurnComponent");
 
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
-	CapsuleComponent->AttachParent = Scene;
+	CapsuleComponent->SetupAttachment(Scene);
 	CapsuleComponent->SetRelativeLocation(FVector(0, 0, 100)); //just above the floor for the default height (44 * 2)
 	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 
 	SelectedHighlight = CreateDefaultSubobject<UStaticMeshComponent>("SelectedHighlight");
-	SelectedHighlight->AttachParent = Scene;
+	SelectedHighlight->SetupAttachment(Scene);
 	UStaticMesh *Selected = ConstructorHelpers::FObjectFinder<UStaticMesh>(
 		TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Cursor.NavGrid_Cursor'")).Object;
 	SelectedHighlight->SetStaticMesh(Selected);
@@ -35,7 +35,7 @@ AGridPawn::AGridPawn()
 	TurnComponent->OnTurnEnd().AddUObject(this, &AGridPawn::OnTurnEnd);
 
 	Arrow = CreateDefaultSubobject<UArrowComponent>("Arrow");
-	Arrow->AttachParent = Scene;
+	Arrow->SetupAttachment(Scene);
 }
 
 void AGridPawn::BeginPlay()

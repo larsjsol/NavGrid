@@ -10,10 +10,10 @@ ANavLadderActor::ANavLadderActor(const FObjectInitializer &ObjectInitializer)
 
 	NavLadderComponent = CreateDefaultSubobject<UNavLadderComponent>("NavLadderComponent");
 	NavLadderComponent->SetRelativeLocation(FVector(0, -10, 0));
-	NavLadderComponent->AttachParent = SceneComponent;
+	NavLadderComponent->SetupAttachment(SceneComponent);
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
-	Mesh->AttachParent = SceneComponent;
+	Mesh->SetupAttachment(SceneComponent);
 
 	TCHAR* AssRef = TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Ladder.NavGrid_Ladder'");
 	auto OF = ConstructorHelpers::FObjectFinder<UStaticMesh>(AssRef);

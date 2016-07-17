@@ -8,7 +8,7 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	:Super(ObjectInitializer)
 {
 	Extent = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, "Extent");
-	Extent->AttachParent = this;
+	Extent->SetupAttachment(this);
 	Extent->SetBoxExtent(FVector(100, 100, 5));
 	
 	Extent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -20,10 +20,10 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 
 	PawnLocationOffset = CreateDefaultSubobject<USceneComponent>(TEXT("PawnLocationOffset"));
 	PawnLocationOffset->SetRelativeLocation(FVector::ZeroVector);
-	PawnLocationOffset->AttachParent = this;
+	PawnLocationOffset->SetupAttachment(this);
 
 	HoverCursor = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, "HoverCursor");
-	HoverCursor->AttachParent = PawnLocationOffset;
+	HoverCursor->SetupAttachment(PawnLocationOffset);
 	HoverCursor->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	HoverCursor->ToggleVisibility(false);
 	HoverCursor->SetRelativeLocation(FVector(0, 0, 20));
@@ -149,7 +149,7 @@ void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &Colli
 	}
 }
 
-void UNavTileComponent::Clicked(UPrimitiveComponent* TouchedComponent)
+void UNavTileComponent::Clicked(UPrimitiveComponent* TouchedComponent, FKey Key)
 {
 	if (Grid)
 	{

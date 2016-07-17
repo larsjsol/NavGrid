@@ -13,11 +13,11 @@ UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitial
 
 	BottomPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("BottomPathPoint"));
 	BottomPathPoint->SetRelativeLocation(FVector(0, -50, 0));
-	BottomPathPoint->AttachParent = this;
+	BottomPathPoint->SetupAttachment(this);
 
 	TopPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("TopPathPoint"));
 	TopPathPoint->SetRelativeLocation(FVector(0, -50, 270));
-	TopPathPoint->AttachParent = this;
+	TopPathPoint->SetupAttachment(this);
 }
 
 TArray<FVector>* UNavLadderComponent::GetContactPoints()

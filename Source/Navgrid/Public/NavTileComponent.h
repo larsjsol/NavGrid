@@ -65,7 +65,7 @@ public:
 	UStaticMeshComponent *HoverCursor;
 
 // User interface
-	UFUNCTION() void Clicked(UPrimitiveComponent* TouchedComponent);
+	UFUNCTION() void Clicked(UPrimitiveComponent* TouchedComponent, FKey Key);
 	UFUNCTION() void CursorOver(UPrimitiveComponent* TouchedComponent);
 	UFUNCTION() void EndCursorOver(UPrimitiveComponent* TouchedComponent);
 	/* Get points for a spline path when entering this tile from OutFromPos */
