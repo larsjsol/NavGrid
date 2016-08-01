@@ -51,11 +51,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") float HorizontalOffset = 87.5;
 
 	/* Create a path to Target, return false if no path is found */
-	bool CreatePath(const UNavTileComponent &Target);
+	bool CreatePath(UNavTileComponent &Target);
 	/* Follow an existing path */
 	void FollowPath();
 	/* Create a path and follow it if it exists */
-	bool MoveTo(const UNavTileComponent &Target);
+	bool MoveTo(UNavTileComponent &Target);
 	/* Visualize path */
 	void ShowPath();
 	/* Hide path */
@@ -78,6 +78,11 @@ protected:
 	/* How far along the spline are we */
 	float Distance = 0;
 
-	/* Up at points along the spline */
-	FInterpCurveVector UpVectors;
+	/* The tile we're currently on*/
+	UNavTileComponent *Tile;
+
+	/* Lookup from spline distance to tile */
+	UNavTileComponent *GetTileAtDistance(float Distance);
+	void SetTileAtInterval(UNavTileComponent *Tile, float From, float To);
+	TArray<UNavTileComponent *> SplineDistanceToTile;
 };

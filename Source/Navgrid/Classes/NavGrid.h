@@ -56,10 +56,7 @@ private:
 	FOnEndTileCursorOver OnEndTileCursorOverEvent;
 
 public:
-	/** return every tile in the supplied world
-	* You should probably store the result in a UPROPRTY to avoid the
-	* garbage collector
-	*/
+	/** return every tile in the supplied world */
 	static void GetEveryTile(TArray<UNavTileComponent* > &OutTiles, UWorld *World);
 
 	static ECollisionChannel ECC_Walkable;

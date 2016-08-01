@@ -175,10 +175,13 @@ void UNavTileComponent::EndCursorOver(UPrimitiveComponent* TouchedComponent)
 	}
 }
 
-void UNavTileComponent::GetPathPoints(const FVector &FromPos, TArray<FVector>& OutPathPoints, TArray<FVector> &OutUpVectors)
+int32 UNavTileComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline)
 {
-	OutPathPoints.Empty();
-	OutPathPoints.Add(PawnLocationOffset->GetComponentLocation());
-	OutUpVectors.Empty();
-	OutUpVectors.Add(GetComponentRotation().RotateVector(FVector(0, 0, 1)));
+	OutSpline.AddSplinePoint(PawnLocationOffset->GetComponentLocation(), ESplineCoordinateSpace::Local);
+	return 1;
+}
+
+FVector UNavTileComponent::GetSplineMeshUpVector()
+{
+	return FVector(0, 0, 1);
 }

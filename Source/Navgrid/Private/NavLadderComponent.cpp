@@ -62,27 +62,28 @@ bool UNavLadderComponent::Obstructed(const FVector & FromPos, const UCapsuleComp
 		UNavTileComponent::Obstructed(TracePoint, PawnLocationOffset->GetComponentLocation(), CollisionCapsule);
 }
 
-void UNavLadderComponent::GetPathPoints(const FVector &FromPos, TArray<FVector>& OutPathPoints, TArray<FVector> &OutUpVectors)
+
+int32 UNavLadderComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline)
 {
-	OutPathPoints.Empty();
-
-	// points suitable if the pawn enters from the top
-	OutPathPoints.Add(TopPathPoint->GetComponentLocation());
-	OutPathPoints.Add(PawnLocationOffset->GetComponentLocation());
-	OutPathPoints.Add(BottomPathPoint->GetComponentLocation());
-
-	// reverse the list if the pawn entered from the bottom
 	float TopDistance = (TopPathPoint->GetComponentLocation() - FromPos).Size();
 	float BottomDistance = (BottomPathPoint->GetComponentLocation() - FromPos).Size();
 	if (TopDistance > BottomDistance)
 	{
-		Algo::Reverse(OutPathPoints);
+		OutSpline.AddSplinePoint(BottomPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		OutSpline.AddSplinePoint(TopPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
+	}
+	else
+	{
+		OutSpline.AddSplinePoint(TopPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		OutSpline.AddSplinePoint(BottomPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
 	}
 
-	OutUpVectors.Empty();
-	FVector Edge = GetComponentRotation().RotateVector(FVector(0, -1, 1)).GetSafeNormal();
-	FVector Middle = GetComponentRotation().RotateVector(FVector(0, -1, 0));
-	OutUpVectors.Add(Edge);
-	OutUpVectors.Add(Middle);
-	OutUpVectors.Add(Edge);
+	return 2;
+}
+
+FVector UNavLadderComponent::GetSplineMeshUpVector()
+{
+	FRotator Rot = GetComponentRotation();
+	FVector UpVector = Rot.RotateVector(FVector(0, -1, 0));
+	return UpVector;
 }

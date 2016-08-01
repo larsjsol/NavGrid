@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Components/SplineComponent.h"
 #include "Components/SceneComponent.h"
 #include "NavTileComponent.generated.h"
 
@@ -68,6 +69,12 @@ public:
 	UFUNCTION() void Clicked(UPrimitiveComponent* TouchedComponent, FKey Key);
 	UFUNCTION() void CursorOver(UPrimitiveComponent* TouchedComponent);
 	UFUNCTION() void EndCursorOver(UPrimitiveComponent* TouchedComponent);
-	/* Get points for a spline path when entering this tile from OutFromPos */
-	virtual void GetPathPoints(const FVector &FromPos, TArray<FVector> &OutPathPoints, TArray<FVector> &OutUpVectors);
+
+	/*
+	* Add points for moving into this tile from FromPos
+	* Return number of points added
+	*/
+	virtual int32 AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline);
+	/* Return a suitable upvector for a splinemesh moving across this tile */
+	virtual FVector GetSplineMeshUpVector();
 };
