@@ -15,7 +15,7 @@ public:
 
 	virtual void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours) override;
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) override;
-	virtual int32 AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline) override;
+	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool LastTile) override;
 
 	/* Helpers for determining walkable paths through this tile */
 	UPROPERTY(EditAnywhere) USceneComponent *BottomPathPoint;

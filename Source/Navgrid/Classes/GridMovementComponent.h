@@ -39,14 +39,13 @@ public:
 	/*
 	Spline that is used as a path. The points are in word coords.
 	
-	We use ESplineCoordinateSpace::Local in the getters and setters to avoid translation issues that we stems from this
-	being a sceenecomponent that maintains a relataive location to the owning actor
+	We use ESplineCoordinateSpace::Local in the getters and setters to avoid any extra coord translation
 	*/
 	UPROPERTY(BlueprintReadOnly, Category = "Visualization") USplineComponent *Spline = NULL;
 	/* Mesh used to visualize the path */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") UStaticMesh *PathMesh = NULL;
 	/* Vertical offset between Path and visualization */
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") float VerticalOffest = 20;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") float VerticalOffset = 50;
 	/* Distance between actor and where we start showing the path */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") float HorizontalOffset = 87.5;
 

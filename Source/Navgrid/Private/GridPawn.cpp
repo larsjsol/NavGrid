@@ -29,7 +29,7 @@ AGridPawn::AGridPawn()
 	SelectedHighlight->SetStaticMesh(Selected);
 	SelectedHighlight->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SelectedHighlight->SetVisibility(false);
-	SelectedHighlight->SetRelativeLocation(FVector(0, 0, 20));
+	SelectedHighlight->SetRelativeLocation(FVector(0, 0, 50));
 
 	TurnComponent->OnTurnStart().AddUObject(this, &AGridPawn::OnTurnStart);
 	TurnComponent->OnTurnEnd().AddUObject(this, &AGridPawn::OnTurnEnd);

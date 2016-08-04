@@ -100,14 +100,36 @@ bool UGridMovementComponent::CreatePath(UNavTileComponent &Target)
 		}
 		Algo::Reverse(Path);
 
-		// first add a spline point at the current location
-		Spline->AddSplinePoint(Tile->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		// first add a spline point for the pawn starting location
+		Spline->AddSplinePoint(GetOwner()->GetActorLocation(), ESplineCoordinateSpace::Local);
 		SetTileAtInterval(Tile, 0, Spline->GetSplineLength());
+
+		// Add spline points for the tiles in the path
 		for (int32 Idx = 1; Idx < Path.Num(); Idx++)
 		{
 			float From = Spline->GetSplineLength();
-			Path[Idx]->AddSplinePoints(Path[Idx - 1]->GetComponentLocation(), *Spline);
+			Path[Idx]->AddSplinePoints(Path[Idx - 1]->GetComponentLocation(), *Spline, Idx == Path.Num() - 1);
 			SetTileAtInterval(Path[Idx], From, Spline->GetSplineLength());
+		}
+
+		/*	remove spline points that are closer together that 50uu
+			this seems to prevent som wierd artifacts
+		*/
+		float PrevDistance = -100;
+		int32 SplinePoint = 0;
+		while (SplinePoint < Spline->GetNumberOfSplinePoints())
+		{
+			float Distance = Spline->GetDistanceAlongSplineAtSplinePoint(SplinePoint);
+			if (Distance - PrevDistance < 50)
+			{
+				Spline->RemoveSplinePoint(SplinePoint);
+			}
+			else
+			{
+				SplinePoint++;
+			}
+
+			PrevDistance = Distance;
 		}
 
 		return true; // success!
@@ -146,6 +168,18 @@ void UGridMovementComponent::ShowPath()
 			AddSplineMesh(Distance, FMath::Min(Distance + MeshLength, SplineLength));
 			Distance += FMath::Min(MeshLength, SplineLength - Distance);
 		}
+
+		// Set up direction
+		FVector PrevUp = FVector::ZeroVector;
+		for (int32 Idx = 0; Idx < SplineMeshes.Num(); Idx++)
+		{
+			USplineMeshComponent *SplineMesh = SplineMeshes[Idx];
+			UNavTileComponent *Tile = GetTileAtDistance(MeshLength * Idx);
+			FVector UpDir = Tile->GetSplineMeshUpVector();
+			/* try to average it out in order to avoid issues in sharp vertical turns */
+			SplineMesh->SetSplineUpDir((UpDir + PrevUp) / 2);
+			PrevUp = UpDir;
+		}
 	}
 }
 
@@ -162,10 +196,10 @@ void UGridMovementComponent::AddSplineMesh(float From, float To)
 {
 	float TanScale = 25;
 	FVector StartPos = Spline->GetLocationAtDistanceAlongSpline(From, ESplineCoordinateSpace::Local);
-	StartPos.Z += VerticalOffest;
+	StartPos.Z += VerticalOffset;
 	FVector StartTan = Spline->GetDirectionAtDistanceAlongSpline(From, ESplineCoordinateSpace::Local) * TanScale;
 	FVector EndPos = Spline->GetLocationAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local);
-	EndPos.Z += VerticalOffest;
+	EndPos.Z += VerticalOffset;
 	FVector EndTan = Spline->GetDirectionAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local) * TanScale;
 
 	UPROPERTY() USplineMeshComponent *SplineMesh = NewObject<USplineMeshComponent>(this);
@@ -175,8 +209,8 @@ void UGridMovementComponent::AddSplineMesh(float From, float To)
 	SplineMesh->SetStaticMesh(PathMesh);
 	SplineMesh->RegisterComponentWithWorld(GetWorld());
 
-	UNavTileComponent *Tile = GetTileAtDistance((From + To) / 2);
-	SplineMesh->SetSplineUpDir(Tile->GetSplineMeshUpVector());
+	//UNavTileComponent *Tile = GetTileAtDistance((From + To) / 2);
+	//SplineMesh->SetSplineUpDir(Tile->GetSplineMeshUpVector());
 	SplineMeshes.Add(SplineMesh);
 }
 

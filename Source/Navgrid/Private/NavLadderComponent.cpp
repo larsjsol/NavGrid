@@ -16,7 +16,7 @@ UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitial
 	BottomPathPoint->SetupAttachment(this);
 
 	TopPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("TopPathPoint"));
-	TopPathPoint->SetRelativeLocation(FVector(0, -50, 270));
+	TopPathPoint->SetRelativeLocation(FVector(0, -50, 300));
 	TopPathPoint->SetupAttachment(this);
 }
 
@@ -63,7 +63,7 @@ bool UNavLadderComponent::Obstructed(const FVector & FromPos, const UCapsuleComp
 }
 
 
-int32 UNavLadderComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline)
+void UNavLadderComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool LastTile)
 {
 	float TopDistance = (TopPathPoint->GetComponentLocation() - FromPos).Size();
 	float BottomDistance = (BottomPathPoint->GetComponentLocation() - FromPos).Size();
@@ -78,7 +78,11 @@ int32 UNavLadderComponent::AddSplinePoints(const FVector &FromPos, USplineCompon
 		OutSpline.AddSplinePoint(BottomPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
 	}
 
-	return 2;
+	if (LastTile)
+	{
+		OutSpline.RemoveSplinePoint(OutSpline.GetNumberOfSplinePoints() - 1);
+		OutSpline.AddSplinePoint(PawnLocationOffset->GetComponentLocation(), ESplineCoordinateSpace::Local);
+	}
 }
 
 FVector UNavLadderComponent::GetSplineMeshUpVector()

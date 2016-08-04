@@ -26,7 +26,7 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	HoverCursor->SetupAttachment(PawnLocationOffset);
 	HoverCursor->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	HoverCursor->ToggleVisibility(false);
-	HoverCursor->SetRelativeLocation(FVector(0, 0, 20));
+	HoverCursor->SetRelativeLocation(FVector(0, 0, 50));
 	auto HCRef = TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Cursor.NavGrid_Cursor'");
 	auto HCFinder = ConstructorHelpers::FObjectFinder<UStaticMesh>(HCRef);
 	if (HCFinder.Succeeded()) 
@@ -175,10 +175,9 @@ void UNavTileComponent::EndCursorOver(UPrimitiveComponent* TouchedComponent)
 	}
 }
 
-int32 UNavTileComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline)
+void UNavTileComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile)
 {
 	OutSpline.AddSplinePoint(PawnLocationOffset->GetComponentLocation(), ESplineCoordinateSpace::Local);
-	return 1;
 }
 
 FVector UNavTileComponent::GetSplineMeshUpVector()

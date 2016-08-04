@@ -72,9 +72,12 @@ public:
 
 	/*
 	* Add points for moving into this tile from FromPos
-	* Return number of points added
+	*
+	* FromPos - the previous position of the entering pawn
+	* OutSpline - the spline to add the points to
+	* EndTile - true if this is the last tile in the path
 	*/
-	virtual int32 AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline);
+	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile);
 	/* Return a suitable upvector for a splinemesh moving across this tile */
 	virtual FVector GetSplineMeshUpVector();
 };
