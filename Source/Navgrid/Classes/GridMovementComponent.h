@@ -51,6 +51,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool LockPitch = true;
 	/* Should we ignore rotation over the Z axis */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool LockYaw = false;
+	/* Should we use root motion for speed */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool bUseRootMotion = true;
 	/*
 	Spline that is used as a path. The points are in word coords.
 	
@@ -75,6 +77,8 @@ public:
 	/* Hide path */
 	void HidePath();
 
+	FTransform ConsumeRootMotion();
+
 	EGridMovementMode GetMovementMode();
 	/* Return the point the the pawn will reach if it continues moving for ForwardDistance */
 	FVector GetForwardLocation(float ForwardDistance);
@@ -85,17 +89,21 @@ public:
 private:
 	FOnMovementDone OnMovementEndEvent;
 
+public:
+	/* Should the actor be moved along the spline on the next Tick()? */
+	bool Moving = false;
+
 protected:
 	UPROPERTY() TArray<USplineMeshComponent *> SplineMeshes;
 
 	/* Helper: Puts a spline mesh in the range along the spline */
 	void AddSplineMesh(float From, float To);
 
-	/* Should the actor be moved along the spline on the next Tick()? */
-	bool Moving = false;
 	/* How far along the spline are we */
 	float Distance = 0;
 
 	/* The tile we're currently on*/
 	UNavTileComponent *Tile;
+
+	UPROPERTY() UAnimInstance *AnimInstance;
 };

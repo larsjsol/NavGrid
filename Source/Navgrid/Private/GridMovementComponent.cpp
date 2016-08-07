@@ -31,7 +31,25 @@ void UGridMovementComponent::BeginPlay()
 	}
 	else
 	{
-		UE_LOG(NavGrid, Fatal, TEXT("%st: Unable to get reference to Navgrid."), *GetName());
+		UE_LOG(NavGrid, Fatal, TEXT("%s: Unable to get reference to Navgrid."), *GetName());
+	}
+
+	/* Grab a reference to (a) AnimInstace */
+	for (UActorComponent *Comp : GetOwner()->GetComponentsByClass(USkeletalMeshComponent::StaticClass()))
+	{
+		USkeletalMeshComponent *Mesh = Cast<USkeletalMeshComponent>(Comp);	
+		if (Mesh)
+		{
+			AnimInstance = Mesh->GetAnimInstance();
+			if (AnimInstance)
+			{
+				break;
+			}
+		}
+	}
+	if (!AnimInstance)
+	{
+		UE_LOG(NavGrid, Error, TEXT("%s: Unable to get reference to AnimInstance"), *GetName());
 	}
 }
 
@@ -43,13 +61,25 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	{
 		EGridMovementMode MovementMode = GetMovementMode();
 
-		/* Find the next location */
-		float CurrentSpeed = MaxWalkSpeed;
-		if (MovementMode == EGridMovementMode::ClimbingDown || MovementMode == EGridMovementMode::ClimbingUp)
+		/* Check if we can get the speed from root motion */
+		float CurrentSpeed = 0;
+		if (bUseRootMotion)
 		{
-			CurrentSpeed = MaxClimbSpeed;
+			CurrentSpeed = ConsumeRootMotion().GetLocation().Size();
 		}
-		Distance = FMath::Min(Spline->GetSplineLength(), Distance + (CurrentSpeed * DeltaTime));
+		/* No root motion available, use manually set values */
+		if (CurrentSpeed == 0)
+		{
+			if (MovementMode == EGridMovementMode::ClimbingDown || MovementMode == EGridMovementMode::ClimbingUp)
+			{
+				CurrentSpeed = MaxClimbSpeed * DeltaTime;
+			}
+			else
+			{
+				CurrentSpeed = MaxWalkSpeed * DeltaTime;
+			}
+		}
+		Distance = FMath::Min(Spline->GetSplineLength(), Distance + CurrentSpeed);
 		
 		/* Grab our current transform so we can find the velocity if we need it later */
 		AActor *Owner = GetOwner();
@@ -76,6 +106,12 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 				FRotator Rotation = Tile->GetComponentRotation();
 				Rotation.Yaw = Rotation.Yaw - 180;
 				NewTransform.SetRotation(Rotation.Quaternion());
+			}
+			else 
+			// Dont update the rotation if we have no idea of what it should be
+			// This leads to prevent the occational stuttering at the start of a descent
+			{
+				NewTransform.SetRotation(GetOwner()->GetActorRotation().Quaternion());
 			}
 		}
 
@@ -184,6 +220,18 @@ void UGridMovementComponent::HidePath()
 		SMesh->DestroyComponent();
 	}
 	SplineMeshes.Empty();
+}
+
+FTransform UGridMovementComponent::ConsumeRootMotion()
+{
+	if (!AnimInstance)
+	{
+		return 0;
+	}
+	
+	FRootMotionMovementParams RootMotionParams;
+	RootMotionParams.Accumulate(AnimInstance->ConsumeExtractedRootMotion(1));
+	return RootMotionParams.RootMotionTransform;
 }
 
 EGridMovementMode UGridMovementComponent::GetMovementMode()
