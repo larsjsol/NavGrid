@@ -54,8 +54,11 @@ void UNavTileComponent::BeginPlay()
 
 bool UNavTileComponent::Traversable(float MaxWalkAngle, const TArray<EGridMovementMode>& AvailableMovementModes) const
 {
+	FRotator TileRot = GetComponentRotation();
+	float MaxAngle = FMath::Max3<float>(TileRot.Pitch, TileRot.Roll, TileRot.Roll);
+	float MinAngle = FMath::Min3<float>(TileRot.Pitch, TileRot.Roll, TileRot.Roll);
 	if (AvailableMovementModes.Contains(EGridMovementMode::Walking) &&
-		(GetComponentRotation().Pitch < MaxWalkAngle && GetComponentRotation().Pitch > -MaxWalkAngle))
+		(MaxAngle < MaxWalkAngle && MinAngle > -MaxWalkAngle))
 	{
 		return true;
 	}
