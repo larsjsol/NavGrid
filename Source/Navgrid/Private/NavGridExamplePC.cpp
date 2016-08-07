@@ -67,10 +67,13 @@ void ANavGridExamplePC::OnTileClicked(const UNavTileComponent &Tile)
 
 		if (Location && MovementComponent && Grid)
 		{
-			if (Location != &Tile && MovementComponent->Velocity.Size() == 0)
+			if (Location != &Tile && 
+				MovementComponent->Velocity.Size() == 0 &&
+				Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes)
+				)
 			{
 				TArray<UNavTileComponent *> InRange;
-				Grid->TilesInRange(Location, InRange, MovementComponent->MovementRange, true, Pawn->CapsuleComponent);
+				Grid->TilesInRange(Location, InRange, Pawn, true);
 				if (InRange.Contains(&Tile))
 				{
 					MovementComponent->MoveTo((UNavTileComponent &) Tile);
@@ -87,7 +90,9 @@ void ANavGridExamplePC::OnTileCursorOver(const UNavTileComponent &Tile)
 	if (Pawn)
 	{
 		UGridMovementComponent *MovementComponent = Pawn->MovementComponent;
-		if (MovementComponent->Velocity.Size() == 0 && MovementComponent->CreatePath((UNavTileComponent &) Tile))
+		if (MovementComponent->Velocity.Size() == 0 && 
+			Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes) && 
+			MovementComponent->CreatePath((UNavTileComponent &) Tile))
 		{
 			MovementComponent->ShowPath();
 		}

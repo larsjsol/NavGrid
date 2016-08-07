@@ -14,6 +14,11 @@ UGridMovementComponent::UGridMovementComponent(const FObjectInitializer &ObjectI
 {
 	Spline = ObjectInitializer.CreateDefaultSubobject<USplineComponent>(this, "PathSpline");
 	PathMesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Path.NavGrid_Path'")).Object;
+	
+	AvailableMovementModes.Add(EGridMovementMode::ClimbingDown);
+	AvailableMovementModes.Add(EGridMovementMode::ClimbingUp);
+	AvailableMovementModes.Add(EGridMovementMode::Stationary);
+	AvailableMovementModes.Add(EGridMovementMode::Walking);
 }
 
 void UGridMovementComponent::BeginPlay()
@@ -36,8 +41,16 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 
 	if (Moving)
 	{
+		UNavTileComponent *Tile = GetTileAtDistance(Distance);
+		EGridMovementMode MovementMode = GetMovementMode();
+
 		/* Find the next location */
-		Distance = FMath::Min(Spline->GetSplineLength(), Distance + (MaxSpeed * DeltaTime));
+		float CurrentSpeed = MaxWalkSpeed;
+		if (MovementMode == EGridMovementMode::ClimbingDown || MovementMode == EGridMovementMode::ClimbingUp)
+		{
+			CurrentSpeed = MaxClimbSpeed;
+		}
+		Distance = FMath::Min(Spline->GetSplineLength(), Distance + (CurrentSpeed * DeltaTime));
 		
 		/* Grab our current transform so we can find the velocity if we need it later */
 		AActor *Owner = GetOwner();
@@ -46,12 +59,22 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		/* Find the next loaction from the spline*/
 		FTransform NewTransform = Spline->GetTransformAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::Local);
 
-		/* Restrain rotation axis */
-		FRotator Rotation = NewTransform.Rotator();
-		Rotation.Roll = LockRoll ? 0 : Rotation.Roll;
-		Rotation.Pitch = LockPitch ? 0 : Rotation.Pitch; 
-		Rotation.Yaw = LockYaw ? 0 : Rotation.Yaw;
-		NewTransform.SetRotation(Rotation.Quaternion());
+		/* Restrain rotation axis if we're walking */
+		if (MovementMode == EGridMovementMode::Walking)
+		{
+			FRotator Rotation = NewTransform.Rotator();
+			Rotation.Roll = LockRoll ? 0 : Rotation.Roll;
+			Rotation.Pitch = LockPitch ? 0 : Rotation.Pitch;
+			Rotation.Yaw = LockYaw ? 0 : Rotation.Yaw;
+			NewTransform.SetRotation(Rotation.Quaternion());
+		}
+		/* Use the rotation from the ladder if we're climbing */
+		else if (MovementMode == EGridMovementMode::ClimbingUp || MovementMode == EGridMovementMode::ClimbingDown)
+		{
+			FRotator Rotation = Tile->GetComponentRotation();
+			Rotation.Yaw = Rotation.Yaw - 180;
+			NewTransform.SetRotation(Rotation.Quaternion());
+		}
 
 		Owner->SetActorTransform(NewTransform);
 
@@ -87,7 +110,7 @@ bool UGridMovementComponent::CreatePath(UNavTileComponent &Target)
 	}
 
 	TArray<UNavTileComponent *> InRange;
-	Grid->TilesInRange(Tile, InRange, MovementRange, true, Owner->CapsuleComponent);
+	Grid->TilesInRange(Tile, InRange, Owner, true);
 	if (InRange.Contains(&Target))
 	{
 		// create a list of tiles from the destination to the starting point and reverse it
@@ -100,38 +123,21 @@ bool UGridMovementComponent::CreatePath(UNavTileComponent &Target)
 		}
 		Algo::Reverse(Path);
 
+		// Estiamte how much of the spline that covers the first tile
+		FVector Extent = Path[0]->Extent->GetScaledBoxExtent();
+		float LengthOffset = FMath::Max3<float>(Extent.X, Extent.Y, Extent.Z);
+
 		// first add a spline point for the pawn starting location
 		Spline->AddSplinePoint(GetOwner()->GetActorLocation(), ESplineCoordinateSpace::Local);
-		SetTileAtInterval(Tile, 0, Spline->GetSplineLength());
+		SetTileAtInterval(Path[0], 0, LengthOffset);
 
 		// Add spline points for the tiles in the path
 		for (int32 Idx = 1; Idx < Path.Num(); Idx++)
 		{
 			float From = Spline->GetSplineLength();
 			Path[Idx]->AddSplinePoints(Path[Idx - 1]->GetComponentLocation(), *Spline, Idx == Path.Num() - 1);
-			SetTileAtInterval(Path[Idx], From, Spline->GetSplineLength());
+			SetTileAtInterval(Path[Idx], From, Spline->GetSplineLength() + LengthOffset);
 		}
-
-		/*	remove spline points that are closer together that 50uu
-			this seems to prevent som wierd artifacts
-		*/
-		float PrevDistance = -100;
-		int32 SplinePoint = 0;
-		while (SplinePoint < Spline->GetNumberOfSplinePoints())
-		{
-			float Distance = Spline->GetDistanceAlongSplineAtSplinePoint(SplinePoint);
-			if (Distance - PrevDistance < 50)
-			{
-				Spline->RemoveSplinePoint(SplinePoint);
-			}
-			else
-			{
-				SplinePoint++;
-			}
-
-			PrevDistance = Distance;
-		}
-
 		return true; // success!
 	}
 	else
@@ -159,7 +165,7 @@ void UGridMovementComponent::ShowPath()
 	{
 		float Distance = HorizontalOffset; // Get some distance between the actor and the path
 		FBoxSphereBounds Bounds = PathMesh->GetBounds();
-		float MeshLength = FMath::Abs(Bounds.BoxExtent.X);
+		float MeshLength = FMath::Abs(Bounds.BoxExtent.X) * 2;
 		float SplineLength = Spline->GetSplineLength();
 		SplineLength -= HorizontalOffset; // Get some distance between the cursor and the path
 
@@ -192,6 +198,38 @@ void UGridMovementComponent::HidePath()
 	SplineMeshes.Empty();
 }
 
+EGridMovementMode UGridMovementComponent::GetMovementMode()
+{
+	if (!Moving)
+	{
+		return EGridMovementMode::Stationary;
+	}
+
+	FVector ForwardLoc = GetForwardLocation(50);
+	ForwardLoc -= GetOwner()->GetActorLocation();
+	ForwardLoc = ForwardLoc.GetSafeNormal();
+	float UpAngle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(ForwardLoc, FVector(0, 0, 1))));
+
+	if (UpAngle < 90 - MaxWalkAngle)
+	{
+		return EGridMovementMode::ClimbingUp;
+	}
+	else if (UpAngle > 90 + MaxWalkAngle)
+	{
+		return EGridMovementMode::ClimbingDown;
+	}
+	else
+	{
+		return EGridMovementMode::Walking;
+	}
+}
+
+FVector UGridMovementComponent::GetForwardLocation(float ForwardDistance)
+{
+	float D = FMath::Min(Spline->GetSplineLength(), Distance + ForwardDistance);
+	return Spline->GetLocationAtDistanceAlongSpline(D, ESplineCoordinateSpace::Local);
+}
+
 void UGridMovementComponent::AddSplineMesh(float From, float To)
 {
 	float TanScale = 25;
@@ -208,9 +246,6 @@ void UGridMovementComponent::AddSplineMesh(float From, float To)
 	SplineMesh->SetStartAndEnd(StartPos, StartTan, EndPos, EndTan);
 	SplineMesh->SetStaticMesh(PathMesh);
 	SplineMesh->RegisterComponentWithWorld(GetWorld());
-
-	//UNavTileComponent *Tile = GetTileAtDistance((From + To) / 2);
-	//SplineMesh->SetSplineUpDir(Tile->GetSplineMeshUpVector());
 	SplineMeshes.Add(SplineMesh);
 }
 

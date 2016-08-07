@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NavGrid.h"
+#include "GridPawn.h"
 
 #include "Editor.h"
 #include <limits>
@@ -22,10 +23,11 @@ ANavGrid::ANavGrid()
 UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation)
 {
 	FHitResult HitResult;
+	FVector TraceStart = WorldLocation + FVector(0, 0, 50);
 	FVector TraceEnd = WorldLocation - FVector(0, 0, 500);
 	FCollisionQueryParams CQP;
 	CQP.bTraceComplex = true;
-	GetWorld()->LineTraceSingleByChannel(HitResult, WorldLocation, TraceEnd, ANavGrid::ECC_Walkable, CQP);
+	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ANavGrid::ECC_Walkable, CQP);
 
 	// check if component of any of its parents are is a tile
 	UPrimitiveComponent *Comp = HitResult.GetComponent();
@@ -59,14 +61,9 @@ void ANavGrid::EndTileCursorOver(UNavTileComponent &Tile)
 	OnEndTileCursorOverEvent.Broadcast(Tile);
 }
 
-void ANavGrid::TilesInRange(UNavTileComponent * Tile, TArray<UNavTileComponent*>& OutArray, float Range, bool DoCollisionTests, UCapsuleComponent * Capsule)
+void ANavGrid::TilesInRange(UNavTileComponent * Tile, TArray<UNavTileComponent*>& OutArray, AGridPawn *Pawn, bool DoCollisionTests)
 {
 	OutArray.Empty();
-	if (!Capsule)
-	{
-		UE_LOG(NavGrid, Error, TEXT("TilesInRange called with NULL param: Tile: %p, Capsule: %p"), (void *)Tile, (void *)Capsule);
-		return;
-	}
 
 	TArray<UNavTileComponent *> AllTiles;
 	GetEveryTile(AllTiles, GetWorld());
@@ -78,14 +75,19 @@ void ANavGrid::TilesInRange(UNavTileComponent * Tile, TArray<UNavTileComponent*>
 	UNavTileComponent *Current = Tile;
 	Current->Distance = 0;
 	TArray<UNavTileComponent *> NeighbouringTiles;
-	Current->GetUnobstructedNeighbours(*Capsule, NeighbouringTiles);
+	Current->GetUnobstructedNeighbours(*Pawn->CapsuleComponent, NeighbouringTiles);
 	TArray<UNavTileComponent *> TentativeSet(NeighbouringTiles);
 
 	while (Current)
 	{
-		Current->GetUnobstructedNeighbours(*Capsule, NeighbouringTiles);
+		Current->GetUnobstructedNeighbours(*Pawn->CapsuleComponent, NeighbouringTiles);
 		for (UNavTileComponent *N : NeighbouringTiles)
 		{
+			if (!N->Traversable(Pawn->MovementComponent->MaxWalkAngle, Pawn->MovementComponent->AvailableMovementModes))
+			{
+				continue;
+			}
+
 			if (!N->Visited)
 			{
 				float TentativeDistance = N->Cost + Current->Distance;
@@ -110,7 +112,7 @@ void ANavGrid::TilesInRange(UNavTileComponent * Tile, TArray<UNavTileComponent*>
 						N->Distance = TentativeDistance;
 						N->Backpointer = Current;
 
-						if (TentativeDistance <= Range)
+						if (TentativeDistance <= Pawn->MovementComponent->MovementRange)
 						{
 							TentativeSet.AddUnique(N);
 						}

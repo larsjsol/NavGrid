@@ -4,6 +4,8 @@
 
 #include "Components/SplineComponent.h"
 #include "Components/SceneComponent.h"
+#include "GridMovementComponent.h"
+
 #include "NavTileComponent.generated.h"
 
 class ANavGrid;
@@ -25,7 +27,7 @@ public:
 	/* Cost of moving into this tile*/
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Pathfinding") float Cost = 1;
 	/* World extent of this tile */
-	UPROPERTY(EditAnywhere) UBoxComponent *Extent;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") UBoxComponent *Extent;
 	/* Distance from starting point of path */
 	float Distance;
 	/* Previous tile in path */
@@ -55,9 +57,16 @@ public:
 	bool static Obstructed(const FVector &From, const FVector &To, const UCapsuleComponent &CollisionCapsule);
 	/* Return the neighbours that are not Obstructed() */
 	virtual void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours);
-
+	/* Can a pawn traverse this tile?
+	*
+	* MaxWalkAngle: the pawns MaxWalkAngle
+	* AvailableMovementModes: movement modes availbe for the pawn
+	*/
+	virtual bool Traversable(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const;
+	/* Can a pawn end its turn on this tile?*/
+	virtual bool LegalPositionAtEndOfTurn(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const;
 	/* Placement for any pawn occupying this tile */
-	UPROPERTY() USceneComponent *PawnLocationOffset;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") USceneComponent *PawnLocationOffset;
 
 // Visualisation
 public:

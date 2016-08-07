@@ -52,6 +52,24 @@ void UNavTileComponent::BeginPlay()
 	}
 }
 
+bool UNavTileComponent::Traversable(float MaxWalkAngle, const TArray<EGridMovementMode>& AvailableMovementModes) const
+{
+	if (AvailableMovementModes.Contains(EGridMovementMode::Walking) &&
+		(GetComponentRotation().Pitch < MaxWalkAngle && GetComponentRotation().Pitch > -MaxWalkAngle))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool UNavTileComponent::LegalPositionAtEndOfTurn(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const
+{
+	return Traversable(MaxWalkAngle, AvailableMovementModes);
+}
+
 void UNavTileComponent::ResetPath()
 {
 	Distance = std::numeric_limits<float>::infinity();

@@ -7,16 +7,17 @@ UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitial
 	:Super(ObjectInitializer)
 {
 	Extent->SetBoxExtent(FVector(50, 5, 150));
+	Extent->SetRelativeRotation(FRotator(0, 90, 0).Quaternion());
 	Extent->SetRelativeLocation(FVector(0, 0, 150));
 
-	PawnLocationOffset->SetRelativeLocation(FVector(0, -50, 150));
+	PawnLocationOffset->SetRelativeLocation(FVector(50, 0, 150));
 
 	BottomPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("BottomPathPoint"));
-	BottomPathPoint->SetRelativeLocation(FVector(0, -50, 0));
+	BottomPathPoint->SetRelativeLocation(FVector(60, 0, 50));
 	BottomPathPoint->SetupAttachment(this);
 
 	TopPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("TopPathPoint"));
-	TopPathPoint->SetRelativeLocation(FVector(0, -50, 300));
+	TopPathPoint->SetRelativeLocation(FVector(60, 0, 300));
 	TopPathPoint->SetupAttachment(this);
 }
 
@@ -60,6 +61,16 @@ bool UNavLadderComponent::Obstructed(const FVector & FromPos, const UCapsuleComp
 
 	return UNavTileComponent::Obstructed(FromPos, TracePoint, CollisionCapsule) || 
 		UNavTileComponent::Obstructed(TracePoint, PawnLocationOffset->GetComponentLocation(), CollisionCapsule);
+}
+
+bool UNavLadderComponent::Traversable(float MaxWalkAngle, const TArray<EGridMovementMode>& AvailableMovementModes) const
+{
+	return AvailableMovementModes.Contains(EGridMovementMode::ClimbingDown) || AvailableMovementModes.Contains(EGridMovementMode::ClimbingUp);
+}
+
+bool UNavLadderComponent::LegalPositionAtEndOfTurn(float MaxWalkAngle, const TArray<EGridMovementMode>& AvailableMovementModes) const
+{
+	return false;
 }
 
 

@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 
 #include "NavTileComponent.h"
+#include "GridMovementComponent.h"
 
 #include "NavGrid.generated.h"
 
@@ -36,7 +37,7 @@ public:
 
 	/* Find all tiles in range */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	virtual void TilesInRange(UNavTileComponent * Tile, TArray<UNavTileComponent*>& OutArray, float Range, bool DoCollisionTests, UCapsuleComponent * Capsule);
+	virtual void TilesInRange(UNavTileComponent * Tile, TArray<UNavTileComponent*>& OutArray, AGridPawn *Pawn, bool DoCollisionTests);
 
 	//Event delegates
 	DECLARE_EVENT_OneParam(ANavGrid, FOnTileClicked, const UNavTileComponent& );

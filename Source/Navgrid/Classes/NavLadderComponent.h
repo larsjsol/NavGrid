@@ -15,11 +15,13 @@ public:
 
 	virtual void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours) override;
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) override;
+	virtual bool Traversable(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const override;
+	virtual bool LegalPositionAtEndOfTurn(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const override;
 	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool LastTile) override;
 
 	/* Helpers for determining walkable paths through this tile */
-	UPROPERTY(EditAnywhere) USceneComponent *BottomPathPoint;
-	UPROPERTY(EditAnywhere) USceneComponent *TopPathPoint;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") USceneComponent *BottomPathPoint;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") USceneComponent *TopPathPoint;
 
 	virtual FVector GetSplineMeshUpVector() override;
 };

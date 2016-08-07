@@ -17,7 +17,7 @@ class NAVGRID_API ANavTileActor : public AActor
 public:
 	ANavTileActor(const FObjectInitializer &ObjectInitializer);
 
-	UPROPERTY(EditAnyWhere, Category = "Components") USceneComponent *SceneComponent;
-	UPROPERTY(EditAnyWhere, Category = "Components") UNavTileComponent *NavTileComponent;
-	UPROPERTY(EditAnyWhere, Category = "Components") UStaticMeshComponent *Mesh;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")  USceneComponent *SceneComponent;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")  UNavTileComponent *NavTileComponent;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")  UStaticMeshComponent *Mesh;
 };

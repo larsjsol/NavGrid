@@ -9,7 +9,7 @@ ANavLadderActor::ANavLadderActor(const FObjectInitializer &ObjectInitializer)
 	RootComponent = SceneComponent;
 
 	NavLadderComponent = CreateDefaultSubobject<UNavLadderComponent>("NavLadderComponent");
-	NavLadderComponent->SetRelativeLocation(FVector(0, -10, 0));
+	NavLadderComponent->SetRelativeLocation(FVector(0, 0, 0));
 	NavLadderComponent->SetupAttachment(SceneComponent);
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");

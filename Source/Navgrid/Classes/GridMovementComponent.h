@@ -11,6 +11,16 @@ class USplineMeshComponent;
 class UStaticMesh;
 class UNavTileComponent;
 
+UENUM(BlueprintType)
+enum class EGridMovementMode : uint8
+{
+	Stationary		UMETA(DisplayName = "Stationary"),
+	Walking			UMETA(DisplayName = "Walking"),
+	ClimbingUp 		UMETA(DisplayName = "Climbing up"),
+	ClimbingDown	UMETA(DisplayName = "Climbing down")
+};
+
+
 /**
  * A movement component that operates on a NavGrid
  */
@@ -27,15 +37,20 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Movement") ANavGrid *Grid = NULL;
 	/* How far (in tile cost) the actor can move in one go */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MovementRange = 4;
-	/* How fast can the actor move */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxSpeed = 450;
+	/* How fast can the actor move when walking*/
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxWalkSpeed = 450;
+	/* How fast can the actor move when climbing */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxClimbSpeed = 200;
+	/* Steepest slope the actor can walk up or down */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxWalkAngle = 45;
+	/* MovementModes usable for this Pawn */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") TArray<EGridMovementMode> AvailableMovementModes;
 	/* Should we ignore rotation over the X axis */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool LockRoll = true;
 	/* Should we ignore rotation over the Y axis */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool LockPitch = true;
 	/* Should we ignore rotation over the Z axis */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool LockYaw = false;
-
 	/*
 	Spline that is used as a path. The points are in word coords.
 	
@@ -59,6 +74,10 @@ public:
 	void ShowPath();
 	/* Hide path */
 	void HidePath();
+
+	EGridMovementMode GetMovementMode();
+	/* Return the point the the pawn will reach if it continues moving for ForwardDistance */
+	FVector GetForwardLocation(float ForwardDistance);
 
 	DECLARE_EVENT(UGridMovementComponent, FOnMovementDone);
 	/* Triggered when movement ends */
