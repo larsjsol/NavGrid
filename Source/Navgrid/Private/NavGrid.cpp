@@ -20,19 +20,53 @@ ANavGrid::ANavGrid()
 	RootComponent = SceneComponent;
 }
 
-UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation)
+UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation, bool FindFloor/*= true*/)
+{
+	if (FindFloor)
+	{
+		return LineTraceTile(WorldLocation + FVector(0, 0, 50), WorldLocation - FVector(0, 0, 500));
+	}
+	else
+	{
+		/* Do a bunch of horizontal line traces and pick the closest tile component*/
+		UNavTileComponent *Closest = NULL;
+		static FVector EndPoints[8] = {
+				FVector(0, 200, 0),
+				FVector(200, 200, 0),
+				FVector(200, 0, 0),
+				FVector(200, -200, 0),
+				FVector(0, -200, 0),
+				FVector(-200, -200, 0),
+				FVector(-200, 0, 0),
+				FVector(-200, 200, 0)
+		};
+		for (FVector EndPoint : EndPoints)
+		{
+			UNavTileComponent *Tile = LineTraceTile(WorldLocation - EndPoint, WorldLocation + EndPoint);
+			if (Tile)
+			{
+				if (!Closest)
+				{
+					Closest = Tile;
+				}
+				else if (FVector::Dist(Tile->GetComponentLocation(), WorldLocation) < FVector::Dist(Closest->GetComponentLocation(), WorldLocation))
+				{
+					Closest = Tile;
+				}
+			}
+		}
+		return Closest;
+	}
+}
+
+UNavTileComponent *ANavGrid::LineTraceTile(const FVector &Start, const FVector &End)
 {
 	FHitResult HitResult;
-	FVector TraceStart = WorldLocation + FVector(0, 0, 50);
-	FVector TraceEnd = WorldLocation - FVector(0, 0, 500);
-	FCollisionQueryParams CQP;
-	CQP.bTraceComplex = true;
-	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ANavGrid::ECC_Walkable, CQP);
+	TArray<FHitResult> HitResults;
 
-	// check if component of any of its parents are is a tile
+	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ANavGrid::ECC_Walkable);
 	UPrimitiveComponent *Comp = HitResult.GetComponent();
 	UNavTileComponent *Tile = Cast<UNavTileComponent>(Comp);
-	if (Tile) { return Tile; }
 	if (Comp)
 	{
 		TArray<USceneComponent *> Components;

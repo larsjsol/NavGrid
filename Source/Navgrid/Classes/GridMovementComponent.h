@@ -98,9 +98,4 @@ protected:
 
 	/* The tile we're currently on*/
 	UNavTileComponent *Tile;
-
-	/* Lookup from spline distance to tile */
-	UNavTileComponent *GetTileAtDistance(float Distance);
-	void SetTileAtInterval(UNavTileComponent *Tile, float From, float To);
-	TArray<UNavTileComponent *> SplineDistanceToTile;
 };

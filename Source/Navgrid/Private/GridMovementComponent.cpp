@@ -41,7 +41,6 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 
 	if (Moving)
 	{
-		UNavTileComponent *Tile = GetTileAtDistance(Distance);
 		EGridMovementMode MovementMode = GetMovementMode();
 
 		/* Find the next location */
@@ -71,9 +70,13 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		/* Use the rotation from the ladder if we're climbing */
 		else if (MovementMode == EGridMovementMode::ClimbingUp || MovementMode == EGridMovementMode::ClimbingDown)
 		{
-			FRotator Rotation = Tile->GetComponentRotation();
-			Rotation.Yaw = Rotation.Yaw - 180;
-			NewTransform.SetRotation(Rotation.Quaternion());
+			UNavTileComponent *Tile = Grid->GetTile(PawnOwner->GetActorLocation(), false);
+			if (Tile)
+			{
+				FRotator Rotation = Tile->GetComponentRotation();
+				Rotation.Yaw = Rotation.Yaw - 180;
+				NewTransform.SetRotation(Rotation.Quaternion());
+			}
 		}
 
 		Owner->SetActorTransform(NewTransform);
@@ -99,7 +102,6 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 bool UGridMovementComponent::CreatePath(UNavTileComponent &Target)
 {
 	Spline->ClearSplinePoints();
-	SplineDistanceToTile.Empty();
 
 	AGridPawn *Owner = Cast<AGridPawn>(GetOwner());
 	Tile = Grid->GetTile(Owner->GetActorLocation());
@@ -129,14 +131,12 @@ bool UGridMovementComponent::CreatePath(UNavTileComponent &Target)
 
 		// first add a spline point for the pawn starting location
 		Spline->AddSplinePoint(GetOwner()->GetActorLocation(), ESplineCoordinateSpace::Local);
-		SetTileAtInterval(Path[0], 0, LengthOffset);
 
 		// Add spline points for the tiles in the path
 		for (int32 Idx = 1; Idx < Path.Num(); Idx++)
 		{
 			float From = Spline->GetSplineLength();
 			Path[Idx]->AddSplinePoints(Path[Idx - 1]->GetComponentLocation(), *Spline, Idx == Path.Num() - 1);
-			SetTileAtInterval(Path[Idx], From, Spline->GetSplineLength() + LengthOffset);
 		}
 		return true; // success!
 	}
@@ -173,18 +173,6 @@ void UGridMovementComponent::ShowPath()
 		{
 			AddSplineMesh(Distance, FMath::Min(Distance + MeshLength, SplineLength));
 			Distance += FMath::Min(MeshLength, SplineLength - Distance);
-		}
-
-		// Set up direction
-		FVector PrevUp = FVector::ZeroVector;
-		for (int32 Idx = 0; Idx < SplineMeshes.Num(); Idx++)
-		{
-			USplineMeshComponent *SplineMesh = SplineMeshes[Idx];
-			UNavTileComponent *Tile = GetTileAtDistance(MeshLength * Idx);
-			FVector UpDir = Tile->GetSplineMeshUpVector();
-			/* try to average it out in order to avoid issues in sharp vertical turns */
-			SplineMesh->SetSplineUpDir((UpDir + PrevUp) / 2);
-			PrevUp = UpDir;
 		}
 	}
 }
@@ -239,44 +227,14 @@ void UGridMovementComponent::AddSplineMesh(float From, float To)
 	FVector EndPos = Spline->GetLocationAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local);
 	EndPos.Z += VerticalOffset;
 	FVector EndTan = Spline->GetDirectionAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local) * TanScale;
+	FVector UpVector = EndPos - StartPos;
+	UpVector = FVector(UpVector.Y, UpVector.Z, UpVector.X);
 
 	UPROPERTY() USplineMeshComponent *SplineMesh = NewObject<USplineMeshComponent>(this);
-
 	SplineMesh->SetMobility(EComponentMobility::Movable);
 	SplineMesh->SetStartAndEnd(StartPos, StartTan, EndPos, EndTan);
 	SplineMesh->SetStaticMesh(PathMesh);
 	SplineMesh->RegisterComponentWithWorld(GetWorld());
+	SplineMesh->SetSplineUpDir(UpVector);
 	SplineMeshes.Add(SplineMesh);
-}
-
-UNavTileComponent *UGridMovementComponent::GetTileAtDistance(float Distance)
-{
-	if (Distance >= 0 && (int32) Distance < SplineDistanceToTile.Num())
-	{
-		return SplineDistanceToTile[Distance];
-	}
-	else
-	{
-		UE_LOG(NavGrid, Warning, TEXT("GetTileAtDistance(): No tile at distance %f"), Distance);
-		return NULL;
-	}
-}
-
-void UGridMovementComponent::SetTileAtInterval(UNavTileComponent *Tile, float From, float To)
-{
-	
-	/* Make sure to fill earlier slots with this tile if they are not already set */
-	From = FMath::Min(SplineDistanceToTile.Num(), (int32) From);
-
-	/* Make sure our array is large enough */
-	if (To + 1 >= SplineDistanceToTile.Num())
-	{ 
-		SplineDistanceToTile.SetNum(To + 1);
-	}
-
-	/* Set all tiles in range To - From inclusive so we later can look them up by saying SplineDistanceToTile[Distance]*/
-	for (int32 Idx = From; Idx <= To; Idx++)
-	{
-		SplineDistanceToTile[Idx] = Tile;
-	}
 }

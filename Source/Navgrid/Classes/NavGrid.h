@@ -29,8 +29,10 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
 
 	/* Get tile from world location, may return NULL */
-	virtual UNavTileComponent *GetTile(const FVector &WorldLocation);
-
+	virtual UNavTileComponent *GetTile(const FVector &WorldLocation, bool FindFloor = true);
+protected:
+	UNavTileComponent *LineTraceTile(const FVector &Start, const FVector &End);
+public:
 	void TileClicked(UNavTileComponent &Tile);
 	void TileCursorOver(UNavTileComponent &Tile);
 	void EndTileCursorOver(UNavTileComponent &Tile);
