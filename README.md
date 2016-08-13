@@ -37,8 +37,8 @@ A single tile that can be traversed by a `AGridPawn`. It will automaticly detect
 Useful functions:
 * `GetNeighbours`: Get all neighbouring tiles.
 * `Obstructed`: Given a capsule and a starting position, is there anything obstructing the movement into this tile?
-* `GetUnobstructedNeighbours`: Get all neighbouring tiles that a pawn can enter from this tile.
-* `Traversable`: Given a movement mode and a max walk angle, is it possible to enter this tile?
+* `GetUnobstructedNeighbours`: Get all neighbouring tiles that a pawn can move into from this tile.
+* `Traversable`: Given a movement mode and a max walk angle, is it legal to enter this tile?
 * `LegalPositionAtEndOfTurn`:  Given a movement mode and a max walk angle, is it legal to end a turn on this tile?
 
 Useful properties:
