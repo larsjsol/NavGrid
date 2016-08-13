@@ -41,6 +41,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxWalkSpeed = 450;
 	/* How fast can the actor move when climbing */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxClimbSpeed = 200;
+	/* How fast can the actor turn */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxRotationSpeed = 1080;
 	/* Steepest slope the actor can walk up or down */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxWalkAngle = 45;
 	/* MovementModes usable for this Pawn */
@@ -118,4 +120,7 @@ protected:
 	UNavTileComponent *Tile;
 
 	UPROPERTY() UAnimInstance *AnimInstance;
+
+	/* Return a delta FRotater that is within MaxRotationSpeed */
+	FRotator LimitRotation(const FRotator &OldRotation, const FRotator &NewRotation, float DeltaTime);
 };

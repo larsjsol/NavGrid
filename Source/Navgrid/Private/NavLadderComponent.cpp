@@ -12,11 +12,11 @@ UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitial
 	PawnLocationOffset->SetRelativeLocation(FVector(90, 0, 150));
 
 	BottomPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("BottomPathPoint"));
-	BottomPathPoint->SetRelativeLocation(FVector(90, 0, 50));
+	BottomPathPoint->SetRelativeLocation(FVector(75, 0, 50));
 	BottomPathPoint->SetupAttachment(this);
 
 	TopPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("TopPathPoint"));
-	TopPathPoint->SetRelativeLocation(FVector(90, 0, 300));
+	TopPathPoint->SetRelativeLocation(FVector(75, 0, 300));
 	TopPathPoint->SetupAttachment(this);
 }
 

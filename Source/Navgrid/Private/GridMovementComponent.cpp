@@ -88,17 +88,17 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		AActor *Owner = GetOwner();
 		FTransform OldTransform = Owner->GetTransform();
 
-		/* Find the next loaction from the spline*/
+		/* Find the next location and rotation from the spline*/
 		FTransform NewTransform = Spline->GetTransformAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::Local);
+		FRotator DesiredRotation;
 
 		/* Restrain rotation axis if we're walking */
 		if (MovementMode == EGridMovementMode::Walking)
 		{
-			FRotator Rotation = NewTransform.Rotator();
-			Rotation.Roll = LockRoll ? 0 : Rotation.Roll;
-			Rotation.Pitch = LockPitch ? 0 : Rotation.Pitch;
-			Rotation.Yaw = LockYaw ? 0 : Rotation.Yaw;
-			NewTransform.SetRotation(Rotation.Quaternion());
+			DesiredRotation = NewTransform.Rotator();
+			DesiredRotation.Roll = LockRoll ? 0 : DesiredRotation.Roll;
+			DesiredRotation.Pitch = LockPitch ? 0 : DesiredRotation.Pitch;
+			DesiredRotation.Yaw = LockYaw ? 0 : DesiredRotation.Yaw;
 		}
 		/* Use the rotation from the ladder if we're climbing */
 		else if (MovementMode == EGridMovementMode::ClimbingUp || MovementMode == EGridMovementMode::ClimbingDown)
@@ -106,18 +106,21 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 			UNavTileComponent *Tile = Grid->GetTile(PawnOwner->GetActorLocation(), false);
 			if (Tile)
 			{
-				FRotator Rotation = Tile->GetComponentRotation();
-				Rotation.Yaw = Rotation.Yaw - 180;
-				NewTransform.SetRotation(Rotation.Quaternion());
+				DesiredRotation = Tile->GetComponentRotation();
+				DesiredRotation.Yaw -= 180;
 			}
 			else 
 			// Dont update the rotation if we have no idea of what it should be
 			// This leads to prevent the occational stuttering at the start of a descent
 			{
-				NewTransform.SetRotation(GetOwner()->GetActorRotation().Quaternion());
+				DesiredRotation = GetOwner()->GetActorRotation();
 			}
 		}
 
+		/* Find the new rotation by limiting DesiredRotation by MaxRotationSpeed */
+		FRotator NewRotation = LimitRotation(OldTransform.GetRotation().Rotator(), DesiredRotation, DeltaTime);
+
+		NewTransform.SetRotation(NewRotation.Quaternion());
 		Owner->SetActorTransform(NewTransform);
 
 		/* Check if we're reached our destination*/
@@ -293,4 +296,19 @@ void UGridMovementComponent::AddSplineMesh(float From, float To)
 	SplineMesh->RegisterComponentWithWorld(GetWorld());
 	SplineMesh->SetSplineUpDir(UpVector);
 	SplineMeshes.Add(SplineMesh);
+}
+
+FRotator UGridMovementComponent::LimitRotation(const FRotator &OldRotation, const FRotator &NewRotation, float DeltaTime)
+{
+	FRotator Result = OldRotation.GetNormalized();
+	FRotator DeltaRotation = NewRotation - OldRotation;
+	DeltaRotation.Normalize();
+	Result.Pitch += DeltaRotation.Pitch > 0 ? FMath::Min<float>(DeltaRotation.Pitch, MaxRotationSpeed * DeltaTime) :
+		FMath::Max<float>(DeltaRotation.Pitch, MaxRotationSpeed * -DeltaTime);
+	Result.Roll += DeltaRotation.Roll > 0 ? FMath::Min<float>(DeltaRotation.Roll, MaxRotationSpeed * DeltaTime) :
+		FMath::Max<float>(DeltaRotation.Roll, MaxRotationSpeed * -DeltaTime);
+	Result.Yaw += DeltaRotation.Yaw > 0 ? FMath::Min<float>(DeltaRotation.Yaw, MaxRotationSpeed * DeltaTime) :
+		FMath::Max<float>(DeltaRotation.Yaw, MaxRotationSpeed * -DeltaTime);
+
+	return Result;
 }
