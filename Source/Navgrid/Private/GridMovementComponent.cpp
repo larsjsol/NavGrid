@@ -1,8 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "NavGrid.h"
-#include "GridPawn.h"
-#include "GridMovementComponent.h"
+#include "NavGridPrivatePCH.h"
 
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
@@ -12,39 +10,117 @@ UGridMovementComponent::UGridMovementComponent(const FObjectInitializer &ObjectI
 {
 	Spline = ObjectInitializer.CreateDefaultSubobject<USplineComponent>(this, "PathSpline");
 	PathMesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Path.NavGrid_Path'")).Object;
+	
+	AvailableMovementModes.Add(EGridMovementMode::ClimbingDown);
+	AvailableMovementModes.Add(EGridMovementMode::ClimbingUp);
+	AvailableMovementModes.Add(EGridMovementMode::Stationary);
+	AvailableMovementModes.Add(EGridMovementMode::Walking);
 }
 
 void UGridMovementComponent::BeginPlay()
 {
 	/* Grab a reference to the NavGrid */
 	TActorIterator<ANavGrid> NavGridItr(GetWorld());
-	Grid = *NavGridItr;
-	if (!Grid) { UE_LOG(NavGrid, Error, TEXT("%st: Unable to get reference to Navgrid."), *GetName()); }
+	if (NavGridItr)
+	{
+		Grid = *NavGridItr;
+	}
+	else
+	{
+		UE_LOG(NavGrid, Fatal, TEXT("%s: Unable to get reference to Navgrid."), *GetName());
+	}
+
+	/* Grab a reference to (a) AnimInstace */
+	for (UActorComponent *Comp : GetOwner()->GetComponentsByClass(USkeletalMeshComponent::StaticClass()))
+	{
+		USkeletalMeshComponent *Mesh = Cast<USkeletalMeshComponent>(Comp);	
+		if (Mesh)
+		{
+			AnimInstance = Mesh->GetAnimInstance();
+			if (AnimInstance)
+			{
+				break;
+			}
+		}
+	}
+	if (!AnimInstance)
+	{
+		UE_LOG(NavGrid, Error, TEXT("%s: Unable to get reference to AnimInstance"), *GetName());
+	}
 }
 
 void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	/* Update movement mode and make a broadcast if it has changed */
+	EGridMovementMode NewMovementMode = GetMovementMode();
+	if (NewMovementMode != MovementMode)
+	{
+		OnMovementModeChangedEvent.Broadcast(MovementMode, NewMovementMode);
+		MovementMode = NewMovementMode;
+	}
+
 	if (Moving)
 	{
-		/* Find the next location */
-		Distance = FMath::Min(Spline->GetSplineLength(), Distance + (MaxSpeed * DeltaTime));
+
+		/* Check if we can get the speed from root motion */
+		float CurrentSpeed = 0;
+		if (bUseRootMotion)
+		{
+			CurrentSpeed = ConsumeRootMotion().GetLocation().Size();
+		}
+		/* No root motion available, use manually set values */
+		if (CurrentSpeed == 0)
+		{
+			if (MovementMode == EGridMovementMode::ClimbingDown || MovementMode == EGridMovementMode::ClimbingUp)
+			{
+				CurrentSpeed = MaxClimbSpeed * DeltaTime;
+			}
+			else
+			{
+				CurrentSpeed = MaxWalkSpeed * DeltaTime;
+			}
+		}
+		Distance = FMath::Min(Spline->GetSplineLength(), Distance + CurrentSpeed);
 		
 		/* Grab our current transform so we can find the velocity if we need it later */
 		AActor *Owner = GetOwner();
 		FTransform OldTransform = Owner->GetTransform();
 
-		/* Find the next loaction from the spline*/
+		/* Find the next location and rotation from the spline*/
 		FTransform NewTransform = Spline->GetTransformAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::Local);
+		FRotator DesiredRotation;
 
-		/* Restrain rotation axis */
-		FRotator Rotation = NewTransform.Rotator();
-		Rotation.Roll = LockRoll ? 0 : Rotation.Roll;
-		Rotation.Pitch = LockPitch ? 0 : Rotation.Pitch; 
-		Rotation.Yaw = LockYaw ? 0 : Rotation.Yaw;
-		NewTransform.SetRotation(Rotation.Quaternion());
+		/* Restrain rotation axis if we're walking */
+		if (MovementMode == EGridMovementMode::Walking)
+		{
+			DesiredRotation = NewTransform.Rotator();
+			DesiredRotation.Roll = LockRoll ? 0 : DesiredRotation.Roll;
+			DesiredRotation.Pitch = LockPitch ? 0 : DesiredRotation.Pitch;
+			DesiredRotation.Yaw = LockYaw ? 0 : DesiredRotation.Yaw;
+		}
+		/* Use the rotation from the ladder if we're climbing */
+		else if (MovementMode == EGridMovementMode::ClimbingUp || MovementMode == EGridMovementMode::ClimbingDown)
+		{
+			UNavTileComponent *Tile = Grid->GetTile(PawnOwner->GetActorLocation(), false);
+			if (Tile)
+			{
+				DesiredRotation = Tile->GetComponentRotation();
+				DesiredRotation.Yaw -= 180;
+			}
+			else 
+			// Dont update the rotation if we have no idea of what it should be
+			// This leads to prevent the occational stuttering at the start of a descent
+			{
+				DesiredRotation = GetOwner()->GetActorRotation();
+			}
+		}
 
+		/* Find the new rotation by limiting DesiredRotation by MaxRotationSpeed */
+		FRotator NewRotation = LimitRotation(OldTransform.GetRotation().Rotator(), DesiredRotation, DeltaTime);
+
+		NewTransform.SetRotation(NewRotation.Quaternion());
 		Owner->SetActorTransform(NewTransform);
 
 		/* Check if we're reached our destination*/
@@ -65,42 +141,51 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	}
 }
 
-bool UGridMovementComponent::CreatePath(const ATile &Target)
+bool UGridMovementComponent::CreatePath(UNavTileComponent &Target)
 {
 	Spline->ClearSplinePoints();
 
-	AActor *Owner = GetOwner();
-	AGridPawn *GridPawnOwner = Cast<AGridPawn>(Owner);
-
-	ATile *Location = Grid->GetTile(Owner->GetActorLocation());
-	if (!Location) { UE_LOG(NavGrid, Error, TEXT("%s: Not on grid"), *Owner->GetName()); return false; }
-
-	TArray<ATile *> InRange;
-	if (GridPawnOwner) {
-		Grid->TilesInRange(Location, InRange, MovementRange, true, GridPawnOwner->CapsuleComponent);
-	}
-	else
-	{
-		Grid->TilesInRange(Location, InRange, MovementRange);
+	AGridPawn *Owner = Cast<AGridPawn>(GetOwner());
+	Tile = Grid->GetTile(Owner->GetActorLocation());
+	if (!Tile) 
+	{ 
+		UE_LOG(NavGrid, Error, TEXT("%s: Not on grid"), *Owner->GetName());
+		return false;
 	}
 
+	TArray<UNavTileComponent *> InRange;
+	Grid->TilesInRange(Tile, InRange, Owner, true);
 	if (InRange.Contains(&Target))
 	{
-		TArray<ATile *> Path;
-		ATile *Current = (ATile *) &Target;
+		// create a list of tiles from the destination to the starting point and reverse it
+		TArray<UNavTileComponent *> Path;
+		UNavTileComponent *Current = &Target;
 		while (Current)
 		{
 			Path.Add(Current);
 			Current = Current->Backpointer;
 		}
+		Algo::Reverse(Path);
 
-		for (int32 Idx = Path.Num() - 1; Idx >= 0; Idx--)
+		// Estiamte how much of the spline that covers the first tile
+		FVector Extent = Path[0]->Extent->GetScaledBoxExtent();
+		float LengthOffset = FMath::Max3<float>(Extent.X, Extent.Y, Extent.Z);
+
+		// first add a spline point for the pawn starting location
+		Spline->AddSplinePoint(GetOwner()->GetActorLocation(), ESplineCoordinateSpace::Local);
+
+		// Add spline points for the tiles in the path
+		for (int32 Idx = 1; Idx < Path.Num(); Idx++)
 		{
-			Spline->AddSplinePoint(Path[Idx]->GetActorLocation(), ESplineCoordinateSpace::Local);
+			float From = Spline->GetSplineLength();
+			Path[Idx]->AddSplinePoints(Path[Idx - 1]->GetComponentLocation(), *Spline, Idx == Path.Num() - 1);
 		}
-		return true;
+		return true; // success!
 	}
-	else { return false; }
+	else
+	{
+		return false; // no path to Target
+	}
 }
 
 void UGridMovementComponent::FollowPath()
@@ -109,7 +194,12 @@ void UGridMovementComponent::FollowPath()
 	Moving = true;
 }
 
-bool UGridMovementComponent::MoveTo(const ATile &Target)
+void UGridMovementComponent::PauseMoving()
+{
+	Moving = false;
+}
+
+bool UGridMovementComponent::MoveTo(UNavTileComponent &Target)
 {
 	bool PathExists = CreatePath(Target);
 	if (PathExists) { FollowPath(); }
@@ -122,7 +212,7 @@ void UGridMovementComponent::ShowPath()
 	{
 		float Distance = HorizontalOffset; // Get some distance between the actor and the path
 		FBoxSphereBounds Bounds = PathMesh->GetBounds();
-		float MeshLength = FMath::Abs(Bounds.BoxExtent.X);
+		float MeshLength = FMath::Abs(Bounds.BoxExtent.X) * 2;
 		float SplineLength = Spline->GetSplineLength();
 		SplineLength -= HorizontalOffset; // Get some distance between the cursor and the path
 
@@ -143,21 +233,82 @@ void UGridMovementComponent::HidePath()
 	SplineMeshes.Empty();
 }
 
+FTransform UGridMovementComponent::ConsumeRootMotion()
+{
+	if (!AnimInstance)
+	{
+		return FTransform();
+	}
+	
+	FRootMotionMovementParams RootMotionParams;
+	RootMotionParams.Accumulate(AnimInstance->ConsumeExtractedRootMotion(1));
+	return RootMotionParams.RootMotionTransform;
+}
+
+EGridMovementMode UGridMovementComponent::GetMovementMode()
+{
+	if (!Moving)
+	{
+		return EGridMovementMode::Stationary;
+	}
+
+	FVector ForwardLoc = GetForwardLocation(50);
+	ForwardLoc -= GetOwner()->GetActorLocation();
+	ForwardLoc = ForwardLoc.GetSafeNormal();
+	float UpAngle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(ForwardLoc, FVector(0, 0, 1))));
+
+	if (UpAngle < 90 - MaxWalkAngle)
+	{
+		return EGridMovementMode::ClimbingUp;
+	}
+	else if (UpAngle > 90 + MaxWalkAngle)
+	{
+		return EGridMovementMode::ClimbingDown;
+	}
+	else
+	{
+		return EGridMovementMode::Walking;
+	}
+}
+
+FVector UGridMovementComponent::GetForwardLocation(float ForwardDistance)
+{
+	float D = FMath::Min(Spline->GetSplineLength(), Distance + ForwardDistance);
+	return Spline->GetLocationAtDistanceAlongSpline(D, ESplineCoordinateSpace::Local);
+}
+
 void UGridMovementComponent::AddSplineMesh(float From, float To)
 {
 	float TanScale = 25;
 	FVector StartPos = Spline->GetLocationAtDistanceAlongSpline(From, ESplineCoordinateSpace::Local);
-	StartPos.Z += VerticalOffest;
+	StartPos.Z += VerticalOffset;
 	FVector StartTan = Spline->GetDirectionAtDistanceAlongSpline(From, ESplineCoordinateSpace::Local) * TanScale;
 	FVector EndPos = Spline->GetLocationAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local);
-	EndPos.Z += VerticalOffest;
+	EndPos.Z += VerticalOffset;
 	FVector EndTan = Spline->GetDirectionAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local) * TanScale;
+	FVector UpVector = EndPos - StartPos;
+	UpVector = FVector(UpVector.Y, UpVector.Z, UpVector.X);
 
 	UPROPERTY() USplineMeshComponent *SplineMesh = NewObject<USplineMeshComponent>(this);
 	SplineMesh->SetMobility(EComponentMobility::Movable);
 	SplineMesh->SetStartAndEnd(StartPos, StartTan, EndPos, EndTan);
 	SplineMesh->SetStaticMesh(PathMesh);
 	SplineMesh->RegisterComponentWithWorld(GetWorld());
-
+	SplineMesh->SetSplineUpDir(UpVector);
 	SplineMeshes.Add(SplineMesh);
+}
+
+FRotator UGridMovementComponent::LimitRotation(const FRotator &OldRotation, const FRotator &NewRotation, float DeltaTime)
+{
+	FRotator Result = OldRotation.GetNormalized();
+	FRotator DeltaRotation = NewRotation - OldRotation;
+	DeltaRotation.Normalize();
+	Result.Pitch += DeltaRotation.Pitch > 0 ? FMath::Min<float>(DeltaRotation.Pitch, MaxRotationSpeed * DeltaTime) :
+		FMath::Max<float>(DeltaRotation.Pitch, MaxRotationSpeed * -DeltaTime);
+	Result.Roll += DeltaRotation.Roll > 0 ? FMath::Min<float>(DeltaRotation.Roll, MaxRotationSpeed * DeltaTime) :
+		FMath::Max<float>(DeltaRotation.Roll, MaxRotationSpeed * -DeltaTime);
+	Result.Yaw += DeltaRotation.Yaw > 0 ? FMath::Min<float>(DeltaRotation.Yaw, MaxRotationSpeed * DeltaTime) :
+		FMath::Max<float>(DeltaRotation.Yaw, MaxRotationSpeed * -DeltaTime);
+
+	return Result;
 }

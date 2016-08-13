@@ -1,8 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-#include "NavGrid.h"
-#include "TurnManager.h"
-
-#include "TurnComponent.h"
+#include "NavGridPrivatePCH.h"
 
 void ATurnManager::BeginPlay()
 {

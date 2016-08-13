@@ -1,10 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "NavGrid.h"
-#include "GridPawn.h"
-#include "GridMovementComponent.h"
-#include "TurnComponent.h"
-
+#include "NavGridPrivatePCH.h"
 
 // Sets default values
 AGridPawn::AGridPawn()
@@ -18,23 +14,24 @@ AGridPawn::AGridPawn()
 	TurnComponent = CreateDefaultSubobject<UTurnComponent>("TurnComponent");
 
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
-	CapsuleComponent->AttachParent = Scene;
-	CapsuleComponent->SetRelativeLocation(FVector(0, 0, 100)); //just above the floor the default height (44 * 2)
+	CapsuleComponent->SetupAttachment(Scene);
+	CapsuleComponent->SetRelativeLocation(FVector(0, 0, 100)); //just above the floor for the default height (44 * 2)
 	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 
 	SelectedHighlight = CreateDefaultSubobject<UStaticMeshComponent>("SelectedHighlight");
-	SelectedHighlight->AttachParent = Scene;
+	SelectedHighlight->SetupAttachment(Scene);
 	UStaticMesh *Selected = ConstructorHelpers::FObjectFinder<UStaticMesh>(
 		TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Cursor.NavGrid_Cursor'")).Object;
 	SelectedHighlight->SetStaticMesh(Selected);
 	SelectedHighlight->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SelectedHighlight->SetVisibility(false);
+	SelectedHighlight->SetRelativeLocation(FVector(0, 0, 50));
 
 	TurnComponent->OnTurnStart().AddUObject(this, &AGridPawn::OnTurnStart);
 	TurnComponent->OnTurnEnd().AddUObject(this, &AGridPawn::OnTurnEnd);
 
 	Arrow = CreateDefaultSubobject<UArrowComponent>("Arrow");
-	Arrow->AttachParent = Scene;
+	Arrow->SetupAttachment(Scene);
 }
 
 void AGridPawn::BeginPlay()
@@ -44,8 +41,8 @@ void AGridPawn::BeginPlay()
 	TActorIterator<ANavGrid>GridItr(GetWorld());
 	if (SnapToGrid && GridItr)
 	{
-		ATile *Tile = GridItr->GetTile(GetActorLocation());
-		if (Tile) { SetActorLocation(Tile->GetActorLocation()); }
+		UNavTileComponent *Tile = GridItr->GetTile(GetActorLocation());
+		if (Tile) { SetActorLocation(Tile->GetComponentLocation()); }
 	}
 }
 

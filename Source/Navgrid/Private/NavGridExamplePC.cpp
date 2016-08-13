@@ -1,12 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "NavGrid.h"
+#include "NavGridPrivatePCH.h"
 #include "NavGridExamplePC.h"
-#include "GridPawn.h"
-#include "GridMovementComponent.h"
-#include "TurnComponent.h"
-#include "TurnManager.h"
-
 
 ANavGridExamplePC::ANavGridExamplePC(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -21,16 +16,16 @@ void ANavGridExamplePC::BeginPlay()
 {
 	/* Grab a reference to the NavGrid and register handlers for mouse events */
 	TActorIterator<ANavGrid> NavGridItr(GetWorld());
-	Grid = *NavGridItr;
-	if (Grid)
+	if (NavGridItr)
 	{
+		Grid = *NavGridItr;
 		Grid->OnTileClicked().AddUObject(this, &ANavGridExamplePC::OnTileClicked);
 		Grid->OnTileCursorOver().AddUObject(this, &ANavGridExamplePC::OnTileCursorOver);
 		Grid->OnEndTileCursorOver().AddUObject(this, &ANavGridExamplePC::OnEndTileCursorOver);
 	}
 	else
 	{
-		UE_LOG(NavGrid, Fatal, TEXT("Unable to get reference to Navgrid. Have you forgotten to place it in the level?"));
+		UE_LOG(NavGrid, Error, TEXT("Unable to get reference to Navgrid. Have you forgotten to place it in the level?"));
 	}
 
 	/* Grab all gridpawns we find */
@@ -56,23 +51,27 @@ void ANavGridExamplePC::OnConstruction(const FTransform &Transform)
 	TurnManager->SetOwner(this);
 }
 
-void ANavGridExamplePC::OnTileClicked(const ATile &Tile)
+void ANavGridExamplePC::OnTileClicked(const UNavTileComponent &Tile)
 {
 	/* Try to move the current pawn to the clicked tile */
+
 	if (Pawn)
 	{
 		UGridMovementComponent *MovementComponent = Pawn->MovementComponent;
-		ATile *Location = Grid->GetTile(Pawn->GetActorLocation());
+		UNavTileComponent *Location = Grid->GetTile(Pawn->GetActorLocation());
 
 		if (Location && MovementComponent && Grid)
 		{
-			if (Location != &Tile && MovementComponent->Velocity.Size() == 0)
+			if (Location != &Tile && 
+				MovementComponent->Velocity.Size() == 0 &&
+				Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes)
+				)
 			{
-				TArray<ATile *> InRange;
-				Grid->TilesInRange(Location, InRange, MovementComponent->MovementRange, true, Pawn->CapsuleComponent);
+				TArray<UNavTileComponent *> InRange;
+				Grid->TilesInRange(Location, InRange, Pawn, true);
 				if (InRange.Contains(&Tile))
 				{
-					MovementComponent->MoveTo(Tile);
+					MovementComponent->MoveTo((UNavTileComponent &) Tile);
 					MovementComponent->HidePath();
 				}
 			}
@@ -80,20 +79,22 @@ void ANavGridExamplePC::OnTileClicked(const ATile &Tile)
 	}
 }
 
-void ANavGridExamplePC::OnTileCursorOver(const ATile &Tile)
+void ANavGridExamplePC::OnTileCursorOver(const UNavTileComponent &Tile)
 {
 	/* If the pawn is not moving, try to create a path to the hovered tile and show it */
 	if (Pawn)
 	{
 		UGridMovementComponent *MovementComponent = Pawn->MovementComponent;
-		if (MovementComponent->Velocity.Size() == 0 && MovementComponent->CreatePath(Tile))
+		if (MovementComponent->Velocity.Size() == 0 && 
+			Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes) && 
+			MovementComponent->CreatePath((UNavTileComponent &) Tile))
 		{
 			MovementComponent->ShowPath();
 		}
 	}
 }
 
-void ANavGridExamplePC::OnEndTileCursorOver(const ATile &Tile)
+void ANavGridExamplePC::OnEndTileCursorOver(const UNavTileComponent &Tile)
 {
 	/* Hide the previously shown path */
 	if (Pawn)
