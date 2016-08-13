@@ -57,9 +57,16 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	/* Update movement mode and make a broadcast if it has changed */
+	EGridMovementMode NewMovementMode = GetMovementMode();
+	if (NewMovementMode != MovementMode)
+	{
+		OnMovementModeChangedEvent.Broadcast(MovementMode, NewMovementMode);
+		MovementMode = NewMovementMode;
+	}
+
 	if (Moving)
 	{
-		EGridMovementMode MovementMode = GetMovementMode();
 
 		/* Check if we can get the speed from root motion */
 		float CurrentSpeed = 0;
@@ -188,6 +195,11 @@ void UGridMovementComponent::FollowPath()
 	Moving = true;
 }
 
+void UGridMovementComponent::PauseMoving()
+{
+	Moving = false;
+}
+
 bool UGridMovementComponent::MoveTo(UNavTileComponent &Target)
 {
 	bool PathExists = CreatePath(Target);
@@ -226,7 +238,7 @@ FTransform UGridMovementComponent::ConsumeRootMotion()
 {
 	if (!AnimInstance)
 	{
-		return 0;
+		return FTransform();
 	}
 	
 	FRootMotionMovementParams RootMotionParams;

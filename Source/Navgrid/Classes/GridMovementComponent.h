@@ -70,6 +70,8 @@ public:
 	bool CreatePath(UNavTileComponent &Target);
 	/* Follow an existing path */
 	void FollowPath();
+	/* Temporarily stop moving, call FollowPath() to resume */
+	void PauseMoving();
 	/* Create a path and follow it if it exists */
 	bool MoveTo(UNavTileComponent &Target);
 	/* Visualize path */
@@ -80,6 +82,9 @@ public:
 	FTransform ConsumeRootMotion();
 
 	EGridMovementMode GetMovementMode();
+protected:
+	EGridMovementMode MovementMode = EGridMovementMode::Stationary;
+public:
 	/* Return the point the the pawn will reach if it continues moving for ForwardDistance */
 	FVector GetForwardLocation(float ForwardDistance);
 
@@ -88,6 +93,13 @@ public:
 	FOnMovementDone& OnMovementEnd() { return OnMovementEndEvent; }
 private:
 	FOnMovementDone OnMovementEndEvent;
+
+public:
+	DECLARE_EVENT_TwoParams(UGridMovementComponent, FOnMovementModeChanged, EGridMovementMode, EGridMovementMode);
+	/* Triggered when the movement mode changes */
+	FOnMovementModeChanged& OnMovementModeChanged() { return OnMovementModeChangedEvent; }
+private:
+	FOnMovementModeChanged OnMovementModeChangedEvent;
 
 public:
 	/* Should the actor be moved along the spline on the next Tick()? */

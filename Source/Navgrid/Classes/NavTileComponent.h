@@ -13,7 +13,7 @@ class ANavGrid;
 /**
 * A single tile in a navigation grid
 */
-UCLASS(meta = (BlueprintSpawnableComponent))
+UCLASS(meta = (BlueprintSpawnableComponent), Blueprintable)
 class NAVGRID_API UNavTileComponent : public USceneComponent
 {
 	GENERATED_BODY()
