@@ -97,7 +97,7 @@ There are two possible solutions to this: Either ensure that the camera is close
 **Version 2.0 - 13.08.2016**
 * Support Unreal Engine 4.12
 * Add ladders
-* Add multiple levels
+* Add multiple levels of tiles
 * Optionaly use root motion for movement speed
 
 **Version 1.0.1 - 29.11.2015**
