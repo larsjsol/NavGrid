@@ -8,7 +8,6 @@
 
 #include "NavTileComponent.generated.h"
 
-class ANavGrid;
 
 /**
 * A single tile in a navigation grid

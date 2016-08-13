@@ -1,10 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "NavGrid.h"
-#include "GridPawn.h"
-#include "GridMovementComponent.h"
-#include "NavTileComponent.h"
-#include "NavLadderComponent.h"
+#include "NavGridPrivatePCH.h"
 
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"

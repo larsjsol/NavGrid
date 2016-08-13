@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "NavGrid.h"
-#include "NavTileComponent.h"
+#include "NavGridPrivatePCH.h"
 #include <limits>
 
 UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer)

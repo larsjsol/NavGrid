@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "NavGrid.h"
-#include "TurnComponent.h"
+#include "NavGridPrivatePCH.h"
 
 void UTurnComponent::TurnStart()
 {

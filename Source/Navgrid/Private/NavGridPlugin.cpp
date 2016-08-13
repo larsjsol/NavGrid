@@ -1,4 +1,4 @@
-#include "NavGrid.h"
+#include "NavGridPrivatePCH.h"
 #include "NavGridPlugin.h"
 
 

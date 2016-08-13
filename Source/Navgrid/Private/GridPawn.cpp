@@ -1,10 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "NavGrid.h"
-#include "GridPawn.h"
-#include "GridMovementComponent.h"
-#include "TurnComponent.h"
-
+#include "NavGridPrivatePCH.h"
 
 // Sets default values
 AGridPawn::AGridPawn()
