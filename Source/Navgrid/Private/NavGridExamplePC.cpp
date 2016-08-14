@@ -10,6 +10,7 @@ ANavGridExamplePC::ANavGridExamplePC(const FObjectInitializer& ObjectInitializer
 	/* Enable mouse events */
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
+	DefaultClickTraceChannel = ANavGrid::ECC_Walkable;
 }
 
 void ANavGridExamplePC::BeginPlay()
