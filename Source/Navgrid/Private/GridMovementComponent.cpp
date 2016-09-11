@@ -4,6 +4,7 @@
 
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
+#include "Animation/AnimInstance.h"
 
 UGridMovementComponent::UGridMovementComponent(const FObjectInitializer &ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -240,9 +241,8 @@ FTransform UGridMovementComponent::ConsumeRootMotion()
 		return FTransform();
 	}
 	
-	FRootMotionMovementParams RootMotionParams;
-	RootMotionParams.Accumulate(AnimInstance->ConsumeExtractedRootMotion(1));
-	return RootMotionParams.RootMotionTransform;
+	FRootMotionMovementParams RootMotionParams = AnimInstance->ConsumeExtractedRootMotion(1);
+	return RootMotionParams.GetRootMotionTransform();
 }
 
 EGridMovementMode UGridMovementComponent::GetMovementMode()
