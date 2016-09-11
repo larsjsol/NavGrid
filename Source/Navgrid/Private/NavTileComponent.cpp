@@ -89,8 +89,8 @@ TArray<FVector>* UNavTileComponent::GetContactPoints()
 		{
 			for (int32 Y = -YExtent; Y <= YExtent; Y += YExtent)
 			{
-				FVector RelativeLocation = GetComponentRotation().RotateVector(FVector(X, Y, 0));
-				FVector WorldLocation = GetComponentLocation() + RelativeLocation;
+				FVector PointLocation = GetComponentRotation().RotateVector(FVector(X, Y, 0));
+				FVector WorldLocation = GetComponentLocation() + PointLocation;
 				ContactPoints.Add(WorldLocation);
 			}
 		}

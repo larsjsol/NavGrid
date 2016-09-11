@@ -103,10 +103,10 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		/* Use the rotation from the ladder if we're climbing */
 		else if (MovementMode == EGridMovementMode::ClimbingUp || MovementMode == EGridMovementMode::ClimbingDown)
 		{
-			UNavTileComponent *Tile = Grid->GetTile(PawnOwner->GetActorLocation(), false);
-			if (Tile)
+			UNavTileComponent *CurrentTile = Grid->GetTile(PawnOwner->GetActorLocation(), false);
+			if (CurrentTile)
 			{
-				DesiredRotation = Tile->GetComponentRotation();
+				DesiredRotation = CurrentTile->GetComponentRotation();
 				DesiredRotation.Yaw -= 180;
 			}
 			else 
@@ -210,16 +210,16 @@ void UGridMovementComponent::ShowPath()
 {
 	if (PathMesh)
 	{
-		float Distance = HorizontalOffset; // Get some distance between the actor and the path
+		float PathDistance = HorizontalOffset; // Get some distance between the actor and the path
 		FBoxSphereBounds Bounds = PathMesh->GetBounds();
 		float MeshLength = FMath::Abs(Bounds.BoxExtent.X) * 2;
 		float SplineLength = Spline->GetSplineLength();
 		SplineLength -= HorizontalOffset; // Get some distance between the cursor and the path
 
-		while (Distance < SplineLength)
+		while (PathDistance < SplineLength)
 		{
-			AddSplineMesh(Distance, FMath::Min(Distance + MeshLength, SplineLength));
-			Distance += FMath::Min(MeshLength, SplineLength - Distance);
+			AddSplineMesh(PathDistance, FMath::Min(PathDistance + MeshLength, SplineLength));
+			PathDistance += FMath::Min(MeshLength, SplineLength - PathDistance);
 		}
 	}
 }

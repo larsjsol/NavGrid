@@ -72,8 +72,8 @@ UNavTileComponent *ANavGrid::LineTraceTile(const FVector &Start, const FVector &
 		Comp->GetParentComponents(Components);
 		for (auto *C : Components)
 		{
-			UNavTileComponent *Tile = Cast<UNavTileComponent>(C);
-			if (Tile) { return Tile; }
+			UNavTileComponent *T = Cast<UNavTileComponent>(C);
+			if (T) { return T; }
 		}
 	}
 	return NULL;
