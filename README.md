@@ -94,6 +94,10 @@ The path preview is thin and changes form and posision from one instance to anot
 There are two possible solutions to this: Either ensure that the camera is close when drawing a path or change the antialiasing method in `Project Settings->Rendering`.
 
 ## Changes
+**Version 2.1 - 11.09.2016**
+* Support Unreal Engine 4.13
+* Ignore props when deciding if a tile is clicked or hovered over
+
 **Version 2.0 - 13.08.2016**
 * Support Unreal Engine 4.12
 * Add ladders
