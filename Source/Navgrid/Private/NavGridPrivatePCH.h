@@ -10,3 +10,4 @@
 #include "../Classes/GridMovementComponent.h"
 #include "../Classes/TurnComponent.h"
 #include "../Classes/TurnManager.h"
+#include "../Classes/TileGeneratingVolume.h"

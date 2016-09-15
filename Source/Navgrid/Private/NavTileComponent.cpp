@@ -9,6 +9,7 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	Extent = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, "Extent");
 	Extent->SetupAttachment(this);
 	Extent->SetBoxExtent(FVector(100, 100, 5));
+	Extent->ShapeColor = FColor::Magenta;
 	
 	Extent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Extent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block); // So we get mouse over events
@@ -203,4 +204,13 @@ void UNavTileComponent::AddSplinePoints(const FVector &FromPos, USplineComponent
 FVector UNavTileComponent::GetSplineMeshUpVector()
 {
 	return FVector(0, 0, 1);
+}
+
+void UNavTileComponent::DestroyComponent(bool PromoteChildren /*= false*/)
+{
+	Extent->DestroyComponent();
+	PawnLocationOffset->DestroyComponent();
+	HoverCursor->DestroyComponent();
+
+	Super::DestroyComponent(PromoteChildren);
 }

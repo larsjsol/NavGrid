@@ -88,4 +88,6 @@ public:
 	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile);
 	/* Return a suitable upvector for a splinemesh moving across this tile */
 	virtual FVector GetSplineMeshUpVector();
+
+	virtual void DestroyComponent(bool PromoteChildren = false) override;
 };
