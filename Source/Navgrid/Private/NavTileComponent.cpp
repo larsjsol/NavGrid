@@ -86,7 +86,7 @@ TArray<FVector>* UNavTileComponent::GetContactPoints()
 	{
 		int32 XExtent = Extent->GetScaledBoxExtent().X;
 		int32 YExtent = Extent->GetScaledBoxExtent().Y;
-		for (int32 X = -XExtent; X <= XExtent; X += YExtent)
+		for (int32 X = -XExtent; X <= XExtent; X += XExtent)
 		{
 			for (int32 Y = -YExtent; Y <= YExtent; Y += YExtent)
 			{
