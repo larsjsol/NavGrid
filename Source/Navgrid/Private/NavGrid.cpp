@@ -19,6 +19,38 @@ ANavGrid::ANavGrid()
 	RootComponent = SceneComponent;
 }
 
+void ANavGrid::OnConstruction(const FTransform & Transform)
+{
+
+	TArray<UNavTileComponent* > Tiles;
+	GetEveryTile(Tiles, GetWorld());
+	for (UNavTileComponent *T : Tiles)
+	{
+		if (bDrawTileDebugFigures)
+		{
+			T->DrawDebugFigures();
+		}
+		else
+		{
+			T->FlushDebugFigures();
+		}
+	}
+
+}
+
+ANavGrid * ANavGrid::GetNavGrid(UWorld *World)
+{
+	TActorIterator<ANavGrid> Itr(World, ANavGrid::StaticClass());
+	if (Itr)
+	{
+		return *Itr;
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
 UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation, bool FindFloor/*= true*/)
 {
 	if (FindFloor)

@@ -37,18 +37,31 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	{
 		UE_LOG(NavGrid, Error, TEXT("Error loading %s"), HCRef);
 	}
+
+	LineBatchComponent = ObjectInitializer.CreateDefaultSubobject<ULineBatchComponent>(this, "LineBatchComponent");
+	LineBatchComponent->SetupAttachment(this);
 }
 
 void UNavTileComponent::BeginPlay()
 {
-	TActorIterator<ANavGrid> Itr(GetWorld());
-	if (Itr)
+	if (!Grid)
 	{
-		Grid = *Itr;
+		Grid = ANavGrid::GetNavGrid(GetWorld());
+		if (!Grid)
+		{
+			UE_LOG(NavGrid, Error, TEXT("%s: Unable to find NavGrid"), *GetName());
+		}
 	}
-	else
+}
+
+void UNavTileComponent::OnComponentCreated()
+{
+	Super::OnComponentCreated();
+
+	Grid = ANavGrid::GetNavGrid(GetWorld());
+	if (Grid && Grid->bDrawTileDebugFigures)
 	{
-		UE_LOG(NavGrid, Error, TEXT("%s: Unable to find NavGrid"), *GetName());
+		DrawDebugFigures();
 	}
 }
 
@@ -101,7 +114,7 @@ TArray<FVector>* UNavTileComponent::GetContactPoints()
 
 TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 {
-	// Find neighbours if we have'nt already done so
+	// Find neighbours if we have not already done so
 	if (!Neighbours.Num())
 	{
 		for (TObjectIterator<UNavTileComponent> Itr; Itr; ++Itr)
@@ -116,7 +129,6 @@ TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 						if ((OtherCP - MyCP).Size() < 25)
 						{
 							Neighbours.Add(*Itr);
-							DrawDebugLine(GetWorld(), PawnLocationOffset->GetComponentLocation() + FVector(0, 0, 10), (*Itr)->PawnLocationOffset->GetComponentLocation() + FVector(0, 0, 10), FColor::Yellow, true);
 							Added = true;
 							break;
 						}
@@ -170,6 +182,25 @@ void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &Colli
 	}
 }
 
+void UNavTileComponent::DrawDebugFigures()
+{
+	FVector Offset = FVector(0, 0, 10); // raise the line a bit so it is not hidden by the floor
+	LineBatchComponent->Flush();
+	for (UNavTileComponent *N : *GetNeighbours())
+	{
+		LineBatchComponent->DrawLine(GetComponentLocation() + Offset, N->GetComponentLocation() + Offset, FColor::Blue, 0);
+	}
+	for (const FVector &CP : *GetContactPoints())
+	{
+		LineBatchComponent->DrawCircle(CP + Offset, FVector(1, 0, 0), FVector(0, 1, 0), FColor::White, 25, 16, 0);
+	}
+}
+
+void UNavTileComponent::FlushDebugFigures()
+{
+	LineBatchComponent->Flush();
+}
+
 void UNavTileComponent::Clicked(UPrimitiveComponent* TouchedComponent, FKey Key)
 {
 	if (Grid)
@@ -211,6 +242,7 @@ void UNavTileComponent::DestroyComponent(bool PromoteChildren /*= false*/)
 	Extent->DestroyComponent();
 	PawnLocationOffset->DestroyComponent();
 	HoverCursor->DestroyComponent();
+	LineBatchComponent->DestroyComponent();
 
 	Super::DestroyComponent(PromoteChildren);
 }

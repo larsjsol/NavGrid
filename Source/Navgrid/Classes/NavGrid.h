@@ -22,11 +22,13 @@ class NAVGRID_API ANavGrid : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ANavGrid();
+	virtual void OnConstruction(const FTransform &Transform) override;
 
 	/* Scene Component (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
+
+	static ANavGrid *GetNavGrid(UWorld *World);
 
 	/* Get tile from world location, may return NULL */
 	virtual UNavTileComponent *GetTile(const FVector &WorldLocation, bool FindFloor = true);
@@ -40,6 +42,10 @@ public:
 	/* Find all tiles in range */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	virtual void TilesInRange(UNavTileComponent * Tile, TArray<UNavTileComponent*>& OutArray, AGridPawn *Pawn, bool DoCollisionTests);
+
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Debug")
+	bool bDrawTileDebugFigures = false;
+
 
 	//Event delegates
 	DECLARE_EVENT_OneParam(ANavGrid, FOnTileClicked, const UNavTileComponent& );

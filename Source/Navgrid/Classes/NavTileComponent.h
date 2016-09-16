@@ -19,6 +19,7 @@ class NAVGRID_API UNavTileComponent : public USceneComponent
 public:
 	UNavTileComponent(const FObjectInitializer &ObjectInitializer);
 	virtual void BeginPlay() override;
+	virtual void OnComponentCreated() override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default") ANavGrid *Grid;
 
@@ -72,6 +73,16 @@ public:
 	/* Cursor for highlighting the hovered tile */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UStaticMeshComponent *HoverCursor;
+
+// Visual debug in editor
+protected:
+	UPROPERTY() ULineBatchComponent *LineBatchComponent;
+public:
+	UFUNCTION(BlueprintCallable, Category = "Debug")
+	void DrawDebugFigures();
+	UFUNCTION(BlueprintCallable, Category = "Debug")
+	void FlushDebugFigures();
+
 
 // User interface
 	UFUNCTION() void Clicked(UPrimitiveComponent* TouchedComponent, FKey Key);
