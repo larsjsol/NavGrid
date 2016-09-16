@@ -5,7 +5,7 @@
 /**
 * A volume for batch placing NavTiles
 */
-UCLASS()
+UCLASS(Blueprintable)
 class NAVGRID_API ATileGeneratingVolume : public AVolume
 {
 	GENERATED_BODY()
