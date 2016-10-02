@@ -6,6 +6,9 @@
 UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer)
 	:Super(ObjectInitializer)
 {
+	SetComponentTickEnabled(false);
+	bUseAttachParentBound = true;
+
 	Extent = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, "Extent");
 	Extent->SetupAttachment(this);
 	Extent->SetBoxExtent(FVector(100, 100, 5));
@@ -21,12 +24,14 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	PawnLocationOffset = CreateDefaultSubobject<USceneComponent>(TEXT("PawnLocationOffset"));
 	PawnLocationOffset->SetRelativeLocation(FVector::ZeroVector);
 	PawnLocationOffset->SetupAttachment(this);
+	PawnLocationOffset->SetVisibility(false);
 
 	HoverCursor = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, "HoverCursor");
 	HoverCursor->SetupAttachment(PawnLocationOffset);
 	HoverCursor->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	HoverCursor->ToggleVisibility(false);
 	HoverCursor->SetRelativeLocation(FVector(0, 0, 50));
+	HoverCursor->bUseAttachParentBound = true;
 	auto HCRef = TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Cursor.NavGrid_Cursor'");
 	auto HCFinder = ConstructorHelpers::FObjectFinder<UStaticMesh>(HCRef);
 	if (HCFinder.Succeeded()) 
@@ -40,6 +45,14 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 
 	LineBatchComponent = ObjectInitializer.CreateDefaultSubobject<ULineBatchComponent>(this, "LineBatchComponent");
 	LineBatchComponent->SetupAttachment(this);
+
+	TArray<USceneComponent *> Components;
+	GetChildrenComponents(true, Components);
+	for (USceneComponent *Comp : Components)
+	{
+		Comp->SetComponentTickEnabled(false);
+		Comp->bUseAttachParentBound = true;
+	}
 }
 
 void UNavTileComponent::BeginPlay()
