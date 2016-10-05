@@ -18,6 +18,14 @@ public:
 	UPROPERTY(EditAnyWhere, Category = "Tiles")
 	bool RegenerateTiles;
 
+	/*	Maximim number of tiles that this volume will create
+
+		If a Tile Generating Volume has too many tile components, the editor will
+		freeze up when it is selected.
+	*/
+	UPROPERTY(EditAnyWhere, Category = "Tiles")
+	int32 MaxNumberOfTiles = 500;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Tiles")
 	TArray<UNavTileComponent *> Tiles;
 

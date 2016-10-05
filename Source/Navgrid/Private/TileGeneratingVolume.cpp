@@ -15,6 +15,7 @@ void ATileGeneratingVolume::GenerateTiles()
 		float MaxX = Center.X + (NumX * TileSize);
 		float MinY = Center.Y - (NumY * TileSize);
 		float MaxY = Center.Y + (NumY * TileSize);
+
 		for (float X = MinX; X <= MaxX; X += TileSize)
 		{
 			for (float Y = MinY; Y <= MaxY; Y += TileSize)
@@ -30,6 +31,12 @@ void ATileGeneratingVolume::GenerateTiles()
 					TileComp->SetWorldLocation(TileLocation);
 					TileComp->RegisterComponentWithWorld(GetWorld());
 					Tiles.Add(TileComp);
+
+					if (Tiles.Num() == MaxNumberOfTiles)
+					{
+						UE_LOG(NavGrid, Warning, TEXT("%s: MaxNumberOfTiles (%i) reached."), *GetName(), MaxNumberOfTiles);
+						return;
+					}
 				}
 			}
 		}
@@ -42,13 +49,15 @@ void ATileGeneratingVolume::OnConstruction(const FTransform &Transform)
 
 	if (RegenerateTiles)
 	{
-		RegenerateTiles = false;
-
 		for (auto *T : Tiles)
 		{
-			T->DestroyComponent();
+			if (T && T->IsValidLowLevel())
+			{
+				T->DestroyComponent();
+			}
 		}
 		Tiles.Empty();
+		RegenerateTiles = false;
 	}
 	GenerateTiles();
 }
