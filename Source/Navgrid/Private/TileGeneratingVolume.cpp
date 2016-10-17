@@ -64,9 +64,13 @@ void ATileGeneratingVolume::OnConstruction(const FTransform &Transform)
 
 bool ATileGeneratingVolume::TraceTileLocation(const FVector & TraceStart, const FVector & TraceEnd, FVector & OutTilePos)
 {
+	FCollisionQueryParams CQP;
+	CQP.bFindInitialOverlaps = true;
+	CQP.bTraceComplex = true;
 	FHitResult HitResult;
-	bool BlockingHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Pawn);
+	bool BlockingHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Pawn, CQP);
 	OutTilePos = HitResult.ImpactPoint;
-	return BlockingHit;
+
+	return !HitResult.bStartPenetrating && BlockingHit;
 }
 
