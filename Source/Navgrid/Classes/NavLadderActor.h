@@ -16,6 +16,6 @@ public:
 	ANavLadderActor(const FObjectInitializer &ObjectInitializer);
 
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") USceneComponent *SceneComponent;
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")  UNavLadderComponent *NavLadderComponent;
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")  UStaticMeshComponent *Mesh;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") UNavLadderComponent *NavLadderComponent;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") UStaticMeshComponent *Mesh;
 };
