@@ -28,6 +28,7 @@ void ATileGeneratingVolume::GenerateTiles()
 					UPROPERTY() UNavTileComponent *TileComp = NewObject<UNavTileComponent>(this);
 					TileComp->SetupAttachment(GetRootComponent());
 					TileComp->SetWorldTransform(FTransform::Identity);
+					TileComp->SetWorldRotation(FQuat::Identity);
 					TileComp->SetWorldLocation(TileLocation);
 					TileComp->RegisterComponentWithWorld(GetWorld());
 					Tiles.Add(TileComp);

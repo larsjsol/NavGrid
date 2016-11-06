@@ -19,25 +19,6 @@ ANavGrid::ANavGrid()
 	RootComponent = SceneComponent;
 }
 
-void ANavGrid::OnConstruction(const FTransform & Transform)
-{
-
-	TArray<UNavTileComponent* > Tiles;
-	GetEveryTile(Tiles, GetWorld());
-	for (UNavTileComponent *T : Tiles)
-	{
-		if (bDrawTileDebugFigures)
-		{
-			T->DrawDebugFigures();
-		}
-		else
-		{
-			T->FlushDebugFigures();
-		}
-	}
-
-}
-
 ANavGrid * ANavGrid::GetNavGrid(UWorld *World)
 {
 	TActorIterator<ANavGrid> Itr(World, ANavGrid::StaticClass());

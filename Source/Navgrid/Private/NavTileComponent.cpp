@@ -21,13 +21,10 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	Extent->OnEndCursorOver.AddDynamic(this, &UNavTileComponent::EndCursorOver);
 	Extent->OnClicked.AddDynamic(this, &UNavTileComponent::Clicked);
 
-	PawnLocationOffset = CreateDefaultSubobject<USceneComponent>(TEXT("PawnLocationOffset"));
-	PawnLocationOffset->SetRelativeLocation(FVector::ZeroVector);
-	PawnLocationOffset->SetupAttachment(this);
-	PawnLocationOffset->SetVisibility(false);
+	PawnLocationOffset = FVector::ZeroVector;
 
 	HoverCursor = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, "HoverCursor");
-	HoverCursor->SetupAttachment(PawnLocationOffset);
+	HoverCursor->SetupAttachment(Extent);
 	HoverCursor->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	HoverCursor->ToggleVisibility(false);
 	HoverCursor->SetRelativeLocation(FVector(0, 0, 50));
@@ -42,9 +39,6 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	{
 		UE_LOG(NavGrid, Error, TEXT("Error loading %s"), HCRef);
 	}
-
-	LineBatchComponent = ObjectInitializer.CreateDefaultSubobject<ULineBatchComponent>(this, "LineBatchComponent");
-	LineBatchComponent->SetupAttachment(this);
 
 	TArray<USceneComponent *> Components;
 	GetChildrenComponents(true, Components);
@@ -72,10 +66,6 @@ void UNavTileComponent::OnComponentCreated()
 	Super::OnComponentCreated();
 
 	Grid = ANavGrid::GetNavGrid(GetWorld());
-	if (Grid && Grid->bDrawTileDebugFigures)
-	{
-		DrawDebugFigures();
-	}
 }
 
 bool UNavTileComponent::Traversable(float MaxWalkAngle, const TArray<EGridMovementMode>& AvailableMovementModes) const
@@ -97,6 +87,16 @@ bool UNavTileComponent::Traversable(float MaxWalkAngle, const TArray<EGridMoveme
 bool UNavTileComponent::LegalPositionAtEndOfTurn(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const
 {
 	return Traversable(MaxWalkAngle, AvailableMovementModes);
+}
+
+FVector UNavTileComponent::GetPawnLocation()
+{
+	return GetComponentLocation() + GetComponentRotation().RotateVector(PawnLocationOffset);
+}
+
+void UNavTileComponent::SetPawnLocationOffset(const FVector &Offset)
+{
+	PawnLocationOffset = Offset;
 }
 
 void UNavTileComponent::ResetPath()
@@ -127,6 +127,8 @@ TArray<FVector>* UNavTileComponent::GetContactPoints()
 
 TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 {
+	float MaxDistance = Extent->GetScaledBoxExtent().X * 0.9;
+
 	// Find neighbours if we have not already done so
 	if (!Neighbours.Num())
 	{
@@ -139,7 +141,7 @@ TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 				{
 					for (const FVector &MyCP : *GetContactPoints())
 					{
-						if ((OtherCP - MyCP).Size() < 25)
+						if ((OtherCP - MyCP).Size() < MaxDistance)
 						{
 							Neighbours.Add(*Itr);
 							Added = true;
@@ -156,7 +158,7 @@ TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 
 bool UNavTileComponent::Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule)
 {
-	return Obstructed(FromPos, PawnLocationOffset->GetComponentLocation(), CollisionCapsule);
+	return Obstructed(FromPos, PawnLocationOffset + GetComponentLocation(), CollisionCapsule);
 }
 
 bool UNavTileComponent::Obstructed(const FVector & From, const FVector & To, const UCapsuleComponent & CollisionCapsule)
@@ -188,30 +190,11 @@ void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &Colli
 	OutNeighbours.Empty();
 	for (auto N : *GetNeighbours())
 	{
-		if (!N->Obstructed(PawnLocationOffset->GetComponentLocation(), CollisionCapsule)) 
+		if (!N->Obstructed(PawnLocationOffset + GetComponentLocation(), CollisionCapsule)) 
 		{ 
 			OutNeighbours.Add(N);
 		}
 	}
-}
-
-void UNavTileComponent::DrawDebugFigures()
-{
-	FVector Offset = FVector(0, 0, 10); // raise the line a bit so it is not hidden by the floor
-	LineBatchComponent->Flush();
-	for (UNavTileComponent *N : *GetNeighbours())
-	{
-		LineBatchComponent->DrawLine(GetComponentLocation() + Offset, N->GetComponentLocation() + Offset, FColor::Blue, 0);
-	}
-	for (const FVector &CP : *GetContactPoints())
-	{
-		LineBatchComponent->DrawCircle(CP + Offset, FVector(1, 0, 0), FVector(0, 1, 0), FColor::White, 25, 16, 0);
-	}
-}
-
-void UNavTileComponent::FlushDebugFigures()
-{
-	LineBatchComponent->Flush();
 }
 
 void UNavTileComponent::Clicked(UPrimitiveComponent* TouchedComponent, FKey Key)
@@ -242,7 +225,7 @@ void UNavTileComponent::EndCursorOver(UPrimitiveComponent* TouchedComponent)
 
 void UNavTileComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile)
 {
-	OutSpline.AddSplinePoint(PawnLocationOffset->GetComponentLocation(), ESplineCoordinateSpace::Local);
+	OutSpline.AddSplinePoint(GetComponentLocation() + PawnLocationOffset, ESplineCoordinateSpace::Local);
 }
 
 FVector UNavTileComponent::GetSplineMeshUpVector()
@@ -253,9 +236,7 @@ FVector UNavTileComponent::GetSplineMeshUpVector()
 void UNavTileComponent::DestroyComponent(bool PromoteChildren /*= false*/)
 {
 	Extent->DestroyComponent();
-	PawnLocationOffset->DestroyComponent();
 	HoverCursor->DestroyComponent();
-	LineBatchComponent->DestroyComponent();
 
 	Super::DestroyComponent(PromoteChildren);
 }

@@ -9,7 +9,7 @@ UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitial
 	Extent->SetRelativeRotation(FRotator(0, 90, 0).Quaternion());
 	Extent->SetRelativeLocation(FVector(0, 0, 150));
 
-	PawnLocationOffset->SetRelativeLocation(FVector(90, 0, 150));
+	PawnLocationOffset = FVector(90, 0, 150);
 
 	BottomPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("BottomPathPoint"));
 	BottomPathPoint->SetRelativeLocation(FVector(75, 0, 50));
@@ -39,12 +39,12 @@ void UNavLadderComponent::GetUnobstructedNeighbours(const UCapsuleComponent & Co
 	for (auto N : *GetNeighbours())
 	{
 		//Determine if we should trace from the top or bottom point
-		float TopDistance = (TopPathPoint->GetComponentLocation() - N->PawnLocationOffset->GetComponentLocation()).Size();
-		float BottomDistance = (BottomPathPoint->GetComponentLocation() - N->PawnLocationOffset->GetComponentLocation()).Size();
+		float TopDistance = (TopPathPoint->GetComponentLocation() - N->GetPawnLocation()).Size();
+		float BottomDistance = (BottomPathPoint->GetComponentLocation() - N->GetPawnLocation()).Size();
 		FVector TracePoint = TopDistance < BottomDistance ? TopPathPoint->GetComponentLocation() : BottomPathPoint->GetComponentLocation();
 
-		if (!UNavTileComponent::Obstructed(PawnLocationOffset->GetComponentLocation(), TracePoint, CollisionCapsule) &&
-			!UNavTileComponent::Obstructed(TracePoint, N->PawnLocationOffset->GetComponentLocation(), CollisionCapsule))
+		if (!UNavTileComponent::Obstructed(PawnLocationOffset + GetComponentLocation(), TracePoint, CollisionCapsule) &&
+			!UNavTileComponent::Obstructed(TracePoint, GetPawnLocation(), CollisionCapsule))
 		{
 			OutNeighbours.Add(N);
 		}
@@ -59,7 +59,7 @@ bool UNavLadderComponent::Obstructed(const FVector & FromPos, const UCapsuleComp
 	FVector TracePoint = TopDistance < BottomDistance ? TopPathPoint->GetComponentLocation() : BottomPathPoint->GetComponentLocation();
 
 	return UNavTileComponent::Obstructed(FromPos, TracePoint, CollisionCapsule) || 
-		UNavTileComponent::Obstructed(TracePoint, PawnLocationOffset->GetComponentLocation(), CollisionCapsule);
+		UNavTileComponent::Obstructed(TracePoint, PawnLocationOffset + GetComponentLocation(), CollisionCapsule);
 }
 
 bool UNavLadderComponent::Traversable(float MaxWalkAngle, const TArray<EGridMovementMode>& AvailableMovementModes) const
@@ -91,7 +91,7 @@ void UNavLadderComponent::AddSplinePoints(const FVector &FromPos, USplineCompone
 	if (LastTile)
 	{
 		OutSpline.RemoveSplinePoint(OutSpline.GetNumberOfSplinePoints() - 1);
-		OutSpline.AddSplinePoint(PawnLocationOffset->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		OutSpline.AddSplinePoint(PawnLocationOffset + GetComponentLocation(), ESplineCoordinateSpace::Local);
 	}
 }
 

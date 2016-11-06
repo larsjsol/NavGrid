@@ -23,7 +23,6 @@ class NAVGRID_API ANavGrid : public AActor
 	
 public:	
 	ANavGrid();
-	virtual void OnConstruction(const FTransform &Transform) override;
 
 	/* Scene Component (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
@@ -42,10 +41,6 @@ public:
 	/* Find all tiles in range */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	virtual void TilesInRange(UNavTileComponent * Tile, TArray<UNavTileComponent*>& OutArray, AGridPawn *Pawn, bool DoCollisionTests);
-
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Debug")
-	bool bDrawTileDebugFigures = false;
-
 
 	//Event delegates
 	DECLARE_EVENT_OneParam(ANavGrid, FOnTileClicked, const UNavTileComponent& );

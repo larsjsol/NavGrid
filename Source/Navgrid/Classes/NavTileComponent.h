@@ -65,24 +65,22 @@ public:
 	virtual bool Traversable(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const;
 	/* Can a pawn end its turn on this tile?*/
 	virtual bool LegalPositionAtEndOfTurn(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const;
-	/* Placement for any pawn occupying this tile */
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") USceneComponent *PawnLocationOffset;
+
+	/* Placement for pawn occupying this tile in world space */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Default")
+	virtual FVector GetPawnLocation();
+	/* Set offset in local space for pawns occupynig this tile */
+	UFUNCTION(BlueprintCallable, Category = "Default")
+	void SetPawnLocationOffset(const FVector &Offset);
+protected:
+	/* Offset in local space for any pawn occupying this tile */
+	FVector PawnLocationOffset;
 
 // Visualisation
 public:
 	/* Cursor for highlighting the hovered tile */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UStaticMeshComponent *HoverCursor;
-
-// Visual debug in editor
-protected:
-	UPROPERTY() ULineBatchComponent *LineBatchComponent;
-public:
-	UFUNCTION(BlueprintCallable, Category = "Debug")
-	void DrawDebugFigures();
-	UFUNCTION(BlueprintCallable, Category = "Debug")
-	void FlushDebugFigures();
-
 
 // User interface
 	UFUNCTION() void Clicked(UPrimitiveComponent* TouchedComponent, FKey Key);
