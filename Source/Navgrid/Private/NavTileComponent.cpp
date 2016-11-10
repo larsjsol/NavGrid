@@ -23,23 +23,6 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 
 	PawnLocationOffset = FVector::ZeroVector;
 
-	HoverCursor = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, "HoverCursor");
-	HoverCursor->SetupAttachment(Extent);
-	HoverCursor->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	HoverCursor->ToggleVisibility(false);
-	HoverCursor->SetRelativeLocation(FVector(0, 0, 50));
-	HoverCursor->bUseAttachParentBound = true;
-	auto HCRef = TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Cursor.NavGrid_Cursor'");
-	auto HCFinder = ConstructorHelpers::FObjectFinder<UStaticMesh>(HCRef);
-	if (HCFinder.Succeeded()) 
-	{ 
-		HoverCursor->SetStaticMesh(HCFinder.Object);
-	}
-	else
-	{
-		UE_LOG(NavGrid, Error, TEXT("Error loading %s"), HCRef);
-	}
-
 	TArray<USceneComponent *> Components;
 	GetChildrenComponents(true, Components);
 	for (USceneComponent *Comp : Components)
@@ -207,18 +190,19 @@ void UNavTileComponent::Clicked(UPrimitiveComponent* TouchedComponent, FKey Key)
 
 void UNavTileComponent::CursorOver(UPrimitiveComponent* TouchedComponent)
 {
-	HoverCursor->SetVisibility(true);
 	if (Grid)
 	{
+		Grid->Cursor->SetWorldLocation(GetPawnLocation() + FVector(0, 0, 30));
+		Grid->Cursor->SetVisibility(true);
 		Grid->TileCursorOver(*this);
 	}
 }
 
 void UNavTileComponent::EndCursorOver(UPrimitiveComponent* TouchedComponent)
 {
-	HoverCursor->SetVisibility(false);
 	if (Grid)
 	{
+		Grid->Cursor->SetVisibility(false);
 		Grid->EndTileCursorOver(*this);
 	}
 }
@@ -236,7 +220,6 @@ FVector UNavTileComponent::GetSplineMeshUpVector()
 void UNavTileComponent::DestroyComponent(bool PromoteChildren /*= false*/)
 {
 	Extent->DestroyComponent();
-	HoverCursor->DestroyComponent();
 
 	Super::DestroyComponent(PromoteChildren);
 }

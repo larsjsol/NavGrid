@@ -17,6 +17,21 @@ ANavGrid::ANavGrid()
 
 	SceneComponent = CreateDefaultSubobject<USceneComponent>("RootComponent");
 	RootComponent = SceneComponent;
+
+	Cursor = CreateDefaultSubobject<UStaticMeshComponent>(FName("Cursor"));
+	Cursor->SetupAttachment(GetRootComponent());
+	Cursor->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	Cursor->ToggleVisibility(false);
+	auto HCRef = TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Cursor.NavGrid_Cursor'");
+	auto HCFinder = ConstructorHelpers::FObjectFinder<UStaticMesh>(HCRef);
+	if (HCFinder.Succeeded())
+	{
+		Cursor->SetStaticMesh(HCFinder.Object);
+	}
+	else
+	{
+		UE_LOG(NavGrid, Error, TEXT("Error loading %s"), HCRef);
+	}
 }
 
 ANavGrid * ANavGrid::GetNavGrid(UWorld *World)

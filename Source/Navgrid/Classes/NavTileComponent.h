@@ -76,11 +76,7 @@ protected:
 	/* Offset in local space for any pawn occupying this tile */
 	FVector PawnLocationOffset;
 
-// Visualisation
 public:
-	/* Cursor for highlighting the hovered tile */
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
-	UStaticMeshComponent *HoverCursor;
 
 // User interface
 	UFUNCTION() void Clicked(UPrimitiveComponent* TouchedComponent, FKey Key);

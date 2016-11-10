@@ -27,6 +27,9 @@ public:
 	/* Scene Component (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
 
+	/* Cursor for highlighting tiles */
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") UStaticMeshComponent *Cursor;
+
 	static ANavGrid *GetNavGrid(UWorld *World);
 
 	/* Get tile from world location, may return NULL */
