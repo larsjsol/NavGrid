@@ -5,10 +5,6 @@
 UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	Extent->SetBoxExtent(FVector(50, 5, 150));
-	Extent->SetRelativeRotation(FRotator(0, 90, 0).Quaternion());
-	Extent->SetRelativeLocation(FVector(0, 0, 150));
-
 	PawnLocationOffset = FVector(90, 0, 150);
 
 	BottomPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("BottomPathPoint"));
@@ -20,11 +16,20 @@ UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitial
 	TopPathPoint->SetupAttachment(this);
 }
 
+void UNavLadderComponent::OnComponentCreated()
+{
+	Super::OnComponentCreated();
+
+	SetBoxExtent(FVector(50, 5, 150));
+	SetRelativeRotation(FRotator(0, 90, 0).Quaternion());
+	SetRelativeLocation(FVector(0, 0, 150));
+}
+
 TArray<FVector>* UNavLadderComponent::GetContactPoints()
 {
 	if (!ContactPoints.Num())
 	{
-		int32 ZExtent = Extent->GetScaledBoxExtent().Z;
+		int32 ZExtent = GetScaledBoxExtent().Z;
 		FVector RelativeTop = GetComponentRotation().RotateVector(FVector(0, 0, 2 * ZExtent));
 		ContactPoints.Add(GetComponentLocation() + RelativeTop);
 		FVector RelativeBottom = GetComponentRotation().RotateVector(FVector(0, 0, 0));

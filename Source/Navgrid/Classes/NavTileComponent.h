@@ -13,21 +13,19 @@
 * A single tile in a navigation grid
 */
 UCLASS(meta = (BlueprintSpawnableComponent), Blueprintable)
-class NAVGRID_API UNavTileComponent : public USceneComponent
+class NAVGRID_API UNavTileComponent : public UBoxComponent
 {
 	GENERATED_BODY()
 public:
 	UNavTileComponent(const FObjectInitializer &ObjectInitializer);
 	virtual void BeginPlay() override;
-	virtual void OnComponentCreated() override;
+	virtual void PostInitProperties() override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default") ANavGrid *Grid;
 
 // Pathing
 	/* Cost of moving into this tile*/
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Pathfinding") float Cost = 1;
-	/* World extent of this tile */
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Components") UBoxComponent *Extent;
 	/* Distance from starting point of path */
 	float Distance;
 	/* Previous tile in path */
@@ -93,6 +91,4 @@ public:
 	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile);
 	/* Return a suitable upvector for a splinemesh moving across this tile */
 	virtual FVector GetSplineMeshUpVector();
-
-	virtual void DestroyComponent(bool PromoteChildren = false) override;
 };

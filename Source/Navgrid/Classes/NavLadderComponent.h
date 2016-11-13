@@ -11,6 +11,8 @@ class NAVGRID_API UNavLadderComponent : public UNavTileComponent
 	GENERATED_BODY()
 public:
 	UNavLadderComponent(const FObjectInitializer &ObjectInitializer);
+	virtual void OnComponentCreated() override;
+
 	TArray<FVector> *GetContactPoints() override;
 
 	virtual void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours) override;

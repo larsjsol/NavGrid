@@ -6,30 +6,16 @@
 UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	SetComponentTickEnabled(false);
-	bUseAttachParentBound = true;
-
-	Extent = ObjectInitializer.CreateDefaultSubobject<UBoxComponent>(this, "Extent");
-	Extent->SetupAttachment(this);
-	Extent->SetBoxExtent(FVector(100, 100, 5));
-	Extent->ShapeColor = FColor::Magenta;
-	
-	Extent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	Extent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block); // So we get mouse over events
-	Extent->SetCollisionResponseToChannel(ANavGrid::ECC_Walkable, ECollisionResponse::ECR_Block); // So we can find the floor with a line trace
-	Extent->OnBeginCursorOver.AddDynamic(this, &UNavTileComponent::CursorOver);
-	Extent->OnEndCursorOver.AddDynamic(this, &UNavTileComponent::EndCursorOver);
-	Extent->OnClicked.AddDynamic(this, &UNavTileComponent::Clicked);
-
 	PawnLocationOffset = FVector::ZeroVector;
+	SetComponentTickEnabled(false);
 
-	TArray<USceneComponent *> Components;
-	GetChildrenComponents(true, Components);
-	for (USceneComponent *Comp : Components)
-	{
-		Comp->SetComponentTickEnabled(false);
-		Comp->bUseAttachParentBound = true;
-	}
+	OnBeginCursorOver.AddDynamic(this, &UNavTileComponent::CursorOver);
+	OnEndCursorOver.AddDynamic(this, &UNavTileComponent::EndCursorOver);
+	OnClicked.AddDynamic(this, &UNavTileComponent::Clicked);
+
+	SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block); // So we get mouse over events
+	SetCollisionResponseToChannel(ANavGrid::ECC_Walkable, ECollisionResponse::ECR_Block); // So we can find the floor with a line trace
 }
 
 void UNavTileComponent::BeginPlay()
@@ -44,9 +30,14 @@ void UNavTileComponent::BeginPlay()
 	}
 }
 
-void UNavTileComponent::OnComponentCreated()
+void UNavTileComponent::PostInitProperties()
 {
-	Super::OnComponentCreated();
+	Super::PostInitProperties();
+
+	bUseAttachParentBound = true;
+
+	SetBoxExtent(FVector(100, 100, 5));
+	ShapeColor = FColor::Magenta;
 
 	Grid = ANavGrid::GetNavGrid(GetWorld());
 }
@@ -93,8 +84,8 @@ TArray<FVector>* UNavTileComponent::GetContactPoints()
 {	
 	if (!ContactPoints.Num())
 	{
-		int32 XExtent = Extent->GetScaledBoxExtent().X;
-		int32 YExtent = Extent->GetScaledBoxExtent().Y;
+		int32 XExtent = GetScaledBoxExtent().X;
+		int32 YExtent = GetScaledBoxExtent().Y;
 		for (int32 X = -XExtent; X <= XExtent; X += XExtent)
 		{
 			for (int32 Y = -YExtent; Y <= YExtent; Y += YExtent)
@@ -110,7 +101,7 @@ TArray<FVector>* UNavTileComponent::GetContactPoints()
 
 TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 {
-	float MaxDistance = Extent->GetScaledBoxExtent().X * 0.9;
+	float MaxDistance = GetScaledBoxExtent().X * 0.9;
 
 	// Find neighbours if we have not already done so
 	if (!Neighbours.Num())
@@ -215,11 +206,4 @@ void UNavTileComponent::AddSplinePoints(const FVector &FromPos, USplineComponent
 FVector UNavTileComponent::GetSplineMeshUpVector()
 {
 	return FVector(0, 0, 1);
-}
-
-void UNavTileComponent::DestroyComponent(bool PromoteChildren /*= false*/)
-{
-	Extent->DestroyComponent();
-
-	Super::DestroyComponent(PromoteChildren);
 }

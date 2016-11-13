@@ -169,7 +169,7 @@ bool UGridMovementComponent::CreatePath(UNavTileComponent &Target)
 		Algo::Reverse(Path);
 
 		// Estiamte how much of the spline that covers the first tile
-		FVector Extent = Path[0]->Extent->GetScaledBoxExtent();
+		FVector Extent = Path[0]->GetScaledBoxExtent();
 		float LengthOffset = FMath::Max3<float>(Extent.X, Extent.Y, Extent.Z);
 
 		// first add a spline point for the pawn starting location

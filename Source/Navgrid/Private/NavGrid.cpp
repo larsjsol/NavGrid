@@ -9,6 +9,7 @@ DEFINE_LOG_CATEGORY(NavGrid);
 
 ECollisionChannel ANavGrid::ECC_Walkable = ECollisionChannel::ECC_GameTraceChannel1; //Ugh... Lets hope this isn't used anywhere else
 
+
 // Sets default values
 ANavGrid::ANavGrid()
 {
@@ -36,15 +37,15 @@ ANavGrid::ANavGrid()
 
 ANavGrid * ANavGrid::GetNavGrid(UWorld *World)
 {
-	TActorIterator<ANavGrid> Itr(World, ANavGrid::StaticClass());
-	if (Itr)
+	if (World)
 	{
-		return *Itr;
+		TActorIterator<ANavGrid> Itr(World, ANavGrid::StaticClass());
+		if (Itr)
+		{
+			return *Itr;
+		}
 	}
-	else
-	{
-		return NULL;
-	}
+	return NULL;
 }
 
 UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation, bool FindFloor/*= true*/)
@@ -89,22 +90,10 @@ UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation, bool FindFloo
 UNavTileComponent *ANavGrid::LineTraceTile(const FVector &Start, const FVector &End)
 {
 	FHitResult HitResult;
-	TArray<FHitResult> HitResults;
 
 	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ANavGrid::ECC_Walkable);
 	UPrimitiveComponent *Comp = HitResult.GetComponent();
-	UNavTileComponent *Tile = Cast<UNavTileComponent>(Comp);
-	if (Comp)
-	{
-		TArray<USceneComponent *> Components;
-		Comp->GetParentComponents(Components);
-		for (auto *C : Components)
-		{
-			UNavTileComponent *T = Cast<UNavTileComponent>(C);
-			if (T) { return T; }
-		}
-	}
-	return NULL;
+	return Cast<UNavTileComponent>(Comp);
 }
 
 void ANavGrid::TileClicked(UNavTileComponent &Tile)
