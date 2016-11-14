@@ -36,7 +36,7 @@ void UNavTileComponent::PostInitProperties()
 
 	bUseAttachParentBound = true;
 
-	SetBoxExtent(FVector(100, 100, 5));
+	SetBoxExtent(FVector(ANavGrid::DefaultTileSize / 2, ANavGrid::DefaultTileSize / 2, 5));
 	ShapeColor = FColor::Magenta;
 
 	Grid = ANavGrid::GetNavGrid(GetWorld());

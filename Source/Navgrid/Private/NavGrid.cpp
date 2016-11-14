@@ -8,7 +8,8 @@
 DEFINE_LOG_CATEGORY(NavGrid);
 
 ECollisionChannel ANavGrid::ECC_Walkable = ECollisionChannel::ECC_GameTraceChannel1; //Ugh... Lets hope this isn't used anywhere else
-
+float ANavGrid::DefaultTileSize = 199;
+float ANavGrid::DefaultTileSpacing = 200; // this leaves a small gap between the tiles in order to prevent flickering fighting when rendered in the editor
 
 // Sets default values
 ANavGrid::ANavGrid()

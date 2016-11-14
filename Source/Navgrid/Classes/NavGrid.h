@@ -67,4 +67,7 @@ public:
 	static void GetEveryTile(TArray<UNavTileComponent* > &OutTiles, UWorld *World);
 
 	static ECollisionChannel ECC_Walkable;
+	static float DefaultTileSize;
+	/* Default distance for the centers of two adjacent tiles */
+	static float DefaultTileSpacing;
 };

@@ -7,18 +7,18 @@ void ATileGeneratingVolume::GenerateTiles()
 		FBoxSphereBounds Bounds = GetBrushComponent()->CalcBounds(GetTransform());
 		FVector Center = GetActorLocation();
 
-		float TileSize = 200; //FIXME we should fetch default tile properties from somewhere
-		int32 NumX = Bounds.BoxExtent.X / TileSize;
-		int32 NumY = Bounds.BoxExtent.Y / TileSize;
+		float Spacing = ANavGrid::DefaultTileSpacing;
+		int32 NumX = Bounds.BoxExtent.X / Spacing;
+		int32 NumY = Bounds.BoxExtent.Y / Spacing;
 
-		float MinX = Center.X - (NumX * TileSize);
-		float MaxX = Center.X + (NumX * TileSize);
-		float MinY = Center.Y - (NumY * TileSize);
-		float MaxY = Center.Y + (NumY * TileSize);
+		float MinX = Center.X - (NumX * Spacing);
+		float MaxX = Center.X + (NumX * Spacing);
+		float MinY = Center.Y - (NumY * Spacing);
+		float MaxY = Center.Y + (NumY * Spacing);
 
-		for (float X = MinX; X <= MaxX; X += TileSize)
+		for (float X = MinX; X <= MaxX; X += Spacing)
 		{
-			for (float Y = MinY; Y <= MaxY; Y += TileSize)
+			for (float Y = MinY; Y <= MaxY; Y += Spacing)
 			{
 				FVector TileLocation;
 				bool CanPlaceTile = TraceTileLocation(FVector(X, Y, Center.Z + Bounds.BoxExtent.Z), FVector(X, Y, Center.Z - Bounds.BoxExtent.Z), TileLocation);
