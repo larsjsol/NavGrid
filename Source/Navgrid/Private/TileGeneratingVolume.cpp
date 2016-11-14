@@ -1,34 +1,36 @@
 #include "NavGridPrivatePCH.h"
 
+#include "Builders/EditorBrushBuilder.h"
+#include "Builders/CubeBuilder.h"
+
 void ATileGeneratingVolume::GenerateTiles()
 {
-	if (Tiles.Num() == 0)
+	const UCubeBuilder *Builder = Cast<UCubeBuilder>(GetBrushBuilder());
+
+	if (Tiles.Num() == 0 && Builder)
 	{
-		FBoxSphereBounds Bounds = GetBrushComponent()->CalcBounds(GetTransform());
-		FVector Center = GetActorLocation();
-
 		float Spacing = ANavGrid::DefaultTileSpacing;
-		int32 NumX = Bounds.BoxExtent.X / Spacing;
-		int32 NumY = Bounds.BoxExtent.Y / Spacing;
+		float XHalfSize = Builder->X * GetActorScale().X / 2;
+		float YHalfSize = Builder->Y * GetActorScale().Y / 2;
+		float ZHalfSize = Builder->Z * GetActorScale().Z / 2;
 
-		float MinX = Center.X - (NumX * Spacing);
-		float MaxX = Center.X + (NumX * Spacing);
-		float MinY = Center.Y - (NumY * Spacing);
-		float MaxY = Center.Y + (NumY * Spacing);
-
-		for (float X = MinX; X <= MaxX; X += Spacing)
+		FRotator Rotation = GetActorRotation();
+		for (float X = -XHalfSize; X <= XHalfSize; X += Spacing)
 		{
-			for (float Y = MinY; Y <= MaxY; Y += Spacing)
+			for (float Y = -YHalfSize; Y <= YHalfSize; Y += Spacing)
 			{
-				FVector TileLocation;
-				bool CanPlaceTile = TraceTileLocation(FVector(X, Y, Center.Z + Bounds.BoxExtent.Z), FVector(X, Y, Center.Z - Bounds.BoxExtent.Z), TileLocation);
+				/* rotate our local point and add the actor location to get the world position*/
+				FVector WorldPos = Rotation.RotateVector(FVector(X, Y, 0)) + GetActorLocation();
 
+				FVector TileLocation;
+				bool CanPlaceTile = TraceTileLocation(FVector(WorldPos.X, WorldPos.Y, WorldPos.Z + ZHalfSize),
+				                                      FVector(WorldPos.X, WorldPos.Y, WorldPos.Z - ZHalfSize), TileLocation);
 				if (CanPlaceTile)
 				{
 					UPROPERTY() UNavTileComponent *TileComp = NewObject<UNavTileComponent>(this);
 					TileComp->SetupAttachment(GetRootComponent());
 					TileComp->SetWorldTransform(FTransform::Identity);
-					TileComp->SetWorldRotation(FQuat::Identity);
+					TileComp->SetWorldRotation(Rotation.Quaternion());
 					TileComp->SetWorldLocation(TileLocation);
 					TileComp->RegisterComponentWithWorld(GetWorld());
 					Tiles.Add(TileComp);
