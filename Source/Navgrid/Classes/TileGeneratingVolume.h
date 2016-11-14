@@ -24,7 +24,7 @@ public:
 		freeze up when it is selected.
 	*/
 	UPROPERTY(EditAnyWhere, Category = "Tiles")
-	int32 MaxNumberOfTiles = 500;
+	int32 MaxNumberOfTiles = 25 * 25; //it's more satisfying to place square volumes
 
 	UPROPERTY()
 	TArray<UNavTileComponent *> Tiles;
