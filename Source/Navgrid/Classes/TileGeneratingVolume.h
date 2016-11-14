@@ -26,7 +26,7 @@ public:
 	UPROPERTY(EditAnyWhere, Category = "Tiles")
 	int32 MaxNumberOfTiles = 500;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Tiles")
+	UPROPERTY()
 	TArray<UNavTileComponent *> Tiles;
 
 	UFUNCTION(BlueprintCallable, Category = "Tiles")
