@@ -32,8 +32,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Tiles")
 	void GenerateTiles();
 
-	virtual void OnConstruction(const FTransform &Transform) override;
+	UFUNCTION(BlueprintCallable, Category = "Tiles")
+	void DestroyTiles();
 
-protected:
-	bool TraceTileLocation(const FVector &TraceStart, const FVector &TraceEnd, FVector &OutTilePos);
+	virtual void OnConstruction(const FTransform &Transform) override;
+	virtual void Destroyed() override;
 };

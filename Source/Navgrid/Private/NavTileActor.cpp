@@ -21,4 +21,6 @@ ANavTileActor::ANavTileActor(const FObjectInitializer &ObjectInitializer)
 	{
 		UE_LOG(NavGrid, Error, TEXT("Error loading %s"), AssRef);
 	}
+
+	SetActorTickEnabled(false);
 }

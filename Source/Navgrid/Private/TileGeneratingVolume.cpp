@@ -6,6 +6,12 @@
 void ATileGeneratingVolume::GenerateTiles()
 {
 	const UCubeBuilder *Builder = Cast<UCubeBuilder>(GetBrushBuilder());
+	ANavGrid *Grid = ANavGrid::GetNavGrid(GetWorld());
+	if (!Grid)
+	{
+		UE_LOG(NavGrid, Error, TEXT("%s: Unable to find NavGrid"), *GetName());
+		return;
+	}
 
 	if (Tiles.Num() == 0 && Builder)
 	{
@@ -21,29 +27,34 @@ void ATileGeneratingVolume::GenerateTiles()
 			{
 				/* rotate our local point and add the actor location to get the world position*/
 				FVector WorldPos = Rotation.RotateVector(FVector(X, Y, 0)) + GetActorLocation();
-
-				FVector TileLocation;
-				bool CanPlaceTile = TraceTileLocation(FVector(WorldPos.X, WorldPos.Y, WorldPos.Z + ZHalfSize),
-				                                      FVector(WorldPos.X, WorldPos.Y, WorldPos.Z - ZHalfSize), TileLocation);
-				if (CanPlaceTile)
+				UPROPERTY() UNavTileComponent *TileComp = Grid->ConsiderPlaceTile(
+					FVector(WorldPos.X, WorldPos.Y, WorldPos.Z + ZHalfSize), 
+					FVector(WorldPos.X, WorldPos.Y, WorldPos.Z - ZHalfSize), this);
+				if (TileComp)
 				{
-					UPROPERTY() UNavTileComponent *TileComp = NewObject<UNavTileComponent>(this);
-					TileComp->SetupAttachment(GetRootComponent());
-					TileComp->SetWorldTransform(FTransform::Identity);
 					TileComp->SetWorldRotation(Rotation.Quaternion());
-					TileComp->SetWorldLocation(TileLocation);
-					TileComp->RegisterComponentWithWorld(GetWorld());
 					Tiles.Add(TileComp);
-
-					if (Tiles.Num() == MaxNumberOfTiles)
-					{
-						UE_LOG(NavGrid, Warning, TEXT("%s: MaxNumberOfTiles (%i) reached."), *GetName(), MaxNumberOfTiles);
-						return;
-					}
+				}
+				if (Tiles.Num() == MaxNumberOfTiles)
+				{
+					UE_LOG(NavGrid, Warning, TEXT("%s: MaxNumberOfTiles (%i) reached."), *GetName(), MaxNumberOfTiles);
+					return;
 				}
 			}
 		}
 	}
+}
+
+void ATileGeneratingVolume::DestroyTiles()
+{
+	for (auto *T : Tiles)
+	{
+		if (T && T->IsValidLowLevel())
+		{
+			T->DestroyComponent();
+		}
+	}
+	Tiles.Empty();
 }
 
 void ATileGeneratingVolume::OnConstruction(const FTransform &Transform)
@@ -52,28 +63,14 @@ void ATileGeneratingVolume::OnConstruction(const FTransform &Transform)
 
 	if (RegenerateTiles)
 	{
-		for (auto *T : Tiles)
-		{
-			if (T && T->IsValidLowLevel())
-			{
-				T->DestroyComponent();
-			}
-		}
-		Tiles.Empty();
+		DestroyTiles();
 		RegenerateTiles = false;
 	}
 	GenerateTiles();
 }
 
-bool ATileGeneratingVolume::TraceTileLocation(const FVector & TraceStart, const FVector & TraceEnd, FVector & OutTilePos)
+void ATileGeneratingVolume::Destroyed()
 {
-	FCollisionQueryParams CQP;
-	CQP.bFindInitialOverlaps = true;
-	CQP.bTraceComplex = true;
-	FHitResult HitResult;
-	bool BlockingHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Pawn, CQP);
-	OutTilePos = HitResult.ImpactPoint;
-
-	return !HitResult.bStartPenetrating && BlockingHit;
+	Super::Destroyed();
+	DestroyTiles();
 }
-

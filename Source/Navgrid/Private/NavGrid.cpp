@@ -185,6 +185,113 @@ void ANavGrid::TilesInRange(UNavTileComponent * Tile, TArray<UNavTileComponent*>
 	}
 }
 
+bool ANavGrid::TraceTileLocation(const FVector & TraceStart, const FVector & TraceEnd, FVector & OutTilePos)
+{
+	FCollisionQueryParams CQP;
+	CQP.bFindInitialOverlaps = true;
+	CQP.bTraceComplex = true;
+	FHitResult HitResult;
+
+	bool BlockingHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Pawn, CQP);
+	if (BlockingHit)
+	{
+		// dont place tiles on top of pawns or inside of things
+		if (Cast<AGridPawn>(HitResult.Actor.Get()) || HitResult.bStartPenetrating)
+		{
+			return false;
+		}
+		// dont place a new tile if there already is one there
+		if (GetTile(HitResult.ImpactPoint))
+		{
+			return false;
+		}
+
+		OutTilePos = HitResult.ImpactPoint;
+		return true;
+	}
+	
+	return false;
+}
+
+UNavTileComponent * ANavGrid::PlaceTile(const FVector & Location, AActor * TileOwner)
+{
+	if (!TileOwner)
+	{
+		TileOwner = this;
+	}
+
+	UPROPERTY() UNavTileComponent *TileComp = NewObject<UNavTileComponent>(this);
+	TileComp->SetupAttachment(TileOwner->GetRootComponent());
+	TileComp->SetWorldTransform(FTransform::Identity);
+	TileComp->SetWorldLocation(Location);
+	TileComp->RegisterComponentWithWorld(TileOwner->GetWorld());
+
+	return TileComp;
+}
+
+UNavTileComponent * ANavGrid::ConsiderPlaceTile(const FVector &TraceStart, const FVector &TraceEnd, AActor * TileOwner /*= NULL*/)
+{
+	if (!TileOwner)
+	{
+		TileOwner = this;
+	}
+
+	FVector TileLocation;
+	bool CanPlaceTile = TraceTileLocation(TraceStart, TraceEnd, TileLocation);
+	if (CanPlaceTile)
+	{
+		return PlaceTile(TileLocation, TileOwner);
+	}
+
+	return NULL;
+}
+
+void ANavGrid::GenerateVirtualTiles(const AGridPawn *Pawn)
+{
+	// only keep a reasonable number
+	if (VirtualTiles.Num() > 1000)
+	{
+		DestroyVirtualTiles();
+	}
+
+	// place a tile under the actor if it is not already one there
+	if (!GetTile(Pawn->GetActorLocation()))
+	{
+		VirtualTiles.Add(PlaceTile(Pawn->GetActorLocation()));
+	}
+
+	FVector Min = Pawn->GetActorLocation() - FVector(Pawn->MovementComponent->MovementRange * DefaultTileSpacing);
+	FVector Max = Pawn->GetActorLocation() + FVector(Pawn->MovementComponent->MovementRange * DefaultTileSpacing);
+	for (float X = Min.X; X <= Max.X; X += DefaultTileSpacing)
+	{
+		for (float Y = Min.Y; Y <= Max.Y; Y += DefaultTileSpacing)
+		{
+			UPROPERTY() UNavTileComponent *TileComp = ConsiderPlaceTile(FVector(X, Y, Max.Z), FVector(X, Y, Min.Z));
+			if (TileComp)
+			{
+				VirtualTiles.Add(TileComp);
+			}
+		}
+	}
+}
+
+void ANavGrid::DestroyVirtualTiles()
+{
+	for (UNavTileComponent *T : VirtualTiles)
+	{
+		if (T && T->IsValidLowLevel())
+		{
+			T->DestroyComponent();
+		}
+	}
+	VirtualTiles.Empty();
+}
+
+void ANavGrid::Destroyed()
+{
+	Super::Destroyed();
+	DestroyVirtualTiles();
+}
 
 void ANavGrid::GetEveryTile(TArray<UNavTileComponent *> &OutTiles, UWorld * World)
 {

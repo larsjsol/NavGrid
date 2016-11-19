@@ -103,27 +103,24 @@ TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 {
 	float MaxDistance = GetScaledBoxExtent().X * 0.9;
 
-	// Find neighbours if we have not already done so
-	if (!Neighbours.Num())
+	Neighbours.Empty();
+	for (TObjectIterator<UNavTileComponent> Itr; Itr; ++Itr)
 	{
-		for (TObjectIterator<UNavTileComponent> Itr; Itr; ++Itr)
+		if (Itr->GetWorld() == GetWorld() && *Itr != this)
 		{
-			if (Itr->GetWorld() == GetWorld() && *Itr != this)
+			bool Added = false; // stop comparing CPs when we know a tile is a neighbour
+			for (const FVector &OtherCP : *Itr->GetContactPoints())
 			{
-				bool Added = false; // stop comparing CPs when we know a tile is a neighbour
-				for (const FVector &OtherCP : *Itr->GetContactPoints())
+				for (const FVector &MyCP : *GetContactPoints())
 				{
-					for (const FVector &MyCP : *GetContactPoints())
+					if ((OtherCP - MyCP).Size() < MaxDistance)
 					{
-						if ((OtherCP - MyCP).Size() < MaxDistance)
-						{
-							Neighbours.Add(*Itr);
-							Added = true;
-							break;
-						}
+						Neighbours.Add(*Itr);
+						Added = true;
+						break;
 					}
-					if (Added) { break; }
 				}
+				if (Added) { break; }
 			}
 		}
 	}

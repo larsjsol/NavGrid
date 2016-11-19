@@ -57,6 +57,23 @@ public:
 	/* Triggered when the cursor leaves a tile */
 	FOnEndTileCursorOver& OnEndTileCursorOver() { return OnEndTileCursorOverEvent; }
 
+public:
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
+	bool TraceTileLocation(const FVector & TraceStart, const FVector & TraceEnd, FVector & OutTilePos);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
+	UNavTileComponent *PlaceTile(const FVector &Location, AActor *TileOwner = NULL);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
+	UNavTileComponent *ConsiderPlaceTile(const FVector &TraceStart, const FVector &TraceEnd, AActor *TileOwner = NULL);
+
+protected:
+	UPROPERTY(Transient)
+	TArray<UNavTileComponent *> VirtualTiles;
+public:
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	void GenerateVirtualTiles(const AGridPawn *Pawn);
+	void DestroyVirtualTiles();
+
+	virtual void Destroyed() override;
 private:
 	FOnTileClicked OnTileClickedEvent;
 	FOnTileCursorOver OnTileCursorOverEvent;

@@ -49,6 +49,7 @@ void AGridPawn::BeginPlay()
 void AGridPawn::OnTurnStart()
 {
 	SelectedHighlight->SetVisibility(true);
+	MovementComponent->Grid->GenerateVirtualTiles(this);
 }
 
 void AGridPawn::OnTurnEnd()
