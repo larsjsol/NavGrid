@@ -5,34 +5,34 @@
 UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	PawnLocationOffset = FVector(90, 0, 150);
-
 	BottomPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("BottomPathPoint"));
-	BottomPathPoint->SetRelativeLocation(FVector(75, 0, 50));
 	BottomPathPoint->SetupAttachment(this);
 
 	TopPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("TopPathPoint"));
-	TopPathPoint->SetRelativeLocation(FVector(75, 0, 300));
 	TopPathPoint->SetupAttachment(this);
+
+	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
+	ArrowComponent->SetupAttachment(this);
 }
 
-void UNavLadderComponent::OnComponentCreated()
+void UNavLadderComponent::BeginPlay()
 {
-	Super::OnComponentCreated();
+	Super::BeginPlay();
 
-	SetBoxExtent(FVector(50, 5, 150));
-	SetRelativeRotation(FRotator(0, 90, 0).Quaternion());
-	SetRelativeLocation(FVector(0, 0, 150));
+	// it seems like 'BoxExtent' still has the default values in PostInitProperties() 
+	PawnLocationOffset = GetComponentRotation().RotateVector(FVector(90, 0, 0));
+	BottomPathPoint->SetRelativeLocation(FVector(75, 0, -BoxExtent.Z + 50));
+	TopPathPoint->SetRelativeLocation(FVector(75, 0, BoxExtent.Z));
 }
 
 TArray<FVector>* UNavLadderComponent::GetContactPoints()
 {
 	if (!ContactPoints.Num())
 	{
-		int32 ZExtent = GetScaledBoxExtent().Z;
-		FVector RelativeTop = GetComponentRotation().RotateVector(FVector(0, 0, 2 * ZExtent));
+		float ZExtent = GetScaledBoxExtent().Z;
+		FVector RelativeTop = GetComponentRotation().RotateVector(FVector(0, 0, ZExtent));
 		ContactPoints.Add(GetComponentLocation() + RelativeTop);
-		FVector RelativeBottom = GetComponentRotation().RotateVector(FVector(0, 0, 0));
+		FVector RelativeBottom = GetComponentRotation().RotateVector(FVector(0, 0, -ZExtent));
 		ContactPoints.Add(GetComponentLocation() + RelativeBottom);
 	}
 	return &ContactPoints;
@@ -48,8 +48,7 @@ void UNavLadderComponent::GetUnobstructedNeighbours(const UCapsuleComponent & Co
 		float BottomDistance = (BottomPathPoint->GetComponentLocation() - N->GetPawnLocation()).Size();
 		FVector TracePoint = TopDistance < BottomDistance ? TopPathPoint->GetComponentLocation() : BottomPathPoint->GetComponentLocation();
 
-		if (!UNavTileComponent::Obstructed(PawnLocationOffset + GetComponentLocation(), TracePoint, CollisionCapsule) &&
-			!UNavTileComponent::Obstructed(TracePoint, GetPawnLocation(), CollisionCapsule))
+		if (!UNavTileComponent::Obstructed(TracePoint, N->GetPawnLocation(), CollisionCapsule))
 		{
 			OutNeighbours.Add(N);
 		}
@@ -63,8 +62,7 @@ bool UNavLadderComponent::Obstructed(const FVector & FromPos, const UCapsuleComp
 	float BottomDistance = (BottomPathPoint->GetComponentLocation() - FromPos).Size();
 	FVector TracePoint = TopDistance < BottomDistance ? TopPathPoint->GetComponentLocation() : BottomPathPoint->GetComponentLocation();
 
-	return UNavTileComponent::Obstructed(FromPos, TracePoint, CollisionCapsule) || 
-		UNavTileComponent::Obstructed(TracePoint, PawnLocationOffset + GetComponentLocation(), CollisionCapsule);
+	return UNavTileComponent::Obstructed(FromPos, TracePoint, CollisionCapsule);
 }
 
 bool UNavLadderComponent::Traversable(float MaxWalkAngle, const TArray<EGridMovementMode>& AvailableMovementModes) const

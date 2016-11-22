@@ -101,7 +101,7 @@ TArray<FVector>* UNavTileComponent::GetContactPoints()
 
 TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 {
-	float MaxDistance = GetScaledBoxExtent().X * 0.9;
+	float MaxDistance = ANavGrid::DefaultTileSpacing * 0.5;
 
 	Neighbours.Empty();
 	for (TObjectIterator<UNavTileComponent> Itr; Itr; ++Itr)
