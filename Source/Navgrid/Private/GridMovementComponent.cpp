@@ -71,8 +71,8 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		{
 			CurrentSpeed = ConsumeRootMotion().GetLocation().Size();
 		}
-		/* No root motion available, use manually set values */
-		if (CurrentSpeed == 0)
+		/* Root motion is either not available or there is really little movement, use manually set values */
+		if (CurrentSpeed < 25 * DeltaTime)
 		{
 			if (MovementMode == EGridMovementMode::ClimbingDown || MovementMode == EGridMovementMode::ClimbingUp)
 			{
@@ -112,7 +112,7 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 			}
 			else 
 			// Dont update the rotation if we have no idea of what it should be
-			// This leads to prevent the occational stuttering at the start of a descent
+			// This to prevent the occational stuttering at the start of a descent
 			{
 				DesiredRotation = GetOwner()->GetActorRotation();
 			}
