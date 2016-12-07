@@ -38,6 +38,11 @@ TArray<FVector>* UNavLadderComponent::GetContactPoints()
 	return &ContactPoints;
 }
 
+FVector UNavLadderComponent::GetPawnLocation()
+{
+	return (BottomPathPoint->GetComponentLocation() + TopPathPoint->GetComponentLocation()) / 2;
+}
+
 void UNavLadderComponent::GetUnobstructedNeighbours(const UCapsuleComponent & CollisionCapsule, TArray<UNavTileComponent*>& OutNeighbours)
 {
 	OutNeighbours.Empty();

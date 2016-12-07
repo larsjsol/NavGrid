@@ -15,6 +15,7 @@ public:
 
 	TArray<FVector> *GetContactPoints() override;
 
+	virtual FVector GetPawnLocation() override;
 	virtual void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours) override;
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) override;
 	virtual bool Traversable(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const override;
