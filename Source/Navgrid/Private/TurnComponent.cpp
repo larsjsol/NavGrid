@@ -2,6 +2,14 @@
 
 #include "NavGridPrivatePCH.h"
 
+void UTurnComponent::EndTurn()
+{
+	if (TurnManager)
+	{
+		TurnManager->EndTurn(this);
+	}
+}
+
 void UTurnComponent::TurnStart()
 {
 	OnTurnStartEvent.Broadcast();

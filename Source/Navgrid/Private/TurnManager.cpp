@@ -19,6 +19,7 @@ void ATurnManager::BeginPlay()
 void ATurnManager::Register(UTurnComponent *TurnComponent)
 {
 	TurnComponents.AddUnique(TurnComponent);
+	TurnComponent->TurnManager = this;
 }
 
 void ATurnManager::EndTurn(UTurnComponent *Ender)

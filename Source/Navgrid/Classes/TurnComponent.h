@@ -5,6 +5,7 @@
 #include "Components/ActorComponent.h"
 #include "TurnComponent.generated.h"
 
+class ATurnManager;
 
 /**
 * Actors with a turn component can be managed by a turn manager 
@@ -27,8 +28,17 @@ public:
 	/* All actors managed by the turn manager have had their turn and a new round begins */
 	FOnRoundStart& OnRoundStart() { return OnRoundStartEvent; }
 
+	UPROPERTY(BlueprintReadWrite, Category = "NavGrid")
+	ATurnManager *TurnManager = NULL;
+
+	/* Tell the manager that we are done */
+	void EndTurn();
+
+	/* Callend when a turn starts */
 	void TurnStart();
+	/* Called when a turn ends */
 	void TurnEnd();
+	/* Called when a new round starts (i.e. everyone has acted and its time to start over) */
 	void RoundStart();
 private:
 	FOnTurnStart OnTurnStartEvent;
