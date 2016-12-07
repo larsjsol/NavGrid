@@ -3,6 +3,12 @@
 #include "Builders/EditorBrushBuilder.h"
 #include "Builders/CubeBuilder.h"
 
+ATileGeneratingVolume::ATileGeneratingVolume()
+{
+	UBrushComponent *MyBrush = GetBrushComponent();
+	MyBrush->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
 void ATileGeneratingVolume::GenerateTiles()
 {
 	const UCubeBuilder *Builder = Cast<UCubeBuilder>(GetBrushBuilder());

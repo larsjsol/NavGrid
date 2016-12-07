@@ -11,6 +11,8 @@ class NAVGRID_API ATileGeneratingVolume : public AVolume
 	GENERATED_BODY()
 
 public:
+	ATileGeneratingVolume();
+
 	/*	Destroy existing tiles and generate a new set
 
 		Autoresets
