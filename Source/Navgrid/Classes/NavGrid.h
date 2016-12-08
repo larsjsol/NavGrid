@@ -24,6 +24,15 @@ class NAVGRID_API ANavGrid : public AActor
 public:	
 	ANavGrid();
 
+	/* Collision channel used when tracing for tiles */
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
+	TEnumAsByte<ECollisionChannel> ECC_NavGridWalkable = ECollisionChannel::ECC_GameTraceChannel1;
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
+	float TileSize = 199;
+	/* Distance between the centers of two adjacent tiles */
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
+	float TileSpacing = 200;
+
 	/* Scene Component (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
 
@@ -89,9 +98,4 @@ private:
 public:
 	/** return every tile in the supplied world */
 	static void GetEveryTile(TArray<UNavTileComponent* > &OutTiles, UWorld *World);
-
-	static ECollisionChannel ECC_Walkable;
-	static float DefaultTileSize;
-	/* Default distance for the centers of two adjacent tiles */
-	static float DefaultTileSpacing;
 };

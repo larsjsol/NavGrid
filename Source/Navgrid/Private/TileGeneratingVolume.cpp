@@ -21,7 +21,7 @@ void ATileGeneratingVolume::GenerateTiles()
 
 	if (Tiles.Num() == 0 && Builder)
 	{
-		float Spacing = ANavGrid::DefaultTileSpacing;
+		float Spacing = Grid->TileSpacing;
 		float XHalfSize = Builder->X * GetActorScale().X / 2;
 		float YHalfSize = Builder->Y * GetActorScale().Y / 2;
 		float ZHalfSize = Builder->Z * GetActorScale().Z / 2;

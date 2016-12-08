@@ -16,19 +16,6 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block); // So we get mouse over events
-	SetCollisionResponseToChannel(ANavGrid::ECC_Walkable, ECollisionResponse::ECR_Block); // So we can find the floor with a line trace
-}
-
-void UNavTileComponent::BeginPlay()
-{
-	if (!Grid)
-	{
-		Grid = ANavGrid::GetNavGrid(GetWorld());
-		if (!Grid)
-		{
-			UE_LOG(NavGrid, Error, TEXT("%s: Unable to find NavGrid"), *GetName());
-		}
-	}
 }
 
 void UNavTileComponent::PostInitProperties()
@@ -37,10 +24,13 @@ void UNavTileComponent::PostInitProperties()
 
 	bUseAttachParentBound = true;
 
-	SetBoxExtent(FVector(ANavGrid::DefaultTileSize / 2, ANavGrid::DefaultTileSize / 2, 5));
-	ShapeColor = FColor::Magenta;
-
 	Grid = ANavGrid::GetNavGrid(GetWorld());
+	if (Grid)
+	{
+		SetBoxExtent(FVector(Grid->TileSize / 2, Grid->TileSize / 2, 5));
+		SetCollisionResponseToChannel(Grid->ECC_NavGridWalkable, ECollisionResponse::ECR_Block); // So we can find the floor with a line trace
+	}
+	ShapeColor = FColor::Magenta;
 }
 
 bool UNavTileComponent::Traversable(float MaxWalkAngle, const TArray<EGridMovementMode>& AvailableMovementModes) const
@@ -102,7 +92,7 @@ TArray<FVector>* UNavTileComponent::GetContactPoints()
 
 TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 {
-	float MaxDistance = ANavGrid::DefaultTileSpacing * 0.5;
+	float MaxDistance = Grid->TileSpacing * 0.5;
 
 	Neighbours.Empty();
 	for (TObjectIterator<UNavTileComponent> Itr; Itr; ++Itr)

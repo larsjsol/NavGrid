@@ -7,10 +7,6 @@
 
 DEFINE_LOG_CATEGORY(NavGrid);
 
-ECollisionChannel ANavGrid::ECC_Walkable = ECollisionChannel::ECC_GameTraceChannel1; //Ugh... Lets hope this isn't used anywhere else
-float ANavGrid::DefaultTileSize = 199;
-float ANavGrid::DefaultTileSpacing = 200; // this leaves a small gap between the tiles in order to prevent flickering when rendered in the editor
-
 // Sets default values
 ANavGrid::ANavGrid()
 {
@@ -92,7 +88,7 @@ UNavTileComponent *ANavGrid::LineTraceTile(const FVector &Start, const FVector &
 {
 	FHitResult HitResult;
 
-	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ANavGrid::ECC_Walkable);
+	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_NavGridWalkable);
 	UPrimitiveComponent *Comp = HitResult.GetComponent();
 	return Cast<UNavTileComponent>(Comp);
 }
@@ -115,6 +111,12 @@ void ANavGrid::EndTileCursorOver(UNavTileComponent &Tile)
 void ANavGrid::CalculateTilesInRange(UNavTileComponent * Tile, AGridPawn *Pawn, bool DoCollisionTests)
 {
 	TilesInRange.Empty();
+
+	if (!Tile || !Pawn)
+	{
+		UE_LOG(NavGrid, Error, TEXT("%s::CalculateTilesInRange(): Passed NULL-pointer"), *GetName());
+		return;
+	}
 
 	TArray<UNavTileComponent *> AllTiles;
 	GetEveryTile(AllTiles, GetWorld());
@@ -265,15 +267,15 @@ void ANavGrid::GenerateVirtualTiles(const AGridPawn *Pawn)
 		VirtualTiles.Add(PlaceTile(Pawn->GetActorLocation()));
 	}
 
-	FVector Min = Pawn->GetActorLocation() - FVector(Pawn->MovementComponent->MovementRange * DefaultTileSpacing);
-	FVector Max = Pawn->GetActorLocation() + FVector(Pawn->MovementComponent->MovementRange * DefaultTileSpacing);
-	for (float X = Min.X; X <= Max.X; X += DefaultTileSpacing)
+	FVector Min = Pawn->GetActorLocation() - FVector(Pawn->MovementComponent->MovementRange * TileSpacing);
+	FVector Max = Pawn->GetActorLocation() + FVector(Pawn->MovementComponent->MovementRange * TileSpacing);
+	for (float X = Min.X; X <= Max.X; X += TileSpacing)
 	{
-		for (float Y = Min.Y; Y <= Max.Y; Y += DefaultTileSpacing)
+		for (float Y = Min.Y; Y <= Max.Y; Y += TileSpacing)
 		{
-			for (float Z = Max.Z; Z >= Min.Z; Z -= DefaultTileSpacing)
+			for (float Z = Max.Z; Z >= Min.Z; Z -= TileSpacing)
 			{
-				UPROPERTY() UNavTileComponent *TileComp = ConsiderPlaceTile(FVector(X, Y, Z + DefaultTileSpacing + 25), FVector(X, Y, Z - 25));
+				UPROPERTY() UNavTileComponent *TileComp = ConsiderPlaceTile(FVector(X, Y, Z + TileSpacing + 25), FVector(X, Y, Z - 25));
 				if (TileComp)
 				{
 					VirtualTiles.Add(TileComp);

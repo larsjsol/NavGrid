@@ -10,7 +10,6 @@ ANavGridExamplePC::ANavGridExamplePC(const FObjectInitializer& ObjectInitializer
 	/* Enable mouse events */
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
-	DefaultClickTraceChannel = ANavGrid::ECC_Walkable;
 }
 
 void ANavGridExamplePC::BeginPlay()
@@ -23,6 +22,8 @@ void ANavGridExamplePC::BeginPlay()
 		Grid->OnTileClicked().AddUObject(this, &ANavGridExamplePC::OnTileClicked);
 		Grid->OnTileCursorOver().AddUObject(this, &ANavGridExamplePC::OnTileCursorOver);
 		Grid->OnEndTileCursorOver().AddUObject(this, &ANavGridExamplePC::OnEndTileCursorOver);
+
+		DefaultClickTraceChannel = Grid->ECC_NavGridWalkable;
 	}
 	else
 	{

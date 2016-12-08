@@ -18,7 +18,6 @@ class NAVGRID_API UNavTileComponent : public UBoxComponent
 	GENERATED_BODY()
 public:
 	UNavTileComponent(const FObjectInitializer &ObjectInitializer);
-	virtual void BeginPlay() override;
 	virtual void PostInitProperties() override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default") ANavGrid *Grid;
