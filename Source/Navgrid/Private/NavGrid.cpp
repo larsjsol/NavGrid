@@ -9,7 +9,7 @@ DEFINE_LOG_CATEGORY(NavGrid);
 
 ECollisionChannel ANavGrid::ECC_Walkable = ECollisionChannel::ECC_GameTraceChannel1; //Ugh... Lets hope this isn't used anywhere else
 float ANavGrid::DefaultTileSize = 199;
-float ANavGrid::DefaultTileSpacing = 200; // this leaves a small gap between the tiles in order to prevent flickering fighting when rendered in the editor
+float ANavGrid::DefaultTileSpacing = 200; // this leaves a small gap between the tiles in order to prevent flickering when rendered in the editor
 
 // Sets default values
 ANavGrid::ANavGrid()
@@ -254,7 +254,7 @@ UNavTileComponent * ANavGrid::ConsiderPlaceTile(const FVector &TraceStart, const
 void ANavGrid::GenerateVirtualTiles(const AGridPawn *Pawn)
 {
 	// only keep a reasonable number
-	if (VirtualTiles.Num() > 1000)
+	if (VirtualTiles.Num() > 10000)
 	{
 		DestroyVirtualTiles();
 	}
@@ -271,10 +271,13 @@ void ANavGrid::GenerateVirtualTiles(const AGridPawn *Pawn)
 	{
 		for (float Y = Min.Y; Y <= Max.Y; Y += DefaultTileSpacing)
 		{
-			UPROPERTY() UNavTileComponent *TileComp = ConsiderPlaceTile(FVector(X, Y, Max.Z), FVector(X, Y, Min.Z));
-			if (TileComp)
+			for (float Z = Max.Z; Z >= Min.Z; Z -= DefaultTileSpacing)
 			{
-				VirtualTiles.Add(TileComp);
+				UPROPERTY() UNavTileComponent *TileComp = ConsiderPlaceTile(FVector(X, Y, Z + DefaultTileSpacing + 25), FVector(X, Y, Z - 25));
+				if (TileComp)
+				{
+					VirtualTiles.Add(TileComp);
+				}
 			}
 		}
 	}
