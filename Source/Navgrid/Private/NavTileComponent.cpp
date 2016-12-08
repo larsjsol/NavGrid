@@ -92,7 +92,7 @@ TArray<FVector>* UNavTileComponent::GetContactPoints()
 
 TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 {
-	float MaxDistance = Grid->TileSpacing * 0.5;
+	float MaxDistance = Grid->TileSpacing * 0.75;
 
 	Neighbours.Empty();
 	for (TObjectIterator<UNavTileComponent> Itr; Itr; ++Itr)

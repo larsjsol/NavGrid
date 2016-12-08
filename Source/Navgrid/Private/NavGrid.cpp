@@ -32,6 +32,17 @@ ANavGrid::ANavGrid()
 	}
 }
 
+FVector ANavGrid::ToRoundedTileLocation(const FVector & WorldLocation)
+{
+	int32 X = WorldLocation.X + (TileSpacing / 2);
+	X /= TileSpacing;
+	X *= TileSpacing;
+	int32 Y = WorldLocation.Y + (TileSpacing / 2);
+	Y /= TileSpacing;
+	Y *= TileSpacing;
+	return FVector(X, Y, WorldLocation.Z);
+}
+
 ANavGrid * ANavGrid::GetNavGrid(UWorld *World)
 {
 	if (World)

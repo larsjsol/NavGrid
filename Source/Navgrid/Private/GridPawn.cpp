@@ -41,8 +41,7 @@ void AGridPawn::BeginPlay()
 	TActorIterator<ANavGrid>GridItr(GetWorld());
 	if (SnapToGrid && GridItr)
 	{
-		UNavTileComponent *Tile = GridItr->GetTile(GetActorLocation());
-		if (Tile) { SetActorLocation(Tile->GetComponentLocation()); }
+		SetActorLocation(GridItr->ToRoundedTileLocation(GetActorLocation()));
 	}
 }
 
