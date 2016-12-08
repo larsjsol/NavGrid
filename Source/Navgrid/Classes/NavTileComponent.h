@@ -49,7 +49,7 @@ protected:
 	TArray<UNavTileComponent *> Neighbours;
 public:
 	/* is there anything blocking an actor from moving from FromPos to this tile? Uses the capsule for collision testing */
-	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule);
+	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const;
 	/* is there anything blocking an actor from moving between From and To? Uses the capsule for collision testing */
 	bool static Obstructed(const FVector &From, const FVector &To, const UCapsuleComponent &CollisionCapsule);
 	/* Return the neighbours that are not Obstructed() */
@@ -65,7 +65,7 @@ public:
 
 	/* Placement for pawn occupying this tile in world space */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Default")
-	virtual FVector GetPawnLocation();
+	virtual FVector GetPawnLocation() const;
 	/* Set offset in local space for pawns occupynig this tile */
 	UFUNCTION(BlueprintCallable, Category = "Default")
 	void SetPawnLocationOffset(const FVector &Offset);

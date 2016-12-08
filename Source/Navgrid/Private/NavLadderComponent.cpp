@@ -38,7 +38,7 @@ TArray<FVector>* UNavLadderComponent::GetContactPoints()
 	return &ContactPoints;
 }
 
-FVector UNavLadderComponent::GetPawnLocation()
+FVector UNavLadderComponent::GetPawnLocation() const
 {
 	return (BottomPathPoint->GetComponentLocation() + TopPathPoint->GetComponentLocation()) / 2;
 }
@@ -60,7 +60,7 @@ void UNavLadderComponent::GetUnobstructedNeighbours(const UCapsuleComponent & Co
 	}
 }
 
-bool UNavLadderComponent::Obstructed(const FVector & FromPos, const UCapsuleComponent & CollisionCapsule)
+bool UNavLadderComponent::Obstructed(const FVector & FromPos, const UCapsuleComponent & CollisionCapsule) const
 {
 	//Determine if we should trace to the top or bottom point
 	float TopDistance = (TopPathPoint->GetComponentLocation() - FromPos).Size();

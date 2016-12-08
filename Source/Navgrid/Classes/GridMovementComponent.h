@@ -55,6 +55,12 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool LockYaw = false;
 	/* Should we use root motion for speed */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool bUseRootMotion = true;
+	/* Should we straighten out the path to avoid zigzaging */
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Movement")
+	bool bStringPullPath = true;
+
+	void StringPull(TArray<const UNavTileComponent *> &InOutPath, TArray<const UNavTileComponent*>& OutPath);
+
 	/*
 	Spline that is used as a path. The points are in word coords.
 	

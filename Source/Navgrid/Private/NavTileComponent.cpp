@@ -54,7 +54,7 @@ bool UNavTileComponent::LegalPositionAtEndOfTurn(float MaxWalkAngle, const TArra
 	return Traversable(MaxWalkAngle, AvailableMovementModes);
 }
 
-FVector UNavTileComponent::GetPawnLocation()
+FVector UNavTileComponent::GetPawnLocation() const
 {
 	return GetComponentLocation() + GetComponentRotation().RotateVector(PawnLocationOffset);
 }
@@ -118,7 +118,7 @@ TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 	return &Neighbours;
 }
 
-bool UNavTileComponent::Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule)
+bool UNavTileComponent::Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const
 {
 	return Obstructed(FromPos, PawnLocationOffset + GetComponentLocation(), CollisionCapsule);
 }

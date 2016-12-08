@@ -15,9 +15,9 @@ public:
 
 	TArray<FVector> *GetContactPoints() override;
 
-	virtual FVector GetPawnLocation() override;
+	virtual FVector GetPawnLocation() const override;
 	virtual void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours) override;
-	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) override;
+	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const override;
 	virtual bool Traversable(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const override;
 	virtual bool LegalPositionAtEndOfTurn(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const override;
 	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool LastTile) const override;

@@ -142,6 +142,39 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	}
 }
 
+void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath, TArray<const UNavTileComponent*>& OutPath)
+{
+	AGridPawn *GridPawnOwner = Cast<AGridPawn>(GetOwner());
+	if (GridPawnOwner && InPath.Num() > 2)
+	{
+		const UCapsuleComponent &Capsule = *GridPawnOwner->CapsuleComponent;
+		OutPath.Empty();
+		int32 CurrentIdx = 0;
+		OutPath.Add(InPath[0]);
+		for (int32 Idx = 1; Idx < InPath.Num(); Idx++)
+		{
+			if (InPath[Idx]->Obstructed(InPath[CurrentIdx]->GetPawnLocation(), Capsule))
+			{
+				OutPath.AddUnique(InPath[Idx - 1]);
+				CurrentIdx = Idx - 1;
+			}
+			// dont stringpull ladders
+			else if (Cast<const UNavLadderComponent>(InPath[Idx]))
+			{
+				OutPath.AddUnique(InPath[Idx - 1]);
+				OutPath.AddUnique(InPath[Idx]);
+				if (Idx + 1 < InPath.Num())
+				{
+					OutPath.AddUnique(InPath[Idx + 1]);
+				}
+				CurrentIdx = Idx + 1;
+				Idx = Idx + 1;
+			}
+		}
+		OutPath.Add(InPath[InPath.Num() - 1]);
+	}
+}
+
 bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 {
 	Spline->ClearSplinePoints();
@@ -168,9 +201,12 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 		}
 		Algo::Reverse(Path);
 
-		// Estiamte how much of the spline that covers the first tile
-		FVector Extent = Path[0]->GetScaledBoxExtent();
-		float LengthOffset = FMath::Max3<float>(Extent.X, Extent.Y, Extent.Z);
+		if (bStringPullPath)
+		{
+			TArray<const UNavTileComponent *> StringPulledPath;
+			StringPull(Path, StringPulledPath);
+			Path = StringPulledPath;
+		}
 
 		// first add a spline point for the pawn starting location
 		Spline->AddSplinePoint(GetOwner()->GetActorLocation(), ESplineCoordinateSpace::Local);
