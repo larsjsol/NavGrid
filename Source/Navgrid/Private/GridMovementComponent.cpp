@@ -142,7 +142,7 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	}
 }
 
-bool UGridMovementComponent::CreatePath(UNavTileComponent &Target)
+bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 {
 	Spline->ClearSplinePoints();
 
@@ -155,12 +155,12 @@ bool UGridMovementComponent::CreatePath(UNavTileComponent &Target)
 	}
 
 	TArray<UNavTileComponent *> InRange;
-	Grid->TilesInRange(Tile, InRange, Owner, true);
+	Grid->GetTilesInRange(InRange);
 	if (InRange.Contains(&Target))
 	{
 		// create a list of tiles from the destination to the starting point and reverse it
-		TArray<UNavTileComponent *> Path;
-		UNavTileComponent *Current = &Target;
+		TArray<const UNavTileComponent *> Path;
+		const UNavTileComponent *Current = &Target;
 		while (Current)
 		{
 			Path.Add(Current);
@@ -200,7 +200,7 @@ void UGridMovementComponent::PauseMoving()
 	Moving = false;
 }
 
-bool UGridMovementComponent::MoveTo(UNavTileComponent &Target)
+bool UGridMovementComponent::MoveTo(const UNavTileComponent &Target)
 {
 	bool PathExists = CreatePath(Target);
 	if (PathExists) { FollowPath(); }

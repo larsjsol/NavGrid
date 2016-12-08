@@ -196,7 +196,7 @@ void UNavTileComponent::EndCursorOver(UPrimitiveComponent* TouchedComponent)
 	}
 }
 
-void UNavTileComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile)
+void UNavTileComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile) const
 {
 	OutSpline.AddSplinePoint(GetComponentLocation() + PawnLocationOffset, ESplineCoordinateSpace::Local);
 }

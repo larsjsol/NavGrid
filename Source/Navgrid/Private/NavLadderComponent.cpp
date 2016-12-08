@@ -81,7 +81,7 @@ bool UNavLadderComponent::LegalPositionAtEndOfTurn(float MaxWalkAngle, const TAr
 }
 
 
-void UNavLadderComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool LastTile)
+void UNavLadderComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool LastTile) const
 {
 	float TopDistance = (TopPathPoint->GetComponentLocation() - FromPos).Size();
 	float BottomDistance = (BottomPathPoint->GetComponentLocation() - FromPos).Size();

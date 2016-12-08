@@ -43,7 +43,14 @@ public:
 
 	/* Find all tiles in range */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	virtual void TilesInRange(UNavTileComponent * Tile, TArray<UNavTileComponent*>& OutArray, AGridPawn *Pawn, bool DoCollisionTests);
+	virtual void CalculateTilesInRange(UNavTileComponent * Tile, AGridPawn *Pawn, bool DoCollisionTests);
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	void GetTilesInRange(TArray<UNavTileComponent *> &OutTiles);
+protected:
+	/* Contains tiles found in the last call to CalculateTilesInRange() */
+	UPROPERTY(Transient)
+	TArray<UNavTileComponent *> TilesInRange;
+public:
 
 	//Event delegates
 	DECLARE_EVENT_OneParam(ANavGrid, FOnTileClicked, const UNavTileComponent& );

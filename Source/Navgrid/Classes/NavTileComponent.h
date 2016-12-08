@@ -88,7 +88,7 @@ public:
 	* OutSpline - the spline to add the points to
 	* EndTile - true if this is the last tile in the path
 	*/
-	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile);
+	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile) const;
 	/* Return a suitable upvector for a splinemesh moving across this tile */
 	virtual FVector GetSplineMeshUpVector();
 };

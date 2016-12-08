@@ -112,9 +112,9 @@ void ANavGrid::EndTileCursorOver(UNavTileComponent &Tile)
 	OnEndTileCursorOverEvent.Broadcast(Tile);
 }
 
-void ANavGrid::TilesInRange(UNavTileComponent * Tile, TArray<UNavTileComponent*>& OutArray, AGridPawn *Pawn, bool DoCollisionTests)
+void ANavGrid::CalculateTilesInRange(UNavTileComponent * Tile, AGridPawn *Pawn, bool DoCollisionTests)
 {
-	OutArray.Empty();
+	TilesInRange.Empty();
 
 	TArray<UNavTileComponent *> AllTiles;
 	GetEveryTile(AllTiles, GetWorld());
@@ -173,7 +173,7 @@ void ANavGrid::TilesInRange(UNavTileComponent * Tile, TArray<UNavTileComponent*>
 		}
 		Current->Visited = true;
 		TentativeSet.Remove(Current);
-		if (Current != Tile) { OutArray.Add(Current); } // dont include the starting tile
+		if (Current != Tile) { TilesInRange.Add(Current); } // dont include the starting tile
 		if (TentativeSet.Num())
 		{
 			Current = TentativeSet[0];
@@ -183,6 +183,11 @@ void ANavGrid::TilesInRange(UNavTileComponent * Tile, TArray<UNavTileComponent*>
 			Current = NULL;
 		}
 	}
+}
+
+void ANavGrid::GetTilesInRange(TArray<UNavTileComponent*>& OutTiles)
+{
+	OutTiles = TilesInRange;
 }
 
 bool ANavGrid::TraceTileLocation(const FVector & TraceStart, const FVector & TraceEnd, FVector & OutTilePos)

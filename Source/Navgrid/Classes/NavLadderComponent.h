@@ -20,7 +20,7 @@ public:
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) override;
 	virtual bool Traversable(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const override;
 	virtual bool LegalPositionAtEndOfTurn(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const override;
-	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool LastTile) override;
+	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool LastTile) const override;
 
 	/* Helpers for determining walkable paths through this tile */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") USceneComponent *BottomPathPoint;

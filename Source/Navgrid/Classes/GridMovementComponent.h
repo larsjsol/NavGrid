@@ -69,13 +69,13 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization") float HorizontalOffset = 87.5;
 
 	/* Create a path to Target, return false if no path is found */
-	bool CreatePath(UNavTileComponent &Target);
+	bool CreatePath(const UNavTileComponent &Target);
 	/* Follow an existing path */
 	void FollowPath();
 	/* Temporarily stop moving, call FollowPath() to resume */
 	void PauseMoving();
 	/* Create a path and follow it if it exists */
-	bool MoveTo(UNavTileComponent &Target);
+	bool MoveTo(const UNavTileComponent &Target);
 	/* Visualize path */
 	void ShowPath();
 	/* Hide path */

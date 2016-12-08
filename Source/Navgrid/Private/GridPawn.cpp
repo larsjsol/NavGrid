@@ -49,7 +49,12 @@ void AGridPawn::BeginPlay()
 void AGridPawn::OnTurnStart()
 {
 	SelectedHighlight->SetVisibility(true);
-	MovementComponent->Grid->GenerateVirtualTiles(this);
+	ANavGrid *Grid = MovementComponent->Grid;
+	if (Grid)
+	{
+		Grid->GenerateVirtualTiles(this);
+		Grid->CalculateTilesInRange(Grid->GetTile(GetActorLocation()), this, true);
+	}
 }
 
 void AGridPawn::OnTurnEnd()
