@@ -26,21 +26,16 @@ public:
 	UTurnComponent *GetCurrentComponent();
 
 	//Event delegates
-	DECLARE_EVENT_OneParam(ATurnManager, FOnTurnStart, const UTurnComponent&);
-	DECLARE_EVENT_OneParam(ATurnManager, FOnTurnEnd, const UTurnComponent&);
-	DECLARE_EVENT(ATurnManager, FOnRoundStart);
-	
-	/* Triggered on turn start for a component */
-	FOnTurnStart& OnTurnStart() { return OnTurnStartEvent; }
-	/* Triggered on turn end for a component */
-	FOnTurnEnd& OnTurnEnd() { return OnTurnEndEvent; }
-	/* Triggered when all components are done and a new round begins */
-	FOnRoundStart& OnRoundEnd() { return OnRoundStartEvent; }
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnStart, UTurnComponent *, TurnComponent);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnEnd, UTurnComponent *, TurnComponent);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundStart);
 
-private:
-	FOnTurnStart OnTurnStartEvent;
-	FOnTurnEnd OnTurnEndEvent;
-	FOnRoundStart OnRoundStartEvent;
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnTurnStart OnTurnStart;
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnTurnEnd OnTurnEnd;
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnRoundStart OnRoundStart;
 
 protected:
 	UPROPERTY() TArray<UTurnComponent *> TurnComponents;

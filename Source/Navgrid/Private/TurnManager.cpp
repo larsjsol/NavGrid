@@ -55,10 +55,10 @@ UTurnComponent *ATurnManager::GetCurrentComponent()
 void ATurnManager::ChangeCurrent(int32 NewIndex)
 {
 	TurnComponents[ComponentIndex]->TurnEnd();
-	OnTurnEndEvent.Broadcast(*TurnComponents[ComponentIndex]);
+	OnTurnEnd.Broadcast(TurnComponents[ComponentIndex]);
 	ComponentIndex = NewIndex;
 	TurnComponents[ComponentIndex]->TurnStart();
-	OnTurnStartEvent.Broadcast(*TurnComponents[ComponentIndex]);
+	OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
 }
 
 bool ATurnManager::ConsiderEndRound()
@@ -86,12 +86,11 @@ void ATurnManager::StartNewRound()
 	{
 		TC->RoundStart();
 	}
-	OnRoundStartEvent.Broadcast();
+	OnRoundStart.Broadcast();
 	ComponentIndex = 0;
 	if (TurnComponents.Num())
 	{
 		TurnComponents[ComponentIndex]->TurnStart();
-		OnTurnStartEvent.Broadcast(*TurnComponents[ComponentIndex]);
-		
+		OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
 	}
 }

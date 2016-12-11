@@ -42,7 +42,7 @@ void ANavGridExamplePC::BeginPlay()
 	}
 
 	/* register handler for turn start*/
-	TurnManager->OnTurnStart().AddUObject(this, &ANavGridExamplePC::OnTurnStart);
+	TurnManager->OnTurnStart.AddDynamic(this, &ANavGridExamplePC::OnTurnStart);
 }
 
 void ANavGridExamplePC::OnConstruction(const FTransform &Transform)
@@ -106,9 +106,9 @@ void ANavGridExamplePC::OnEndTileCursorOver(const UNavTileComponent &Tile)
 	}
 }
 
-void ANavGridExamplePC::OnTurnStart(const UTurnComponent &Component)
+void ANavGridExamplePC::OnTurnStart(UTurnComponent *Component)
 {
-	Pawn = (AGridPawn *) Component.GetOwner();
+	Pawn = (AGridPawn *) Component->GetOwner();
 }
 
 void ANavGridExamplePC::OnMovementEnd()

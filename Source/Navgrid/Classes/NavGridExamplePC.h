@@ -35,7 +35,7 @@ public:
 	void OnEndTileCursorOver(const UNavTileComponent &Tile);
 
 	/* Called when a new turn starts*/
-	void OnTurnStart(const UTurnComponent &Component);
+	void OnTurnStart(UTurnComponent *Component);
 	/* Called when the current pawn is done moving*/
 	void OnMovementEnd();
 	
