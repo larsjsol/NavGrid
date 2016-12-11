@@ -31,6 +31,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "NavGrid")
 	ATurnManager *TurnManager = NULL;
 
+	bool bCanStillActThisRound = true;
+
 	/* Tell the manager that we are done */
 	void EndTurn();
 
@@ -40,6 +42,7 @@ public:
 	void TurnEnd();
 	/* Called when a new round starts (i.e. everyone has acted and its time to start over) */
 	void RoundStart();
+
 private:
 	FOnTurnStart OnTurnStartEvent;
 	FOnTurnEnd OnTurnEndEvent;

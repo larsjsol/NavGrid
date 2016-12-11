@@ -3,17 +3,7 @@
 void ATurnManager::BeginPlay()
 {
 	Super::BeginPlay();
-
-	for (UTurnComponent *TC : TurnComponents)
-	{
-		TC->RoundStart();
-	}
-	OnRoundStartEvent.Broadcast();
-	if (TurnComponents.Num())
-	{
-		TurnComponents[0]->TurnStart();
-		OnTurnStartEvent.Broadcast(*TurnComponents[0]);
-	}
+	StartNewRound();
 }
 
 void ATurnManager::Register(UTurnComponent *TurnComponent)
@@ -26,21 +16,7 @@ void ATurnManager::EndTurn(UTurnComponent *Ender)
 {
 	if (Ender == TurnComponents[ComponentIndex])
 	{
-		Ender->TurnEnd();
-		OnTurnEndEvent.Broadcast(*TurnComponents[ComponentIndex]);
-
-		ComponentIndex = (ComponentIndex + 1) % TurnComponents.Num();
-		if (ComponentIndex == 0)
-		{
-			for (UTurnComponent *TC : TurnComponents)
-			{
-				TC->RoundStart();
-			}
-			OnRoundStartEvent.Broadcast();
-		}
-
-		TurnComponents[ComponentIndex]->TurnStart();
-		OnTurnStartEvent.Broadcast(*TurnComponents[ComponentIndex]);
+		StartTurnNext();
 	}
 	else
 	{
@@ -48,7 +24,74 @@ void ATurnManager::EndTurn(UTurnComponent *Ender)
 	}
 }
 
+void ATurnManager::StartTurn(UTurnComponent * TurnComponent)
+{
+	for (int32 Counter = 0; Counter < TurnComponents.Num(); Counter++)
+	{
+		int32 Idx = (ComponentIndex + Counter) % TurnComponents.Num();
+		if (TurnComponents[Idx] == TurnComponent)
+		{
+			ChangeCurrent(Idx);
+			return;
+		}
+	}
+	UE_LOG(NavGrid, Error, TEXT("ATurnManager::StartTurn() called with invalid TurnComponent %s"), *TurnComponent->GetName());
+}
+
+void ATurnManager::StartTurnNext()
+{
+	if (!ConsiderEndRound())
+	{
+		int32 NewIndex = (ComponentIndex + 1) % TurnComponents.Num();
+		ChangeCurrent(NewIndex);
+	}
+}
+
 UTurnComponent *ATurnManager::GetCurrentComponent()
 {
 	return TurnComponents[ComponentIndex];
+}
+
+void ATurnManager::ChangeCurrent(int32 NewIndex)
+{
+	TurnComponents[ComponentIndex]->TurnEnd();
+	OnTurnEndEvent.Broadcast(*TurnComponents[ComponentIndex]);
+	ComponentIndex = NewIndex;
+	TurnComponents[ComponentIndex]->TurnStart();
+	OnTurnStartEvent.Broadcast(*TurnComponents[ComponentIndex]);
+}
+
+bool ATurnManager::ConsiderEndRound()
+{
+	bool AllDone = true;
+	for (UTurnComponent * TC : TurnComponents)
+	{
+		if (TC->bCanStillActThisRound)
+		{
+			AllDone = false;
+			break;
+		}
+	}
+
+	if (AllDone)
+	{
+		StartNewRound();
+	}
+	return AllDone;
+}
+
+void ATurnManager::StartNewRound()
+{
+	for (UTurnComponent *TC : TurnComponents)
+	{
+		TC->RoundStart();
+	}
+	OnRoundStartEvent.Broadcast();
+	ComponentIndex = 0;
+	if (TurnComponents.Num())
+	{
+		TurnComponents[ComponentIndex]->TurnStart();
+		OnTurnStartEvent.Broadcast(*TurnComponents[ComponentIndex]);
+		
+	}
 }

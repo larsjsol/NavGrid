@@ -18,6 +18,10 @@ public:
 	virtual void BeginPlay() override;
 	void Register(UTurnComponent *TurnComponent);
 	void EndTurn(UTurnComponent *Ender);
+	/* Start turn for a component */
+	void StartTurn(UTurnComponent *TurnComponent);
+	/* Move on to the next component in line */
+	void StartTurnNext();
 	/* Return the component whos turn it is */
 	UTurnComponent *GetCurrentComponent();
 
@@ -41,4 +45,7 @@ private:
 protected:
 	UPROPERTY() TArray<UTurnComponent *> TurnComponents;
 	int32 ComponentIndex = 0;
+	void ChangeCurrent(int32 NewIndex);
+	bool ConsiderEndRound();
+	void StartNewRound();
 };
