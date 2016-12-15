@@ -55,21 +55,39 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	AActor *Owner = GetOwner();
+	FTransform NewTransform = Owner->GetActorTransform();
+
 	ConsiderUpdateMovementMode();
 	switch (MovementMode)
 	{
 	case EGridMovementMode::Stationary:
 		break; //nothing to do
 	case EGridMovementMode::InPlaceTurn:
-		UpdateRotation(DeltaTime);
+		NewTransform = TransformFromRotation(DeltaTime);
 		break;
 	default:
-		UpdateLocationFromPath(DeltaTime);
+		NewTransform = TransformFromPath(DeltaTime);
 		break;
 	}
+
+	if (bAlwaysUseRootMotion)
+	{
+		// Might be empty if we have already gotten it above
+		FTransform RootMotion = ConsumeRootMotion();
+		NewTransform.SetRotation(NewTransform.GetRotation() * RootMotion.GetRotation());
+		NewTransform.SetLocation(NewTransform.GetLocation() + RootMotion.GetLocation());
+	}
+
+	// update velocity so it can be fetched by the pawn 
+	Velocity = (NewTransform.GetLocation() - Owner->GetActorLocation()) * (1 / DeltaTime);
+	UpdateComponentVelocity();
+	// actually move the the actor
+	NewTransform.SetScale3D(Owner->GetActorScale3D()); // dont ever change the scale
+	Owner->SetActorTransform(NewTransform);
 }
 
-void UGridMovementComponent::UpdateLocationFromPath(float DeltaTime)
+FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 {
 	/* Check if we can get the speed from root motion */
 	float CurrentSpeed = 0;
@@ -126,30 +144,22 @@ void UGridMovementComponent::UpdateLocationFromPath(float DeltaTime)
 
 	/* Find the new rotation by limiting DesiredRotation by MaxRotationSpeed */
 	FRotator NewRotation = LimitRotation(OldTransform.GetRotation().Rotator(), DesiredRotation, DeltaTime);
-
 	NewTransform.SetRotation(NewRotation.Quaternion());
-	Owner->SetActorTransform(NewTransform);
 
 	/* Check if we're reached our destination*/
 	if (Distance >= Spline->GetSplineLength())
 	{
 		Distance = 0;
-		Velocity = FVector::ZeroVector;
 		ChangeMovementMode(EGridMovementMode::Stationary);
-		OnMovementEndEvent.Broadcast();
-	}
-	else
-	{
-		Velocity = (NewTransform.GetLocation() - OldTransform.GetLocation()) * (1 / DeltaTime);
 	}
 
-	// update velocity so it can be fetched by the pawn 
-	UpdateComponentVelocity();
+	return NewTransform;
 }
 
-void UGridMovementComponent::UpdateRotation(float DeltaTime)
+FTransform UGridMovementComponent::TransformFromRotation(float DeltaTime)
 { 
 	AActor *Owner = GetOwner();
+	FTransform NewTransform = Owner->GetActorTransform();
 	if (Owner->GetActorRotation().Equals(DesiredForwardRotation))
 	{
 		ChangeMovementMode(EGridMovementMode::Stationary);
@@ -157,8 +167,9 @@ void UGridMovementComponent::UpdateRotation(float DeltaTime)
 	else
 	{
 		FRotator NewRotation = LimitRotation(Owner->GetActorRotation(), DesiredForwardRotation, DeltaTime);
-		Owner->SetActorRotation(NewRotation);
+		NewTransform.SetRotation(NewRotation.Quaternion());
 	}
+	return NewTransform;
 }
 
 void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath, TArray<const UNavTileComponent*>& OutPath)
@@ -378,6 +389,11 @@ void UGridMovementComponent::ChangeMovementMode(EGridMovementMode NewMode)
 	{
 		OnMovementModeChangedEvent.Broadcast(MovementMode, NewMode);
 		MovementMode = NewMode;
+
+		if (MovementMode == EGridMovementMode::Stationary)
+		{
+			OnMovementEndEvent.Broadcast();
+		}
 	}
 }
 

@@ -35,9 +35,10 @@ public:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
 protected:
-	void UpdateLocationFromPath(float DeltaTime);
-	/* Update rotation for InPlaceRotation mode*/
-	void UpdateRotation(float DeltaTime);
+	/* return an transform usable for following the spline path */
+	FTransform TransformFromPath(float DeltaTime);
+	/* return an tranfrom usable for rotation in place */
+	FTransform TransformFromRotation(float DeltaTime);
 public:
 
 	/* bound to the first NavGrid found in the level */
@@ -60,8 +61,12 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool LockPitch = true;
 	/* Should we ignore rotation over the Z axis */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool LockYaw = false;
-	/* Should we use root motion for speed */
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement") bool bUseRootMotion = true;
+	/* Should we extract root motion for speed while moving */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement")
+	bool bUseRootMotion = true;
+	/* Should we extract root motion for speed and rotation even */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement")
+	bool bAlwaysUseRootMotion = false;
 	/* Should we straighten out the path to avoid zigzaging */
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Movement")
 	bool bStringPullPath = true;
