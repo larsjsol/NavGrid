@@ -16,6 +16,7 @@ UGridMovementComponent::UGridMovementComponent(const FObjectInitializer &ObjectI
 	AvailableMovementModes.Add(EGridMovementMode::ClimbingUp);
 	AvailableMovementModes.Add(EGridMovementMode::Stationary);
 	AvailableMovementModes.Add(EGridMovementMode::Walking);
+	AvailableMovementModes.Add(EGridMovementMode::InPlaceTurn);
 }
 
 void UGridMovementComponent::BeginPlay()
@@ -54,91 +55,109 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	/* Update movement mode and make a broadcast if it has changed */
-	EGridMovementMode NewMovementMode = GetMovementMode();
-	if (NewMovementMode != MovementMode)
+	ConsiderUpdateMovementMode();
+	switch (MovementMode)
 	{
-		OnMovementModeChangedEvent.Broadcast(MovementMode, NewMovementMode);
-		MovementMode = NewMovementMode;
+	case EGridMovementMode::Stationary:
+		break; //nothing to do
+	case EGridMovementMode::InPlaceTurn:
+		UpdateRotation(DeltaTime);
+		break;
+	default:
+		UpdateLocationFromPath(DeltaTime);
+		break;
 	}
+}
 
-	if (Moving)
+void UGridMovementComponent::UpdateLocationFromPath(float DeltaTime)
+{
+	/* Check if we can get the speed from root motion */
+	float CurrentSpeed = 0;
+	if (bUseRootMotion)
 	{
-
-		/* Check if we can get the speed from root motion */
-		float CurrentSpeed = 0;
-		if (bUseRootMotion)
+		CurrentSpeed = ConsumeRootMotion().GetLocation().Size();
+	}
+	/* Root motion is either not available or there is really little movement, use manually set values */
+	if (CurrentSpeed < 25 * DeltaTime)
+	{
+		if (MovementMode == EGridMovementMode::ClimbingDown || MovementMode == EGridMovementMode::ClimbingUp)
 		{
-			CurrentSpeed = ConsumeRootMotion().GetLocation().Size();
-		}
-		/* Root motion is either not available or there is really little movement, use manually set values */
-		if (CurrentSpeed < 25 * DeltaTime)
-		{
-			if (MovementMode == EGridMovementMode::ClimbingDown || MovementMode == EGridMovementMode::ClimbingUp)
-			{
-				CurrentSpeed = MaxClimbSpeed * DeltaTime;
-			}
-			else
-			{
-				CurrentSpeed = MaxWalkSpeed * DeltaTime;
-			}
-		}
-		Distance = FMath::Min(Spline->GetSplineLength(), Distance + CurrentSpeed);
-		
-		/* Grab our current transform so we can find the velocity if we need it later */
-		AActor *Owner = GetOwner();
-		FTransform OldTransform = Owner->GetTransform();
-
-		/* Find the next location and rotation from the spline*/
-		FTransform NewTransform = Spline->GetTransformAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::Local);
-		FRotator DesiredRotation;
-
-		/* Restrain rotation axis if we're walking */
-		if (MovementMode == EGridMovementMode::Walking)
-		{
-			DesiredRotation = NewTransform.Rotator();
-			DesiredRotation.Roll = LockRoll ? 0 : DesiredRotation.Roll;
-			DesiredRotation.Pitch = LockPitch ? 0 : DesiredRotation.Pitch;
-			DesiredRotation.Yaw = LockYaw ? 0 : DesiredRotation.Yaw;
-		}
-		/* Use the rotation from the ladder if we're climbing */
-		else if (MovementMode == EGridMovementMode::ClimbingUp || MovementMode == EGridMovementMode::ClimbingDown)
-		{
-			UNavTileComponent *CurrentTile = Grid->GetTile(PawnOwner->GetActorLocation(), false);
-			if (CurrentTile)
-			{
-				DesiredRotation = CurrentTile->GetComponentRotation();
-				DesiredRotation.Yaw -= 180;
-			}
-			else 
-			// Dont update the rotation if we have no idea of what it should be
-			// This to prevent the occational stuttering at the start of a descent
-			{
-				DesiredRotation = GetOwner()->GetActorRotation();
-			}
-		}
-
-		/* Find the new rotation by limiting DesiredRotation by MaxRotationSpeed */
-		FRotator NewRotation = LimitRotation(OldTransform.GetRotation().Rotator(), DesiredRotation, DeltaTime);
-
-		NewTransform.SetRotation(NewRotation.Quaternion());
-		Owner->SetActorTransform(NewTransform);
-
-		/* Check if we're reached our destination*/
-		if (Distance >= Spline->GetSplineLength())
-		{
-			Moving = false;
-			Distance = 0;
-			Velocity = FVector::ZeroVector;
-			OnMovementEndEvent.Broadcast();
+			CurrentSpeed = MaxClimbSpeed * DeltaTime;
 		}
 		else
 		{
-			Velocity = (NewTransform.GetLocation() - OldTransform.GetLocation()) * (1 / DeltaTime);
+			CurrentSpeed = MaxWalkSpeed * DeltaTime;
 		}
+	}
+	Distance = FMath::Min(Spline->GetSplineLength(), Distance + CurrentSpeed);
 
-		// update velocity so it can be fetched by the pawn 
-		UpdateComponentVelocity();
+	/* Grab our current transform so we can find the velocity if we need it later */
+	AActor *Owner = GetOwner();
+	FTransform OldTransform = Owner->GetTransform();
+
+	/* Find the next location and rotation from the spline*/
+	FTransform NewTransform = Spline->GetTransformAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::Local);
+	FRotator DesiredRotation;
+
+	/* Restrain rotation axis if we're walking */
+	if (MovementMode == EGridMovementMode::Walking)
+	{
+		DesiredRotation = NewTransform.Rotator();
+		DesiredRotation.Roll = LockRoll ? 0 : DesiredRotation.Roll;
+		DesiredRotation.Pitch = LockPitch ? 0 : DesiredRotation.Pitch;
+		DesiredRotation.Yaw = LockYaw ? 0 : DesiredRotation.Yaw;
+	}
+	/* Use the rotation from the ladder if we're climbing */
+	else if (MovementMode == EGridMovementMode::ClimbingUp || MovementMode == EGridMovementMode::ClimbingDown)
+	{
+		UNavTileComponent *CurrentTile = Grid->GetTile(PawnOwner->GetActorLocation(), false);
+		if (CurrentTile)
+		{
+			DesiredRotation = CurrentTile->GetComponentRotation();
+			DesiredRotation.Yaw -= 180;
+		}
+		else
+			// Dont update the rotation if we have no idea of what it should be
+			// This to prevent the occational stuttering at the start of a descent
+		{
+			DesiredRotation = GetOwner()->GetActorRotation();
+		}
+	}
+
+	/* Find the new rotation by limiting DesiredRotation by MaxRotationSpeed */
+	FRotator NewRotation = LimitRotation(OldTransform.GetRotation().Rotator(), DesiredRotation, DeltaTime);
+
+	NewTransform.SetRotation(NewRotation.Quaternion());
+	Owner->SetActorTransform(NewTransform);
+
+	/* Check if we're reached our destination*/
+	if (Distance >= Spline->GetSplineLength())
+	{
+		Distance = 0;
+		Velocity = FVector::ZeroVector;
+		ChangeMovementMode(EGridMovementMode::Stationary);
+		OnMovementEndEvent.Broadcast();
+	}
+	else
+	{
+		Velocity = (NewTransform.GetLocation() - OldTransform.GetLocation()) * (1 / DeltaTime);
+	}
+
+	// update velocity so it can be fetched by the pawn 
+	UpdateComponentVelocity();
+}
+
+void UGridMovementComponent::UpdateRotation(float DeltaTime)
+{ 
+	AActor *Owner = GetOwner();
+	if (Owner->GetActorRotation().Equals(DesiredForwardRotation))
+	{
+		ChangeMovementMode(EGridMovementMode::Stationary);
+	}
+	else
+	{
+		FRotator NewRotation = LimitRotation(Owner->GetActorRotation(), DesiredForwardRotation, DeltaTime);
+		Owner->SetActorRotation(NewRotation);
 	}
 }
 
@@ -225,22 +244,26 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 	}
 }
 
-void UGridMovementComponent::FollowPath()
-{
-	/* Set the Moving flag, the real work is done in TickComponent() */
-	Moving = true;
-}
-
-void UGridMovementComponent::PauseMoving()
-{
-	Moving = false;
-}
-
 bool UGridMovementComponent::MoveTo(const UNavTileComponent &Target)
 {
 	bool PathExists = CreatePath(Target);
-	if (PathExists) { FollowPath(); }
+	if (PathExists)
+	{
+		ChangeMovementMode(EGridMovementMode::Walking);
+	}
 	return PathExists;
+}
+
+void UGridMovementComponent::TurnTo(const FRotator & Forward)
+{
+	if (AvailableMovementModes.Contains(EGridMovementMode::InPlaceTurn))
+	{
+		DesiredForwardRotation = Forward;
+		DesiredForwardRotation.Roll = LockRoll ? 0 : Forward.Roll;
+		DesiredForwardRotation.Pitch = LockPitch ? 0 : Forward.Pitch;
+		DesiredForwardRotation.Yaw = LockYaw ? 0 : Forward.Yaw;
+		ChangeMovementMode(EGridMovementMode::InPlaceTurn);
+	}
 }
 
 void UGridMovementComponent::ShowPath()
@@ -283,27 +306,78 @@ FTransform UGridMovementComponent::ConsumeRootMotion()
 
 EGridMovementMode UGridMovementComponent::GetMovementMode()
 {
-	if (!Moving)
+	// we need to do some calculations for certain modes
+	switch (MovementMode)
 	{
-		return EGridMovementMode::Stationary;
-	}
+	case EGridMovementMode::Stationary:
+	case EGridMovementMode::InPlaceTurn:
+	default:
+		return MovementMode;
+	case EGridMovementMode::Walking:
+	case EGridMovementMode::ClimbingUp:
+	case EGridMovementMode::ClimbingDown:
+		FVector ForwardLoc = GetForwardLocation(50);
+		ForwardLoc -= GetOwner()->GetActorLocation();
+		ForwardLoc = ForwardLoc.GetSafeNormal();
+		float UpAngle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(ForwardLoc, FVector(0, 0, 1))));
 
-	FVector ForwardLoc = GetForwardLocation(50);
-	ForwardLoc -= GetOwner()->GetActorLocation();
-	ForwardLoc = ForwardLoc.GetSafeNormal();
-	float UpAngle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(ForwardLoc, FVector(0, 0, 1))));
+		if (UpAngle < 90 - MaxWalkAngle)
+		{
+			return EGridMovementMode::ClimbingUp;
+		}
+		else if (UpAngle > 90 + MaxWalkAngle)
+		{
+			return EGridMovementMode::ClimbingDown;
+		}
+		else
+		{
+			return EGridMovementMode::Walking;
+		}
+	}
+}
 
-	if (UpAngle < 90 - MaxWalkAngle)
+void UGridMovementComponent::ConsiderUpdateMovementMode()
+{
+	
+	// we need to do some calculations for certain modes
+	switch (MovementMode)
 	{
-		return EGridMovementMode::ClimbingUp;
+	case EGridMovementMode::Stationary:
+	case EGridMovementMode::InPlaceTurn:
+	default:
+		break;
+	case EGridMovementMode::Walking:
+	case EGridMovementMode::ClimbingUp:
+	case EGridMovementMode::ClimbingDown:
+		FVector ForwardLoc = GetForwardLocation(50);
+		ForwardLoc -= GetOwner()->GetActorLocation();
+		ForwardLoc = ForwardLoc.GetSafeNormal();
+		float UpAngle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(ForwardLoc, FVector(0, 0, 1))));
+
+		EGridMovementMode NewMode;
+		if (UpAngle < 90 - MaxWalkAngle)
+		{
+			NewMode = EGridMovementMode::ClimbingUp;
+		}
+		else if (UpAngle > 90 + MaxWalkAngle)
+		{
+			NewMode = EGridMovementMode::ClimbingDown;
+		}
+		else
+		{
+			NewMode = EGridMovementMode::Walking;
+		}
+		ChangeMovementMode(NewMode);
+		break;
 	}
-	else if (UpAngle > 90 + MaxWalkAngle)
+}
+
+void UGridMovementComponent::ChangeMovementMode(EGridMovementMode NewMode)
+{
+	if (NewMode != MovementMode)
 	{
-		return EGridMovementMode::ClimbingDown;
-	}
-	else
-	{
-		return EGridMovementMode::Walking;
+		OnMovementModeChangedEvent.Broadcast(MovementMode, NewMode);
+		MovementMode = NewMode;
 	}
 }
 

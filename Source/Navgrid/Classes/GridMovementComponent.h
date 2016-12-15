@@ -17,7 +17,8 @@ enum class EGridMovementMode : uint8
 	Stationary		UMETA(DisplayName = "Stationary"),
 	Walking			UMETA(DisplayName = "Walking"),
 	ClimbingUp 		UMETA(DisplayName = "Climbing up"),
-	ClimbingDown	UMETA(DisplayName = "Climbing down")
+	ClimbingDown	UMETA(DisplayName = "Climbing down"),
+	InPlaceTurn     UMETA(DisplayName = "Turn in place"),
 };
 
 
@@ -33,6 +34,12 @@ public:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
+protected:
+	void UpdateLocationFromPath(float DeltaTime);
+	/* Update rotation for InPlaceRotation mode*/
+	void UpdateRotation(float DeltaTime);
+public:
+
 	/* bound to the first NavGrid found in the level */
 	UPROPERTY(BlueprintReadOnly, Category = "Movement") ANavGrid *Grid = NULL;
 	/* How far (in tile cost) the actor can move in one go */
@@ -42,7 +49,7 @@ public:
 	/* How fast can the actor move when climbing */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxClimbSpeed = 200;
 	/* How fast can the actor turn */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxRotationSpeed = 1080;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxRotationSpeed = 720;
 	/* Steepest slope the actor can walk up or down */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MaxWalkAngle = 45;
 	/* MovementModes usable for this Pawn */
@@ -76,12 +83,13 @@ public:
 
 	/* Create a path to Target, return false if no path is found */
 	bool CreatePath(const UNavTileComponent &Target);
-	/* Follow an existing path */
-	void FollowPath();
-	/* Temporarily stop moving, call FollowPath() to resume */
-	void PauseMoving();
 	/* Create a path and follow it if it exists */
 	bool MoveTo(const UNavTileComponent &Target);
+	/* Turn in place */
+	void TurnTo(const FRotator &Forward);
+protected:
+	FRotator DesiredForwardRotation;
+public:
 	/* Visualize path */
 	void ShowPath();
 	/* Hide path */
@@ -92,6 +100,8 @@ public:
 	EGridMovementMode GetMovementMode();
 protected:
 	EGridMovementMode MovementMode = EGridMovementMode::Stationary;
+	void ConsiderUpdateMovementMode();
+	void ChangeMovementMode(EGridMovementMode NewMode);
 public:
 	/* Return the point the the pawn will reach if it continues moving for ForwardDistance */
 	FVector GetForwardLocation(float ForwardDistance);
@@ -111,7 +121,7 @@ private:
 
 public:
 	/* Should the actor be moved along the spline on the next Tick()? */
-	bool Moving = false;
+	//bool Moving = false;
 
 protected:
 	UPROPERTY() TArray<USplineMeshComponent *> SplineMeshes;
