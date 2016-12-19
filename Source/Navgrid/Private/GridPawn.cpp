@@ -27,6 +27,7 @@ AGridPawn::AGridPawn()
 	SelectedHighlight->SetVisibility(false);
 	SelectedHighlight->SetRelativeLocation(FVector(0, 0, 50));
 
+	TurnComponent->OnRoundStart().AddUObject(this, &AGridPawn::OnRoundStart);
 	TurnComponent->OnTurnStart().AddUObject(this, &AGridPawn::OnTurnStart);
 	TurnComponent->OnTurnEnd().AddUObject(this, &AGridPawn::OnTurnEnd);
 
@@ -45,6 +46,11 @@ void AGridPawn::BeginPlay()
 	}
 }
 
+void AGridPawn::OnRoundStart()
+{
+	TurnComponent->bCanStillActThisRound = true;
+}
+
 void AGridPawn::OnTurnStart()
 {
 	SelectedHighlight->SetVisibility(true);
@@ -59,4 +65,5 @@ void AGridPawn::OnTurnStart()
 void AGridPawn::OnTurnEnd()
 {
 	SelectedHighlight->SetVisibility(false);
+	TurnComponent->bCanStillActThisRound = false;
 }

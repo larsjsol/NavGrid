@@ -18,9 +18,13 @@ class NAVGRID_API UNavTileComponent : public UBoxComponent
 	GENERATED_BODY()
 public:
 	UNavTileComponent(const FObjectInitializer &ObjectInitializer);
-	virtual void PostInitProperties() override;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Default") ANavGrid *Grid;
+protected:
+	UPROPERTY() 
+	ANavGrid *Grid;
+public:
+	void SetGrid(ANavGrid *InGrid);
+	ANavGrid* GetGrid() const;
 
 // Pathing
 	/* Cost of moving into this tile*/

@@ -44,6 +44,13 @@ public:
 	/* Cursor for highlighting tiles */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") UStaticMeshComponent *Cursor;
 
+	/* Number of tiles that exist in the current level */
+	UPROPERTY(VisibleAnywhere, Category = "NavGrid")
+	int32 NumPersistentTiles = 0;
+	/* Current number of virtual tiles */
+	UPROPERTY(VisibleAnywhere, Category = "NavGrid")
+	int32 NumVirtualTiles = 0;
+
 	static ANavGrid *GetNavGrid(UWorld *World);
 
 	/* Get tile from world location, may return NULL */

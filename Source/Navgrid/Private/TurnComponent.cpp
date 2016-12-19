@@ -23,5 +23,4 @@ void UTurnComponent::TurnEnd()
 void UTurnComponent::RoundStart()
 {
 	OnRoundStartEvent.Broadcast();
-	bCanStillActThisRound = true;
 }

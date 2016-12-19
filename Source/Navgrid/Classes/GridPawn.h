@@ -42,6 +42,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Default")
 	bool SnapToGrid = true;
 
+	/* Callend on round start */
+	virtual void OnRoundStart();
 	/* Called on turn start */
 	virtual void OnTurnStart();
 	/* Called on turn end */

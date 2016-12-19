@@ -3,7 +3,18 @@
 void ATurnManager::BeginPlay()
 {
 	Super::BeginPlay();
-	StartNewRound();
+}
+
+void ATurnManager::StartFirstRound()
+{
+	for (UTurnComponent *TC : TurnComponents)
+	{
+		TC->RoundStart();
+	}
+	OnRoundStart.Broadcast();
+	ComponentIndex = 0;
+	TurnComponents[ComponentIndex]->TurnStart();
+	OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
 }
 
 void ATurnManager::Register(UTurnComponent *TurnComponent)
@@ -16,7 +27,15 @@ void ATurnManager::EndTurn(UTurnComponent *Ender)
 {
 	if (Ender == TurnComponents[ComponentIndex])
 	{
-		StartTurnNext();
+		if (Ender->bCanStillActThisRound)
+		{
+			// tell the will get to keep going if it still can act this round
+			ChangeCurrent(ComponentIndex);
+		}
+		else
+		{
+			StartTurnNext();
+		}
 	}
 	else
 	{
@@ -40,10 +59,14 @@ void ATurnManager::StartTurn(UTurnComponent * TurnComponent)
 
 void ATurnManager::StartTurnNext()
 {
-	if (!ConsiderEndRound())
+	int32 NewIndex = GetNextIndexThatCanAct();
+	if (NewIndex >= 0)
 	{
-		int32 NewIndex = (ComponentIndex + 1) % TurnComponents.Num();
 		ChangeCurrent(NewIndex);
+	}
+	else
+	{
+		StartNewRound();
 	}
 }
 
@@ -61,23 +84,17 @@ void ATurnManager::ChangeCurrent(int32 NewIndex)
 	OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
 }
 
-bool ATurnManager::ConsiderEndRound()
+int32 ATurnManager::GetNextIndexThatCanAct()
 {
-	bool AllDone = true;
-	for (UTurnComponent * TC : TurnComponents)
+	for (int32 Count = 0; Count < TurnComponents.Num(); Count++)
 	{
-		if (TC->bCanStillActThisRound)
+		int32 CandidateIndex = (ComponentIndex + Count) % TurnComponents.Num();
+		if (TurnComponents[CandidateIndex]->bCanStillActThisRound)
 		{
-			AllDone = false;
-			break;
+			return CandidateIndex;
 		}
 	}
-
-	if (AllDone)
-	{
-		StartNewRound();
-	}
-	return AllDone;
+	return -1;
 }
 
 void ATurnManager::StartNewRound()
@@ -88,9 +105,9 @@ void ATurnManager::StartNewRound()
 	}
 	OnRoundStart.Broadcast();
 	ComponentIndex = 0;
-	if (TurnComponents.Num())
+	int32 NextIndex = GetNextIndexThatCanAct();
+	if (NextIndex >= 0)
 	{
-		TurnComponents[ComponentIndex]->TurnStart();
-		OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
+		ChangeCurrent(NextIndex);
 	}
 }

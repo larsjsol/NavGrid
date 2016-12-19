@@ -16,20 +16,7 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block); // So we get mouse over events
-}
 
-void UNavTileComponent::PostInitProperties()
-{
-	Super::PostInitProperties();
-
-	bUseAttachParentBound = true;
-
-	Grid = ANavGrid::GetNavGrid(GetWorld());
-	if (Grid)
-	{
-		SetBoxExtent(FVector(Grid->TileSize / 2, Grid->TileSize / 2, 5));
-		SetCollisionResponseToChannel(Grid->ECC_NavGridWalkable, ECollisionResponse::ECR_Block); // So we can find the floor with a line trace
-	}
 	ShapeColor = FColor::Magenta;
 }
 
@@ -62,6 +49,17 @@ FVector UNavTileComponent::GetPawnLocation() const
 void UNavTileComponent::SetPawnLocationOffset(const FVector &Offset)
 {
 	PawnLocationOffset = Offset;
+}
+
+void UNavTileComponent::SetGrid(ANavGrid * InGrid)
+{
+	Grid = InGrid;
+	SetCollisionResponseToChannel(Grid->ECC_NavGridWalkable, ECollisionResponse::ECR_Block); // So we can find the floor with a line trace
+}
+
+ANavGrid * UNavTileComponent::GetGrid() const
+{
+	return Grid;
 }
 
 void UNavTileComponent::ResetPath()

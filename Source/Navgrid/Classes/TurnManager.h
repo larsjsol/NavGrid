@@ -16,7 +16,12 @@ class NAVGRID_API ATurnManager : public AActor
 	GENERATED_BODY()
 public:
 	virtual void BeginPlay() override;
+
+	/* Start the first round */
+	void StartFirstRound();
+	/* Add a turn component to be managed */
 	void Register(UTurnComponent *TurnComponent);
+	/* End the turn for the current turn component */
 	void EndTurn(UTurnComponent *Ender);
 	/* Start turn for a component */
 	void StartTurn(UTurnComponent *TurnComponent);
@@ -41,6 +46,7 @@ protected:
 	UPROPERTY() TArray<UTurnComponent *> TurnComponents;
 	int32 ComponentIndex = 0;
 	void ChangeCurrent(int32 NewIndex);
-	bool ConsiderEndRound();
+	// returns -1 if no components can act this round
+	int32 GetNextIndexThatCanAct();
 	void StartNewRound();
 };

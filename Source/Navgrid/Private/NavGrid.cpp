@@ -135,6 +135,7 @@ void ANavGrid::CalculateTilesInRange(UNavTileComponent * Tile, AGridPawn *Pawn, 
 	{
 		T->ResetPath();
 	}
+	NumPersistentTiles = AllTiles.Num() - NumVirtualTiles;
 
 	UNavTileComponent *Current = Tile;
 	Current->Distance = 0;
@@ -242,6 +243,8 @@ UNavTileComponent * ANavGrid::PlaceTile(const FVector & Location, AActor * TileO
 	TileComp->SetupAttachment(TileOwner->GetRootComponent());
 	TileComp->SetWorldTransform(FTransform::Identity);
 	TileComp->SetWorldLocation(Location);
+	TileComp->SetGrid(this);
+	TileComp->SetBoxExtent(FVector(TileSize / 2, TileSize / 2, 5));
 	TileComp->RegisterComponentWithWorld(TileOwner->GetWorld());
 
 	return TileComp;
@@ -294,6 +297,7 @@ void ANavGrid::GenerateVirtualTiles(const AGridPawn *Pawn)
 			}
 		}
 	}
+	NumVirtualTiles = VirtualTiles.Num();
 }
 
 void ANavGrid::DestroyVirtualTiles()
