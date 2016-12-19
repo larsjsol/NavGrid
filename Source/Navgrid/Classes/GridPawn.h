@@ -48,4 +48,6 @@ public:
 	virtual void OnTurnStart();
 	/* Called on turn end */
 	virtual void OnTurnEnd();
+
+	virtual bool CanMoveTo(const UNavTileComponent & Tile);
 };

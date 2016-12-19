@@ -67,3 +67,20 @@ void AGridPawn::OnTurnEnd()
 	SelectedHighlight->SetVisibility(false);
 	TurnComponent->bCanStillActThisRound = false;
 }
+
+bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
+{
+	ANavGrid *Grid = MovementComponent->Grid;
+	UNavTileComponent *Location = Grid->GetTile(GetActorLocation());
+
+	if (Location && Location != &Tile && Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
+	{
+		TArray<UNavTileComponent *> InRange;
+		Grid->GetTilesInRange(InRange);
+		if (InRange.Contains(&Tile) && MovementComponent->CreatePath(Tile))
+		{
+			return true;
+		}
+	}
+	return false;
+}
