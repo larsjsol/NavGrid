@@ -7,12 +7,14 @@ void ATurnManager::BeginPlay()
 
 void ATurnManager::StartFirstRound()
 {
+	Round++;
+
 	for (UTurnComponent *TC : TurnComponents)
 	{
 		TC->RoundStart();
 	}
 	OnRoundStart.Broadcast();
-	ComponentIndex = 0;
+	ComponentIndex = GetNextIndexThatCanAct();
 	TurnComponents[ComponentIndex]->TurnStart();
 	OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
 }
@@ -20,7 +22,7 @@ void ATurnManager::StartFirstRound()
 void ATurnManager::Register(UTurnComponent *TurnComponent)
 {
 	TurnComponents.AddUnique(TurnComponent);
-	TurnComponent->TurnManager = this;
+	TurnComponent->SetTurnManager(this);
 }
 
 void ATurnManager::EndTurn(UTurnComponent *Ender)
@@ -86,7 +88,8 @@ void ATurnManager::ChangeCurrent(int32 NewIndex)
 
 int32 ATurnManager::GetNextIndexThatCanAct()
 {
-	for (int32 Count = 0; Count < TurnComponents.Num(); Count++)
+	// add +1 so we only reselt the current pawn if it is the only one left that can act
+	for (int32 Count = 1; Count <= TurnComponents.Num(); Count++)
 	{
 		int32 CandidateIndex = (ComponentIndex + Count) % TurnComponents.Num();
 		if (TurnComponents[CandidateIndex]->bCanStillActThisRound)
@@ -99,6 +102,8 @@ int32 ATurnManager::GetNextIndexThatCanAct()
 
 void ATurnManager::StartNewRound()
 {
+	Round++;
+
 	for (UTurnComponent *TC : TurnComponents)
 	{
 		TC->RoundStart();

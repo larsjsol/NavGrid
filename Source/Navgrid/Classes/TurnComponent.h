@@ -28,14 +28,18 @@ public:
 	/* All actors managed by the turn manager have had their turn and a new round begins */
 	FOnRoundStart& OnRoundStart() { return OnRoundStartEvent; }
 
-	UPROPERTY(BlueprintReadWrite, Category = "NavGrid")
+	void SetTurnManager(ATurnManager *InTurnManager);
+protected:
+	UPROPERTY()
 	ATurnManager *TurnManager = NULL;
-
+public:
+	UPROPERTY(VisibleAnywhere, Category = "Turn Component")
 	bool bCanStillActThisRound = true;
 
-	/* Tell the manager that we are done */
+	/* Tell the manager that we are done acting for this round*/
 	void EndTurn();
-
+	/* Tell the manager that the turn should pass to the next component*/
+	void StartTurnNext();
 	/* Callend when a turn starts */
 	void TurnStart();
 	/* Called when a turn ends */

@@ -2,12 +2,22 @@
 
 #include "NavGridPrivatePCH.h"
 
+void UTurnComponent::SetTurnManager(ATurnManager *InTurnManager)
+{
+	TurnManager = InTurnManager;
+}
+
 void UTurnComponent::EndTurn()
 {
 	if (TurnManager)
 	{
 		TurnManager->EndTurn(this);
 	}
+}
+
+void UTurnComponent::StartTurnNext()
+{
+	TurnManager->StartTurnNext();
 }
 
 void UTurnComponent::TurnStart()

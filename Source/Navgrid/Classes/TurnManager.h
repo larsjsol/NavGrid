@@ -44,7 +44,10 @@ public:
 
 protected:
 	UPROPERTY() TArray<UTurnComponent *> TurnComponents;
+	UPROPERTY(VisibleAnyWhere, Category = "Turn Manager", meta = (AllowPrivateAccess = "true"))
 	int32 ComponentIndex = 0;
+	UPROPERTY(VisibleAnyWhere, Category = "Turn Manager", meta = (AllowPrivateAccess = "true"))
+	int32 Round = 0;
 	void ChangeCurrent(int32 NewIndex);
 	// returns -1 if no components can act this round
 	int32 GetNextIndexThatCanAct();
