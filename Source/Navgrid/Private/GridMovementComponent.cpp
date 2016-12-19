@@ -175,10 +175,11 @@ FTransform UGridMovementComponent::TransformFromRotation(float DeltaTime)
 void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath, TArray<const UNavTileComponent*>& OutPath)
 {
 	AGridPawn *GridPawnOwner = Cast<AGridPawn>(GetOwner());
+
+	OutPath.Empty();
 	if (GridPawnOwner && InPath.Num() > 2)
 	{
 		const UCapsuleComponent &Capsule = *GridPawnOwner->CapsuleComponent;
-		OutPath.Empty();
 		int32 CurrentIdx = 0;
 		OutPath.Add(InPath[0]);
 		for (int32 Idx = 1; Idx < InPath.Num(); Idx++)
@@ -202,6 +203,10 @@ void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath
 			}
 		}
 		OutPath.Add(InPath[InPath.Num() - 1]);
+	}
+	else
+	{
+		OutPath = InPath;
 	}
 }
 
@@ -244,9 +249,15 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 		// Add spline points for the tiles in the path
 		for (int32 Idx = 1; Idx < Path.Num(); Idx++)
 		{
-			float From = Spline->GetSplineLength();
 			Path[Idx]->AddSplinePoints(Path[Idx - 1]->GetComponentLocation(), *Spline, Idx == Path.Num() - 1);
 		}
+
+		if (Spline->GetSplineLength() == 0)
+		{
+			UE_LOG(NavGrid, Error, TEXT("UGridMovementComponent::CreatePath() Ended up with a zero-length spline"));
+			return false;
+		}
+
 		return true; // success!
 	}
 	else
