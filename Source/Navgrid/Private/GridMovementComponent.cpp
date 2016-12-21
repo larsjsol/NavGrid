@@ -184,7 +184,8 @@ void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath
 		OutPath.Add(InPath[0]);
 		for (int32 Idx = 1; Idx < InPath.Num(); Idx++)
 		{
-			if (InPath[Idx]->Obstructed(InPath[CurrentIdx]->GetPawnLocation(), Capsule))
+			if (FMath::Abs(InPath[CurrentIdx]->GetPawnLocation().Z - InPath[Idx]->GetPawnLocation().Z) > 30 ||
+				InPath[Idx]->Obstructed(InPath[CurrentIdx]->GetPawnLocation(), Capsule))
 			{
 				OutPath.AddUnique(InPath[Idx - 1]);
 				CurrentIdx = Idx - 1;
