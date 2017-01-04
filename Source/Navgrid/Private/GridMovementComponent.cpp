@@ -61,29 +61,30 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	ConsiderUpdateMovementMode();
 	switch (MovementMode)
 	{
+	default:
 	case EGridMovementMode::Stationary:
+		if (bAlwaysUseRootMotion)
+		{
+			FTransform RootMotion = ConsumeRootMotion();
+			NewTransform.SetRotation(NewTransform.GetRotation() * RootMotion.GetRotation());
+			NewTransform.SetLocation(NewTransform.GetLocation() + RootMotion.GetLocation());
+		}
 		break; //nothing to do
 	case EGridMovementMode::InPlaceTurn:
 		NewTransform = TransformFromRotation(DeltaTime);
 		break;
-	default:
+	case EGridMovementMode::Walking:
+	case EGridMovementMode::ClimbingDown:
+	case EGridMovementMode::ClimbingUp:
 		NewTransform = TransformFromPath(DeltaTime);
 		break;
-	}
-
-	if (bAlwaysUseRootMotion)
-	{
-		// Might be empty if we have already gotten it above
-		FTransform RootMotion = ConsumeRootMotion();
-		NewTransform.SetRotation(NewTransform.GetRotation() * RootMotion.GetRotation());
-		NewTransform.SetLocation(NewTransform.GetLocation() + RootMotion.GetLocation());
 	}
 
 	// update velocity so it can be fetched by the pawn 
 	Velocity = (NewTransform.GetLocation() - Owner->GetActorLocation()) * (1 / DeltaTime);
 	UpdateComponentVelocity();
-	// actually move the the actor
 	NewTransform.SetScale3D(Owner->GetActorScale3D()); // dont ever change the scale
+	// actually move the the actor
 	Owner->SetActorTransform(NewTransform);
 }
 
@@ -93,7 +94,8 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 	float CurrentSpeed = 0;
 	if (bUseRootMotion)
 	{
-		CurrentSpeed = ConsumeRootMotion().GetLocation().Size();
+		FTransform RootMotion = ConsumeRootMotion();
+		CurrentSpeed = RootMotion.GetLocation().Size();
 	}
 	/* Root motion is either not available or there is really little movement, use manually set values */
 	if (CurrentSpeed < 25 * DeltaTime)
