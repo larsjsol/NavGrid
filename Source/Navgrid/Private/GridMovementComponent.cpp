@@ -9,7 +9,6 @@
 UGridMovementComponent::UGridMovementComponent(const FObjectInitializer &ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	Spline = ObjectInitializer.CreateDefaultSubobject<USplineComponent>(this, "PathSpline");
 	PathMesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Path.NavGrid_Path'")).Object;
 	
 	AvailableMovementModes.Add(EGridMovementMode::ClimbingDown);
@@ -21,6 +20,13 @@ UGridMovementComponent::UGridMovementComponent(const FObjectInitializer &ObjectI
 
 void UGridMovementComponent::BeginPlay()
 {
+	/* I dont know why, but if we use createdefaultsubobject in the constructor this is sometimes reset to NULL*/
+	if (!IsValid(Spline))
+	{
+		Spline = NewObject<USplineComponent>(this, "PathSpline");
+		check(Spline);
+	}
+
 	/* Grab a reference to the NavGrid */
 	TActorIterator<ANavGrid> NavGridItr(GetWorld());
 	if (NavGridItr)
