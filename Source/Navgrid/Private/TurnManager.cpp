@@ -15,7 +15,10 @@ void ATurnManager::StartFirstRound()
 	}
 	OnRoundStart.Broadcast();
 	ComponentIndex = GetNextIndexThatCanAct();
-	TurnComponents[ComponentIndex]->TurnStart();
+	if (ComponentIndex > -1 && ComponentIndex < TurnComponents.Num())
+	{
+		TurnComponents[ComponentIndex]->TurnStart();
+	}
 	OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
 }
 
