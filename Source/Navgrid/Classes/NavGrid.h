@@ -32,6 +32,9 @@ public:
 	/* Distance between the centers of two adjacent tiles */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
 	float TileSpacing = 200;
+	/* Should virtual tiles be placed on empty areas */
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
+	bool EnableVirtualTiles = false;
 
 	/* Scene Component (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components")

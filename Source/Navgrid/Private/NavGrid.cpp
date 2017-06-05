@@ -118,6 +118,11 @@ void ANavGrid::CalculateTilesInRange(UNavTileComponent * Tile, AGridPawn *Pawn, 
 		return;
 	}
 
+	if (EnableVirtualTiles)
+	{
+		GenerateVirtualTiles(Pawn);
+	}
+
 	TArray<UNavTileComponent *> AllTiles;
 	GetEveryTile(AllTiles, GetWorld());
 	for (auto *T : AllTiles)
