@@ -3,7 +3,7 @@ using System.IO;
  
 public class NavGrid : ModuleRules
 {
-    public NavGrid(TargetInfo Target) {
+    public NavGrid(ReadOnlyTargetRules TargetRules) : base(TargetRules) {
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
         PrivateDependencyModuleNames.AddRange(new string[] { "UnrealED" });
 
