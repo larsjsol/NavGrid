@@ -38,7 +38,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") 
 	UArrowComponent *Arrow = NULL;
 
-	/* Should this pawn snap to grid when the game starts */
+	/* Should this pawn snap to grid at the start of each turn */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Default")
 	bool SnapToGrid = true;
 

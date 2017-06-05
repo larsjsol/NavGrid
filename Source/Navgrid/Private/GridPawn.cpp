@@ -55,9 +55,9 @@ void AGridPawn::OnTurnStart()
 		if (SnapToGrid)
 		{
 			SetActorLocation(Grid->ToRoundedTileLocation(GetActorLocation()));
-			Grid->GenerateVirtualTiles(this);
-			Grid->CalculateTilesInRange(Grid->GetTile(GetActorLocation()), this, true);
 		}
+		Grid->GenerateVirtualTiles(this);
+		Grid->CalculateTilesInRange(Grid->GetTile(GetActorLocation()), this, true);
 	}
 	else
 	{
