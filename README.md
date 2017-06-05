@@ -33,7 +33,7 @@ Useful events:
 
 Useful properties:
 * `ECC_NavGridWalkable`: The channel used when tracing for tiles. Set this to the channel you created in step 4 of the quickstart. 
-* `EnableVirtualTiles`: Enables placement of virtual tiles on empty spaces. Useful if you don't want to manually place a tile on every walkable part of your levels.
+* `EnableVirtualTiles`: Enables placement of virtual tiles on empty spaces. Useful if you don't want to manually place tiles on every walkable part of your levels.
 
 ### UNavTileComponent
 A single tile that can be traversed by a `AGridPawn`. It will automaticly detect any neighbouring tiles.
