@@ -34,10 +34,12 @@ public:
 	float TileSpacing = 200;
 
 	/* Scene Component (root) */
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components")
+	USceneComponent *SceneComponent = NULL;
 
 	/* Cursor for highlighting tiles */
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") UStaticMeshComponent *Cursor;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
+	UStaticMeshComponent *Cursor;
 
 	/* Number of tiles that exist in the current level */
 	UPROPERTY(VisibleAnywhere, Category = "NavGrid")
