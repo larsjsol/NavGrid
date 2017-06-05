@@ -222,6 +222,7 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 	Spline->ClearSplinePoints();
 	AGridPawn *Owner = Cast<AGridPawn>(GetOwner());
 
+	UNavTileComponent *Tile = NULL;
 	if (Grid)
 	{
 		Tile = Grid->GetTile(Owner->GetActorLocation());
@@ -295,6 +296,20 @@ void UGridMovementComponent::TurnTo(const FRotator & Forward)
 		DesiredForwardRotation.Pitch = LockPitch ? 0 : Forward.Pitch;
 		DesiredForwardRotation.Yaw = LockYaw ? 0 : Forward.Yaw;
 		ChangeMovementMode(EGridMovementMode::InPlaceTurn);
+	}
+}
+
+void UGridMovementComponent::SnapToGrid()
+{
+	UNavTileComponent *SnapTile;
+	if (Grid)
+	{
+		AActor *Owner = GetOwner();
+		SnapTile = Grid->GetTile(Owner->GetActorLocation());
+		if (SnapTile)
+		{
+			Owner->SetActorLocation(SnapTile->GetPawnLocation());
+		}
 	}
 }
 

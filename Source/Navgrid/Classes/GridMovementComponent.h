@@ -90,6 +90,8 @@ public:
 	bool MoveTo(const UNavTileComponent &Target);
 	/* Turn in place */
 	void TurnTo(const FRotator &Forward);
+	/* Snap actor the grid */
+	void SnapToGrid();
 protected:
 	FRotator DesiredForwardRotation;
 public:
@@ -135,15 +137,14 @@ protected:
 	/* How far along the spline are we */
 	float Distance = 0;
 
+	/* the grid we're currently on */
+	UPROPERTY()
+	ANavGrid *Grid = NULL;
 	/* The tile we're currently on*/
-	UNavTileComponent *Tile;
+	//UNavTileComponent *Tile;
 
 	UPROPERTY() UAnimInstance *AnimInstance;
 
 	/* Return a delta FRotater that is within MaxRotationSpeed */
 	FRotator LimitRotation(const FRotator &OldRotation, const FRotator &NewRotation, float DeltaTime);
-
-protected:
-	UPROPERTY()
-	ANavGrid *Grid = NULL;
 };

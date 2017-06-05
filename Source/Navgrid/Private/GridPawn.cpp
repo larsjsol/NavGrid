@@ -48,14 +48,14 @@ void AGridPawn::OnRoundStart()
 void AGridPawn::OnTurnStart()
 {
 	SelectedHighlight->SetVisibility(true);
+	if (SnapToGrid)
+	{
+		MovementComponent->SnapToGrid();
+	}
 
 	Grid = ANavGrid::GetNavGrid(GetWorld());
 	if (Grid)
 	{
-		if (SnapToGrid)
-		{
-			SetActorLocation(Grid->ToRoundedTileLocation(GetActorLocation()));
-		}
 		Grid->GenerateVirtualTiles(this);
 		Grid->CalculateTilesInRange(Grid->GetTile(GetActorLocation()), this, true);
 	}

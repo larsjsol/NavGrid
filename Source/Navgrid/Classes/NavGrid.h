@@ -33,11 +33,6 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
 	float TileSpacing = 200;
 
-	/* Return the closes position that is in the middle of a tile
-	   Z coordinate is ignored	
-	*/
-	FVector ToRoundedTileLocation(const FVector &WorldLocation);
-
 	/* Scene Component (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components") USceneComponent *SceneComponent = NULL;
 
