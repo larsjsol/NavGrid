@@ -41,8 +41,6 @@ protected:
 	FTransform TransformFromRotation(float DeltaTime);
 public:
 
-	/* bound to the first NavGrid found in the level */
-	UPROPERTY(BlueprintReadOnly, Category = "Movement") ANavGrid *Grid = NULL;
 	/* How far (in tile cost) the actor can move in one go */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement") float MovementRange = 4;
 	/* How fast can the actor move when walking*/
@@ -144,4 +142,8 @@ protected:
 
 	/* Return a delta FRotater that is within MaxRotationSpeed */
 	FRotator LimitRotation(const FRotator &OldRotation, const FRotator &NewRotation, float DeltaTime);
+
+protected:
+	UPROPERTY()
+	ANavGrid *Grid = NULL;
 };

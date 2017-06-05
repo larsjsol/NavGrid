@@ -50,4 +50,7 @@ public:
 	virtual void OnTurnEnd();
 
 	virtual bool CanMoveTo(const UNavTileComponent & Tile);
+protected:
+	UPROPERTY()
+	ANavGrid *Grid = NULL;
 };

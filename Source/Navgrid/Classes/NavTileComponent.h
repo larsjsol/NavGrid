@@ -18,6 +18,7 @@ class NAVGRID_API UNavTileComponent : public UBoxComponent
 	GENERATED_BODY()
 public:
 	UNavTileComponent(const FObjectInitializer &ObjectInitializer);
+	virtual void PostInitProperties();
 
 protected:
 	UPROPERTY() 

@@ -51,6 +51,17 @@ void UNavTileComponent::SetPawnLocationOffset(const FVector &Offset)
 	PawnLocationOffset = Offset;
 }
 
+void UNavTileComponent::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+	ANavGrid *MyGrid = ANavGrid::GetNavGrid(GetWorld());
+	if (MyGrid)
+	{
+		SetGrid(MyGrid);
+	}
+}
+
 void UNavTileComponent::SetGrid(ANavGrid * InGrid)
 {
 	Grid = InGrid;

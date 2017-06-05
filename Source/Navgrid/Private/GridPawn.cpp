@@ -38,12 +38,6 @@ AGridPawn::AGridPawn()
 void AGridPawn::BeginPlay()
 {
 	Super::BeginPlay();
-
-	TActorIterator<ANavGrid>GridItr(GetWorld());
-	if (SnapToGrid && GridItr)
-	{
-		SetActorLocation(GridItr->ToRoundedTileLocation(GetActorLocation()));
-	}
 }
 
 void AGridPawn::OnRoundStart()
@@ -54,11 +48,20 @@ void AGridPawn::OnRoundStart()
 void AGridPawn::OnTurnStart()
 {
 	SelectedHighlight->SetVisibility(true);
-	ANavGrid *Grid = MovementComponent->Grid;
+
+	Grid = ANavGrid::GetNavGrid(GetWorld());
 	if (Grid)
 	{
-		Grid->GenerateVirtualTiles(this);
-		Grid->CalculateTilesInRange(Grid->GetTile(GetActorLocation()), this, true);
+		if (SnapToGrid)
+		{
+			SetActorLocation(Grid->ToRoundedTileLocation(GetActorLocation()));
+			Grid->GenerateVirtualTiles(this);
+			Grid->CalculateTilesInRange(Grid->GetTile(GetActorLocation()), this, true);
+		}
+	}
+	else
+	{
+		UE_LOG(NavGrid, Error, TEXT("%s was unable to find a NavGrid in level"), *this->GetName());
 	}
 }
 
@@ -70,7 +73,6 @@ void AGridPawn::OnTurnEnd()
 
 bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
 {
-	ANavGrid *Grid = MovementComponent->Grid;
 	UNavTileComponent *Location = Grid->GetTile(GetActorLocation());
 
 	if (Location && Location != &Tile && Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))

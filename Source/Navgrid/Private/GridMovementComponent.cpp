@@ -27,15 +27,10 @@ void UGridMovementComponent::BeginPlay()
 		check(Spline);
 	}
 
-	/* Grab a reference to the NavGrid */
-	TActorIterator<ANavGrid> NavGridItr(GetWorld());
-	if (NavGridItr)
+	Grid = ANavGrid::GetNavGrid(GetWorld());
+	if (!Grid)
 	{
-		Grid = *NavGridItr;
-	}
-	else
-	{
-		UE_LOG(NavGrid, Fatal, TEXT("%s: Unable to get reference to Navgrid."), *GetName());
+		UE_LOG(NavGrid, Error, TEXT("%s was unable to find a NavGrid in level"), *this->GetName());
 	}
 
 	/* Grab a reference to (a) AnimInstace */
@@ -136,11 +131,14 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 	/* Use the rotation from the ladder if we're climbing */
 	else if (MovementMode == EGridMovementMode::ClimbingUp || MovementMode == EGridMovementMode::ClimbingDown)
 	{
-		UNavTileComponent *CurrentTile = Grid->GetTile(PawnOwner->GetActorLocation(), false);
-		if (CurrentTile)
+		if (Grid)
 		{
-			DesiredRotation = CurrentTile->GetComponentRotation();
-			DesiredRotation.Yaw -= 180;
+			UNavTileComponent *CurrentTile = Grid->GetTile(PawnOwner->GetActorLocation(), false);
+			if (CurrentTile)
+			{
+				DesiredRotation = CurrentTile->GetComponentRotation();
+				DesiredRotation.Yaw -= 180;
+			}
 		}
 		else
 			// Dont update the rotation if we have no idea of what it should be
@@ -222,10 +220,13 @@ void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath
 bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 {
 	Spline->ClearSplinePoints();
-
 	AGridPawn *Owner = Cast<AGridPawn>(GetOwner());
-	Tile = Grid->GetTile(Owner->GetActorLocation());
-	if (!Tile) 
+
+	if (Grid)
+	{
+		Tile = Grid->GetTile(Owner->GetActorLocation());
+	}
+	if (!Tile)
 	{ 
 		UE_LOG(NavGrid, Error, TEXT("%s: Not on grid"), *Owner->GetName());
 		return false;
