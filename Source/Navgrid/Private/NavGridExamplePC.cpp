@@ -42,7 +42,7 @@ void ANavGridExamplePC::BeginPlay()
 	}
 
 	/* register handler for turn start*/
-	TurnManager->OnTurnStart.AddDynamic(this, &ANavGridExamplePC::OnTurnStart);
+	TurnManager->OnTurnStart().AddUObject(this, &ANavGridExamplePC::OnTurnStart);
 }
 
 void ANavGridExamplePC::OnConstruction(const FTransform &Transform)

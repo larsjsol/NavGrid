@@ -8,7 +8,12 @@
 class UTurnComponent;
 
 /**
-* Coordinates a set of turn components
+* Coordinates a set of turn components.
+*
+* Terms:
+*  'Turn' is used for a singe pawn doing one or more actions.
+*  'Round' is used for all active pawns having their Turn. Note that a pawn may have several Turns in a Round, 
+*  say if the player selects another pawn to go first.
 */
 UCLASS()
 class NAVGRID_API ATurnManager : public AActor
@@ -30,17 +35,18 @@ public:
 	/* Return the component whos turn it is */
 	UTurnComponent *GetCurrentComponent();
 
-	//Event delegates
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnStart, UTurnComponent *, TurnComponent);
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnEnd, UTurnComponent *, TurnComponent);
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundStart);
+	//Declare events
+	DECLARE_EVENT_OneParam(UTurnComponent, FOnTurnStart, UTurnComponent *);
+	DECLARE_EVENT_OneParam(UTurnComponent, FOnTurnEnd, UTurnComponent *);
+	DECLARE_EVENT(UTurnComponent, FOnRoundStart);
 
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnTurnStart OnTurnStart;
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnTurnEnd OnTurnEnd;
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnRoundStart OnRoundStart;
+	FOnTurnStart& OnTurnStart() { return OnTurnStartEvent; }
+	FOnTurnEnd& OnTurnEnd() { return OnTurnEndEvent; }
+	FOnRoundStart& OnRoundStart() { return OnRoundStartEvent; }
+private:
+	FOnTurnStart OnTurnStartEvent;
+	FOnTurnEnd OnTurnEndEvent;
+	FOnRoundStart OnRoundStartEvent;
 
 protected:
 	UPROPERTY() TArray<UTurnComponent *> TurnComponents;
