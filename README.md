@@ -31,6 +31,10 @@ Useful events:
 * `OnTileCursorOver`
 * `OnTileEndCursorOver`
 
+Useful properties:
+* `ECC_NavGridWalkable`: The channel used when tracing for tiles. Set this to the channel you created in step 4 of the quickstart. 
+* `EnableVirtualTiles`: Enables placement of virtual tiles on empty spaces. Useful if you don't want to manually place a tile on every walkable part of your levels.
+
 ### UNavTileComponent
 A single tile that can be traversed by a `AGridPawn`. It will automaticly detect any neighbouring tiles.
 
@@ -94,6 +98,11 @@ The path preview is thin and changes form and posision from one instance to anot
 There are two possible solutions to this: Either ensure that the camera is close when drawing a path or change the antialiasing method in `Project Settings->Rendering`.
 
 ## Changes
+**Version 2.2 - 05.06.2017**
+* Support Unreal Engine 4.16
+* Add automatic placement of 'virtual tiles' on empty areas
+* Add option on ANavGrid for specifying the channel used when tracing for tiles
+
 **Version 2.1 - 11.09.2016**
 * Support Unreal Engine 4.13
 * Ignore props when deciding if a tile is clicked or hovered over
