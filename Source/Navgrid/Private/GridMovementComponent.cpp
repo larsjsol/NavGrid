@@ -443,10 +443,10 @@ void UGridMovementComponent::AddSplineMesh(float From, float To)
 {
 	float TanScale = 25;
 	FVector StartPos = Spline->GetLocationAtDistanceAlongSpline(From, ESplineCoordinateSpace::Local);
-	StartPos.Z += VerticalOffset;
+	StartPos.Z += Grid->UIOffset;
 	FVector StartTan = Spline->GetDirectionAtDistanceAlongSpline(From, ESplineCoordinateSpace::Local) * TanScale;
 	FVector EndPos = Spline->GetLocationAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local);
-	EndPos.Z += VerticalOffset;
+	EndPos.Z += Grid->UIOffset;
 	FVector EndTan = Spline->GetDirectionAtDistanceAlongSpline(To, ESplineCoordinateSpace::Local) * TanScale;
 	FVector UpVector = EndPos - StartPos;
 	UpVector = FVector(UpVector.Y, UpVector.Z, UpVector.X);

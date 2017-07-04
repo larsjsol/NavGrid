@@ -180,7 +180,7 @@ void UNavTileComponent::CursorOver(UPrimitiveComponent* TouchedComponent)
 {
 	if (Grid)
 	{
-		Grid->Cursor->SetWorldLocation(GetPawnLocation() + FVector(0, 0, 30));
+		Grid->Cursor->SetWorldLocation(GetPawnLocation() + FVector(0, 0, Grid->UIOffset));
 		Grid->Cursor->SetVisibility(true);
 		Grid->TileCursorOver(*this);
 	}

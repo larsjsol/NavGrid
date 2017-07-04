@@ -25,7 +25,6 @@ AGridPawn::AGridPawn()
 	SelectedHighlight->SetStaticMesh(Selected);
 	SelectedHighlight->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SelectedHighlight->SetVisibility(false);
-	SelectedHighlight->SetRelativeLocation(FVector(0, 0, 50));
 
 	TurnComponent->OnRoundStart().AddUObject(this, &AGridPawn::OnRoundStart);
 	TurnComponent->OnTurnStart().AddUObject(this, &AGridPawn::OnTurnStart);
@@ -38,6 +37,10 @@ AGridPawn::AGridPawn()
 void AGridPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	Grid = ANavGrid::GetNavGrid(GetWorld());
+	check(Grid);
+	SelectedHighlight->SetRelativeLocation(FVector(0, 0, Grid->UIOffset));
 }
 
 void AGridPawn::OnRoundStart()
