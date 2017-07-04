@@ -103,6 +103,11 @@ The path preview is thin and changes form and posision from one instance to anot
 There are two possible solutions to this: Either ensure that the camera is close when drawing a path or change the antialiasing method in `Project Settings->Rendering`.
 
 ## Changes
+**Version 2.2.1 - 04.07.2017**
+* Place virtual tiles before we do pathfinding
+* Disable shadows for UI elements
+* Use the same height offset for UI elements
+
 **Version 2.2 - 05.06.2017**
 * Support Unreal Engine 4.16
 * Add automatic placement of 'virtual tiles' on empty areas
