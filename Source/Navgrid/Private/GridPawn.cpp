@@ -56,7 +56,7 @@ void AGridPawn::OnTurnStart()
 	Grid = ANavGrid::GetNavGrid(GetWorld());
 	if (Grid)
 	{
-		Grid->CalculateTilesInRange(Grid->GetTile(GetActorLocation()), this, true);
+		Grid->CalculateTilesInRange(this, true);
 	}
 	else
 	{

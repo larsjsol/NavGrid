@@ -64,7 +64,7 @@ public:
 
 	/* Find all tiles in range */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	virtual void CalculateTilesInRange(UNavTileComponent * Tile, AGridPawn *Pawn, bool DoCollisionTests);
+	virtual void CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests);
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void GetTilesInRange(TArray<UNavTileComponent *> &OutTiles);
 protected:

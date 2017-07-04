@@ -108,21 +108,23 @@ void ANavGrid::EndTileCursorOver(UNavTileComponent &Tile)
 	OnEndTileCursorOverEvent.Broadcast(Tile);
 }
 
-void ANavGrid::CalculateTilesInRange(UNavTileComponent * Tile, AGridPawn *Pawn, bool DoCollisionTests)
+void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 {
-	TilesInRange.Empty();
-
-	if (!Tile || !Pawn)
-	{
-		UE_LOG(NavGrid, Error, TEXT("%s::CalculateTilesInRange(): Passed NULL-pointer"), *GetName());
-		return;
-	}
+	check(Pawn);
 
 	if (EnableVirtualTiles)
 	{
 		GenerateVirtualTiles(Pawn);
 	}
 
+	UNavTileComponent * Tile = GetTile(Pawn->GetActorLocation());
+	if (!Tile)
+	{
+		UE_LOG(NavGrid, Error, TEXT("ANavGrid::CalculateTilesInRange(): %s is of the grid"), *Pawn->GetName());
+		return;
+	}
+
+	TilesInRange.Empty();
 	TArray<UNavTileComponent *> AllTiles;
 	GetEveryTile(AllTiles, GetWorld());
 	for (auto *T : AllTiles)
