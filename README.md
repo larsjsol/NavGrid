@@ -20,9 +20,9 @@ A few more steps are needed after compiling the plugin:
 7. Hit Play!
 
 ## Class Overview
-Examining the headers for `AGridPawn`, `ANavGridExamplePC` and `UGridMovementComponent` are probably good starting points for figuring out how this plugin works. I've tried to make the code as readable as possible.
+Examining the headers for `AGridPawn`, `ANavGridExamplePC` and `UGridMovementComponent` are probably good starting points for figuring out how this plugin works. You probably want to extend `AGridPawn` and create you own player controller for your project. 
 
-A few of the central classes are summarized below.
+A few of the classes are summarized below.
 
 ### ANavGrid
 Represents the grid. It is responsible for pathfinding.
