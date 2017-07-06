@@ -1,7 +1,9 @@
 #include "NavGridPrivatePCH.h"
 
+#if WITH_EDITOR
 #include "Builders/EditorBrushBuilder.h"
 #include "Builders/CubeBuilder.h"
+#endif
 
 ATileGeneratingVolume::ATileGeneratingVolume()
 {
@@ -11,6 +13,7 @@ ATileGeneratingVolume::ATileGeneratingVolume()
 
 void ATileGeneratingVolume::GenerateTiles()
 {
+#if WITH_EDITOR
 	const UCubeBuilder *Builder = Cast<UCubeBuilder>(GetBrushBuilder());
 	ANavGrid *Grid = ANavGrid::GetNavGrid(GetWorld());
 	if (!Grid)
@@ -49,6 +52,7 @@ void ATileGeneratingVolume::GenerateTiles()
 			}
 		}
 	}
+#endif
 }
 
 void ATileGeneratingVolume::DestroyTiles()

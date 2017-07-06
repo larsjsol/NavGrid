@@ -2,7 +2,6 @@
 
 #include "NavGridPrivatePCH.h"
 
-#include "Editor.h"
 #include <limits>
 
 DEFINE_LOG_CATEGORY(NavGrid);
