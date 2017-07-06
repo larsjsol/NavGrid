@@ -7,6 +7,11 @@
 
 class UGridMovementComponent;
 class UTurnComponent;
+class UCapsuleComponent;
+class UArrowComponent;
+class UNavTileComponent;
+class ANavGrid;
+
 /**
  * A pawn that can move around on a NavGrid.
  *
