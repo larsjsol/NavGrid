@@ -12,7 +12,7 @@ ANavTileActor::ANavTileActor(const FObjectInitializer &ObjectInitializer)
 	NavTileComponent->SetupAttachment(SceneComponent);
 	NavTileComponent->SetBoxExtent(FVector(100, 100, 5));
 
-	TCHAR* AssRef = TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Tile.NavGrid_Tile'");
+	const TCHAR* AssRef = TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Tile.NavGrid_Tile'");
 	auto OF = ConstructorHelpers::FObjectFinder<UStaticMesh>(AssRef);
 	if (OF.Succeeded())
 	{

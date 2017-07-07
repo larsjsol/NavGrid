@@ -15,7 +15,7 @@ ANavLadderActor::ANavLadderActor(const FObjectInitializer &ObjectInitializer)
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
 	Mesh->SetupAttachment(SceneComponent);
 
-	TCHAR* AssRef = TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Ladder.NavGrid_Ladder'");
+	const TCHAR* AssRef = TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Ladder.NavGrid_Ladder'");
 	auto OF = ConstructorHelpers::FObjectFinder<UStaticMesh>(AssRef);
 	if (OF.Succeeded())
 	{
