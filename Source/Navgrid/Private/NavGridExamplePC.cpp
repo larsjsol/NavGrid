@@ -10,6 +10,8 @@ ANavGridExamplePC::ANavGridExamplePC(const FObjectInitializer& ObjectInitializer
 	/* Enable mouse events */
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
+	bEnableTouchEvents = true;
+	bEnableTouchOverEvents = true;
 }
 
 void ANavGridExamplePC::BeginPlay()

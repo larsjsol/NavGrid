@@ -81,9 +81,18 @@ protected:
 public:
 
 // User interface
-	UFUNCTION() void Clicked(UPrimitiveComponent* TouchedComponent, FKey Key);
-	UFUNCTION() void CursorOver(UPrimitiveComponent* TouchedComponent);
-	UFUNCTION() void EndCursorOver(UPrimitiveComponent* TouchedComponent);
+	UFUNCTION()
+	void Clicked(UPrimitiveComponent* TouchedComponent, FKey Key);
+	UFUNCTION()
+	void CursorOver(UPrimitiveComponent* TouchedComponent);
+	UFUNCTION()
+	void EndCursorOver(UPrimitiveComponent* TouchedComponent);
+	UFUNCTION()
+	void TouchEnter(ETouchIndex::Type Type, UPrimitiveComponent* TouchedComponent);
+	UFUNCTION()
+	void TouchLeave(ETouchIndex::Type Type, UPrimitiveComponent* TouchedComponent);
+	UFUNCTION()
+	void TouchEnd(ETouchIndex::Type Type, UPrimitiveComponent* TouchedComponent);
 
 	/*
 	* Add points for moving into this tile from FromPos

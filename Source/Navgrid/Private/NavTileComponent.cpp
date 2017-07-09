@@ -9,9 +9,14 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	PawnLocationOffset = FVector::ZeroVector;
 	SetComponentTickEnabled(false);
 
+	/* Bind mouse events */
 	OnBeginCursorOver.AddDynamic(this, &UNavTileComponent::CursorOver);
 	OnEndCursorOver.AddDynamic(this, &UNavTileComponent::EndCursorOver);
 	OnClicked.AddDynamic(this, &UNavTileComponent::Clicked);
+	/* Bind touch events */
+	OnInputTouchEnter.AddDynamic(this, &UNavTileComponent::TouchEnter);
+	OnInputTouchLeave.AddDynamic(this, &UNavTileComponent::TouchLeave);
+	OnInputTouchEnd.AddDynamic(this, &UNavTileComponent::TouchEnd);
 
 	SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
@@ -192,6 +197,24 @@ void UNavTileComponent::EndCursorOver(UPrimitiveComponent* TouchedComponent)
 	{
 		Grid->Cursor->SetVisibility(false);
 		Grid->EndTileCursorOver(*this);
+	}
+}
+
+void UNavTileComponent::TouchEnter(ETouchIndex::Type Type, UPrimitiveComponent* TouchedComponent)
+{
+	CursorOver(TouchedComponent);
+}
+
+void UNavTileComponent::TouchLeave(ETouchIndex::Type Type, UPrimitiveComponent* TouchedComponent)
+{
+	EndCursorOver(TouchedComponent);
+}
+
+void UNavTileComponent::TouchEnd(ETouchIndex::Type Type, UPrimitiveComponent* TouchedComponent)
+{
+	if (Grid)
+	{
+		Grid->TileClicked(*this);
 	}
 }
 
