@@ -103,6 +103,12 @@ The path preview is thin and changes form and posision from one instance to anot
 There are two possible solutions to this: Either ensure that the camera is close when drawing a path or change the antialiasing method in `Project Settings->Rendering`.
 
 ## Changes
+**Version 2.2.2 - 12.07.2017**
+* Compile even if headers are included in 'incorrect' order
+* Fix building without editor 
+* Fix building for Android
+* Handle touch events
+
 **Version 2.2.1 - 04.07.2017**
 * Place virtual tiles before we do pathfinding
 * Disable shadows for UI elements
