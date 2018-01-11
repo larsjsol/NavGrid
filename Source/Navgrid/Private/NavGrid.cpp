@@ -119,7 +119,7 @@ void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 	UNavTileComponent * Tile = GetTile(Pawn->GetActorLocation());
 	if (!Tile)
 	{
-		UE_LOG(NavGrid, Error, TEXT("ANavGrid::CalculateTilesInRange(): %s is of the grid"), *Pawn->GetName());
+		UE_LOG(NavGrid, Error, TEXT("ANavGrid::CalculateTilesInRange(): %s is off the grid"), *Pawn->GetName());
 		return;
 	}
 

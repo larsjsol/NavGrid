@@ -61,7 +61,6 @@ void ANavGridExamplePC::OnConstruction(const FTransform &Transform)
 void ANavGridExamplePC::OnTileClicked(const UNavTileComponent &Tile)
 {
 	/* Try to move the current pawn to the clicked tile */
-
 	if (Pawn)
 	{
 		UGridMovementComponent *MovementComponent = Pawn->MovementComponent;
