@@ -6,7 +6,7 @@ public class NavGrid : ModuleRules
     public NavGrid(ReadOnlyTargetRules TargetRules) : base(TargetRules) {
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
 
-        if (UEBuildConfiguration.bBuildEditor)
+        if (TargetRules.bBuildEditor)
         {
             PrivateDependencyModuleNames.AddRange(new string[] { "UnrealED" });
         }
