@@ -73,6 +73,11 @@ void AGridPawn::OnTurnEnd()
 	TurnComponent->bCanStillActThisRound = false;
 }
 
+bool AGridPawn::IsBusy()
+{
+	return MovementComponent->Velocity.Size() > 0;
+}
+
 bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
 {
 	UNavTileComponent *Location = Grid->GetTile(GetActorLocation());
