@@ -61,26 +61,13 @@ void ANavGridExamplePC::OnConstruction(const FTransform &Transform)
 void ANavGridExamplePC::OnTileClicked(const UNavTileComponent &Tile)
 {
 	/* Try to move the current pawn to the clicked tile */
-	if (Pawn)
+	if (Pawn && !Pawn->IsBusy())
 	{
 		UGridMovementComponent *MovementComponent = Pawn->MovementComponent;
-		UNavTileComponent *Location = Grid->GetTile(Pawn->GetActorLocation());
-
-		if (Location && MovementComponent && Grid)
+		if (Pawn->CanMoveTo(Tile))
 		{
-			if (Location != &Tile && 
-				MovementComponent->Velocity.Size() == 0 &&
-				Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes)
-				)
-			{
-				TArray<UNavTileComponent *> InRange;
-				Grid->GetTilesInRange(InRange);
-				if (InRange.Contains(&Tile))
-				{
-					MovementComponent->MoveTo((UNavTileComponent &) Tile);
-					MovementComponent->HidePath();
-				}
-			}
+			MovementComponent->MoveTo((UNavTileComponent &)Tile);
+			MovementComponent->HidePath();
 		}
 	}
 }
@@ -88,13 +75,12 @@ void ANavGridExamplePC::OnTileClicked(const UNavTileComponent &Tile)
 void ANavGridExamplePC::OnTileCursorOver(const UNavTileComponent &Tile)
 {
 	/* If the pawn is not moving, try to create a path to the hovered tile and show it */
-	if (Pawn)
+	if (Pawn && !Pawn->IsBusy())
 	{
 		UGridMovementComponent *MovementComponent = Pawn->MovementComponent;
-		if (MovementComponent->Velocity.Size() == 0 && 
-			Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes) && 
-			MovementComponent->CreatePath((UNavTileComponent &) Tile))
+		if (Pawn->CanMoveTo(Tile))
 		{
+			MovementComponent->CreatePath((UNavTileComponent &)Tile);
 			MovementComponent->ShowPath();
 		}
 	}
