@@ -32,6 +32,10 @@ void ATurnManager::EndTurn(UTurnComponent *Ender)
 {
 	if (Ender == TurnComponents[ComponentIndex])
 	{
+		// broadcast the end turn event to the Ender
+		Ender->TurnEnd();
+		OnTurnEndEvent.Broadcast(Ender);
+
 		if (Ender->bCanStillActThisRound)
 		{
 			// tell the will get to keep going if it still can act this round
