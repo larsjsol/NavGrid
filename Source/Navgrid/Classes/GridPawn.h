@@ -27,24 +27,24 @@ public:
 	AGridPawn();
 	virtual void BeginPlay() override;
 
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") USceneComponent *Scene = NULL;
-
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
-	UGridMovementComponent *MovementComponent = NULL;
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
-	UTurnComponent *TurnComponent = NULL;
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	USceneComponent *Scene;
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UGridMovementComponent *MovementComponent;
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UTurnComponent *TurnComponent;
 	/* Used to test if thre's room for pawn on a tile*/
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
-	UCapsuleComponent *CapsuleComponent = NULL;
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UCapsuleComponent *CapsuleComponent;
 	/* Shown when the pawn is selected/has its turn */
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
-	UStaticMeshComponent *SelectedHighlight = NULL;
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UStaticMeshComponent *SelectedHighlight;
 	/* An arrow pointing forward */
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") 
-	UArrowComponent *Arrow = NULL;
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UArrowComponent *Arrow;
 
 	/* Should this pawn snap to grid at the start of each turn */
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Default")
+	UPROPERTY(EditAnyWhere, Category = "NavGrid")
 	bool SnapToGrid = true;
 
 	/* Callend on round start */
@@ -60,7 +60,8 @@ public:
 	virtual bool IsBusy();
 
 	virtual bool CanMoveTo(const UNavTileComponent & Tile);
+
 protected:
 	UPROPERTY()
-	ANavGrid *Grid = NULL;
+	ANavGrid *Grid;
 };

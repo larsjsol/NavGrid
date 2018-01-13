@@ -56,6 +56,7 @@ void AGridPawn::OnTurnStart()
 		MovementComponent->SnapToGrid();
 	}
 
+	// fetch the grid in case BeginPlay has not been called yet
 	Grid = ANavGrid::GetNavGrid(GetWorld());
 	if (Grid)
 	{
@@ -80,16 +81,19 @@ bool AGridPawn::IsBusy()
 
 bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
 {
-	UNavTileComponent *Location = Grid->GetTile(GetActorLocation());
-
-	if (Location && Location != &Tile && Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
+	if (Grid)
 	{
-		TArray<UNavTileComponent *> InRange;
-		Grid->GetTilesInRange(InRange);
-		if (InRange.Contains(&Tile) && MovementComponent->CreatePath(Tile))
+		UNavTileComponent *Location = Grid->GetTile(GetActorLocation());
+		if (Location && Location != &Tile && Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
 		{
-			return true;
+			TArray<UNavTileComponent *> InRange;
+			Grid->GetTilesInRange(InRange);
+			if (InRange.Contains(&Tile) && MovementComponent->CreatePath(Tile))
+			{
+				return true;
+			}
 		}
 	}
+
 	return false;
 }
