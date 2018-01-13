@@ -4,6 +4,7 @@
 
 #include "Components/SplineComponent.h"
 #include "Components/SceneComponent.h"
+#include "Components/BoxComponent.h"
 #include "GridMovementComponent.h"
 
 #include "NavTileComponent.generated.h"
