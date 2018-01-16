@@ -17,21 +17,21 @@ class NAVGRID_API UTurnComponent : public UActorComponent
 public:
 
 	//Event delegates
-	DECLARE_EVENT(UTurnComponent, FOnTurnStart);
-	DECLARE_EVENT(UTurnComponent, FOnTurnEnd);
-	DECLARE_EVENT(UTurnComponent, FOnRoundStart);
+	DECLARE_DELEGATE(FOnTurnStart);
+	DECLARE_DELEGATE(FOnTurnEnd);
+	DECLARE_DELEGATE(FOnRoundStart);
 
 	/* The Owners turn have started */
-	FOnTurnStart& OnTurnStart() { return OnTurnStartEvent; }
+	FOnTurnStart& OnTurnStart() { return OnTurnStartDelegate; }
 	/* The Owners turn have ended */
-	FOnTurnEnd& OnTurnEnd() { return OnTurnEndEvent; }
+	FOnTurnEnd& OnTurnEnd() { return OnTurnEndDelegate; }
 	/* All actors managed by the turn manager have had their turn and a new round begins */
-	FOnRoundStart& OnRoundStart() { return OnRoundStartEvent; }
+	FOnRoundStart& OnRoundStart() { return OnRoundStartDelegate; }
 
 	void SetTurnManager(ATurnManager *InTurnManager);
 protected:
 	UPROPERTY()
-	ATurnManager *TurnManager = NULL;
+	ATurnManager *TurnManager;
 public:
 	UPROPERTY(VisibleAnywhere, Category = "Turn Component")
 	bool bCanStillActThisRound = true;
@@ -48,7 +48,7 @@ public:
 	void RoundStart();
 
 private:
-	FOnTurnStart OnTurnStartEvent;
-	FOnTurnEnd OnTurnEndEvent;
-	FOnRoundStart OnRoundStartEvent;
+	FOnTurnStart OnTurnStartDelegate;
+	FOnTurnEnd OnTurnEndDelegate;
+	FOnRoundStart OnRoundStartDelegate;
 };

@@ -71,7 +71,7 @@ public:
 	/* Should we extract root motion for speed while moving */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement")
 	bool bUseRootMotion = true;
-	/* Should we extract root motion for speed and rotation even */
+	/* Should we extract root motion for speed and rotation even if we are not moving*/
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement")
 	bool bAlwaysUseRootMotion = false;
 	/* Should we straighten out the path to avoid zigzaging */
@@ -81,7 +81,7 @@ public:
 	void StringPull(TArray<const UNavTileComponent *> &InOutPath, TArray<const UNavTileComponent*>& OutPath);
 
 	/*
-	Spline that is used as a path. The points are in word coords.
+	Spline that is used as a path. The points are in world coords.
 	
 	We use ESplineCoordinateSpace::Local in the getters and setters to avoid any extra coord translation
 	*/

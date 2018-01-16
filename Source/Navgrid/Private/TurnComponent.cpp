@@ -4,33 +4,33 @@
 
 void UTurnComponent::SetTurnManager(ATurnManager *InTurnManager)
 {
+	check(InTurnManager);
 	TurnManager = InTurnManager;
 }
 
 void UTurnComponent::EndTurn()
 {
-	if (TurnManager)
-	{
-		TurnManager->EndTurn(this);
-	}
+	check(TurnManager);
+	TurnManager->EndTurn(this);
 }
 
 void UTurnComponent::StartTurnNext()
 {
+	check(TurnManager);
 	TurnManager->StartTurnNext();
 }
 
 void UTurnComponent::TurnStart()
 {
-	OnTurnStartEvent.Broadcast();
+	OnTurnStart().ExecuteIfBound();
 }
 
 void UTurnComponent::TurnEnd()
 {
-	OnTurnEndEvent.Broadcast();
+	OnTurnEnd().ExecuteIfBound();
 }
 
 void UTurnComponent::RoundStart()
 {
-	OnRoundStartEvent.Broadcast();
+	OnRoundStart().ExecuteIfBound();
 }

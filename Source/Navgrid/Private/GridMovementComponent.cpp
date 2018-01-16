@@ -254,7 +254,7 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 			Path = StringPulledPath;
 		}
 
-		// first add a spline point for the pawn starting location
+		// first add a spline point for the starting location
 		Spline->AddSplinePoint(GetOwner()->GetActorLocation(), ESplineCoordinateSpace::Local);
 
 		// Add spline points for the tiles in the path

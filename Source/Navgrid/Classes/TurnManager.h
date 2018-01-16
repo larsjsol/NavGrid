@@ -28,8 +28,6 @@ public:
 	void Register(UTurnComponent *TurnComponent);
 	/* End the turn for the current turn component */
 	void EndTurn(UTurnComponent *Ender);
-	/* Start turn for a component */
-	void StartTurn(UTurnComponent *TurnComponent);
 	/* Move on to the next component in line */
 	void StartTurnNext();
 	/* Return the component whos turn it is */
