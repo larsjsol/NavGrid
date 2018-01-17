@@ -153,4 +153,6 @@ protected:
 
 	/* Return a delta FRotater that is within MaxRotationSpeed */
 	FRotator LimitRotation(const FRotator &OldRotation, const FRotator &NewRotation, float DeltaTime);
+	/* The rotation of the skeletal mesh (if any). Used to handle root motion rotation */
+	FRotator MeshRotation;
 };

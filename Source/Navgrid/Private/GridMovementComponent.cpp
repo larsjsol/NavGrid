@@ -39,6 +39,7 @@ void UGridMovementComponent::BeginPlay()
 		USkeletalMeshComponent *Mesh = Cast<USkeletalMeshComponent>(Comp);	
 		if (Mesh)
 		{
+			MeshRotation = Mesh->GetRelativeTransform().Rotator();
 			AnimInstance = Mesh->GetAnimInstance();
 			if (AnimInstance)
 			{
@@ -68,7 +69,9 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		{
 			FTransform RootMotion = ConsumeRootMotion();
 			NewTransform.SetRotation(NewTransform.GetRotation() * RootMotion.GetRotation());
-			NewTransform.SetLocation(NewTransform.GetLocation() + RootMotion.GetLocation());
+			FRotator AnimToWorld = Owner->GetActorRotation() + MeshRotation;
+			NewTransform.SetLocation(NewTransform.GetLocation() + AnimToWorld.RotateVector(RootMotion.GetLocation()));
+
 		}
 		break; //nothing to do
 	case EGridMovementMode::InPlaceTurn:
