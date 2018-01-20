@@ -74,6 +74,10 @@ public:
 	/* Should we extract root motion for speed and rotation even if we are not moving*/
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement")
 	bool bAlwaysUseRootMotion = false;
+	/* Set this to stop moving a certain distance from the path end point, useful if 
+	you bAlwaysUseRootMotion and have a walk-end animation that contains some movement */
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Movement")
+	float StoppingDistance = 0;
 	/* Should we straighten out the path to avoid zigzaging */
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Movement")
 	bool bStringPullPath = true;

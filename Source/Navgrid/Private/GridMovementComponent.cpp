@@ -156,7 +156,7 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 	NewTransform.SetRotation(NewRotation.Quaternion());
 
 	/* Check if we're reached our destination*/
-	if (Distance >= Spline->GetSplineLength())
+	if (Distance + StoppingDistance >= Spline->GetSplineLength())
 	{
 		Distance = 0;
 		ChangeMovementMode(EGridMovementMode::Stationary);
