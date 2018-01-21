@@ -7,6 +7,11 @@
 
 class UTurnComponent;
 
+//Declare delegates
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnStart, UTurnComponent *, TurnComponent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnEnd, UTurnComponent *, TurnComponent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundStart);
+
 /**
 * Coordinates a set of turn components.
 *
@@ -23,34 +28,34 @@ public:
 	virtual void BeginPlay() override;
 
 	/* Start the first round */
+	UFUNCTION(BlueprintCallable, Category = "TurnManager")
 	void StartFirstRound();
 	/* Add a turn component to be managed */
+	UFUNCTION(BlueprintCallable, Category = "TurnManager")
 	void Register(UTurnComponent *TurnComponent);
 	/* End the turn for the current turn component */
+	UFUNCTION(BlueprintCallable, Category = "TurnManager")
 	void EndTurn(UTurnComponent *Ender);
 	/* Move on to the next component in line */
+	UFUNCTION(BlueprintCallable, Category = "TurnManager")
 	void StartTurnNext();
 	/* Return the component whos turn it is */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "TurnManager")
 	UTurnComponent *GetCurrentComponent();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "TurnManager")
 	int32 GetRound() const { return Round; }
 
-	//Declare events
-	DECLARE_EVENT_OneParam(UTurnComponent, FOnTurnStart, UTurnComponent *);
-	DECLARE_EVENT_OneParam(UTurnComponent, FOnTurnEnd, UTurnComponent *);
-	DECLARE_EVENT(UTurnComponent, FOnRoundStart);
-
-	FOnTurnStart& OnTurnStart() { return OnTurnStartEvent; }
-	FOnTurnEnd& OnTurnEnd() { return OnTurnEndEvent; }
-	FOnRoundStart& OnRoundStart() { return OnRoundStartEvent; }
-private:
-	FOnTurnStart OnTurnStartEvent;
-	FOnTurnEnd OnTurnEndEvent;
-	FOnRoundStart OnRoundStartEvent;
+	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
+	FOnTurnStart OnTurnStart;
+	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
+	FOnTurnEnd OnTurnEnd;
+	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
+	FOnRoundStart OnRoundStart;
 
 protected:
-	UPROPERTY() TArray<UTurnComponent *> TurnComponents;
+	UPROPERTY()
+	TArray<UTurnComponent *> TurnComponents;
 	UPROPERTY(VisibleAnyWhere, Category = "Turn Manager", meta = (AllowPrivateAccess = "true"))
 	int32 ComponentIndex = 0;
 	UPROPERTY(VisibleAnyWhere, Category = "Turn Manager", meta = (AllowPrivateAccess = "true"))

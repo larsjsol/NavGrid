@@ -60,10 +60,10 @@ void ATurnManager::ChangeCurrent(int32 NewIndex)
 	if (NewIndex >= 0 && NewIndex < TurnComponents.Num())
 	{
 		TurnComponents[ComponentIndex]->TurnEnd();
-		OnTurnEnd().Broadcast(TurnComponents[ComponentIndex]);
+		OnTurnEnd.Broadcast(TurnComponents[ComponentIndex]);
 		ComponentIndex = NewIndex;
 		TurnComponents[ComponentIndex]->TurnStart();
-		OnTurnStart().Broadcast(TurnComponents[ComponentIndex]);
+		OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
 	}
 	else
 	{
@@ -90,12 +90,12 @@ void ATurnManager::StartNewRound()
 	{
 		TC->RoundStart();
 	}
-	OnRoundStartEvent.Broadcast();
+	OnRoundStart.Broadcast();
 	int32 First = GetNextIndexThatCanAct();
 	if (First >= 0)
 	{
 		ComponentIndex = First;
 		TurnComponents[ComponentIndex]->TurnStart();
-		OnTurnStart().Broadcast(TurnComponents[ComponentIndex]);
+		OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
 	}
 }

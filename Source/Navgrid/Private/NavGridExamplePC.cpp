@@ -44,7 +44,7 @@ void ANavGridExamplePC::BeginPlay()
 	}
 
 	/* register handler for turn start*/
-	TurnManager->OnTurnStart().AddUObject(this, &ANavGridExamplePC::OnTurnStart);
+	TurnManager->OnTurnStart.AddDynamic(this, &ANavGridExamplePC::OnTurnStart);
 
 	/* start the first round */
 	TurnManager->StartFirstRound();
