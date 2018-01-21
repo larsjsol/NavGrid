@@ -15,7 +15,7 @@ class UTurnComponent;
 *  'Round' is used for all active pawns having their Turn. Note that a pawn may have several Turns in a Round, 
 *  say if the player selects another pawn to go first.
 */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable, NotPlaceable)
 class NAVGRID_API ATurnManager : public AActor
 {
 	GENERATED_BODY()
@@ -32,6 +32,9 @@ public:
 	void StartTurnNext();
 	/* Return the component whos turn it is */
 	UTurnComponent *GetCurrentComponent();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "TurnManager")
+	int32 GetRound() const { return Round; }
 
 	//Declare events
 	DECLARE_EVENT_OneParam(UTurnComponent, FOnTurnStart, UTurnComponent *);
