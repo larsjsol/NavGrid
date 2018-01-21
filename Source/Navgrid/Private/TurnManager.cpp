@@ -91,5 +91,11 @@ void ATurnManager::StartNewRound()
 		TC->RoundStart();
 	}
 	OnRoundStartEvent.Broadcast();
-	StartTurnNext();
+	int32 First = GetNextIndexThatCanAct();
+	if (First >= 0)
+	{
+		ComponentIndex = First;
+		TurnComponents[ComponentIndex]->TurnStart();
+		OnTurnStart().Broadcast(TurnComponents[ComponentIndex]);
+	}
 }
