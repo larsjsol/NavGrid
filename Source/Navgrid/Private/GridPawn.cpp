@@ -62,16 +62,7 @@ void AGridPawn::OnTurnStart()
 		MovementComponent->SnapToGrid();
 	}
 
-	// fetch the grid in case BeginPlay has not been called yet
-	Grid = ANavGrid::GetNavGrid(GetWorld());
-	if (Grid)
-	{
-		Grid->CalculateTilesInRange(this, true);
-	}
-	else
-	{
-		UE_LOG(NavGrid, Error, TEXT("%s was unable to find a NavGrid in level"), *this->GetName());
-	}
+	Grid->CalculateTilesInRange(this, true);
 }
 
 void AGridPawn::OnTurnEnd()
@@ -93,17 +84,14 @@ bool AGridPawn::IsBusy()
 
 bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
 {
-	if (Grid)
+	UNavTileComponent *Location = Grid->GetTile(GetActorLocation());
+	if (Location && Location != &Tile && Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
 	{
-		UNavTileComponent *Location = Grid->GetTile(GetActorLocation());
-		if (Location && Location != &Tile && Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
+		TArray<UNavTileComponent *> InRange;
+		Grid->GetTilesInRange(InRange);
+		if (InRange.Contains(&Tile) && MovementComponent->CreatePath(Tile))
 		{
-			TArray<UNavTileComponent *> InRange;
-			Grid->GetTilesInRange(InRange);
-			if (InRange.Contains(&Tile) && MovementComponent->CreatePath(Tile))
-			{
-				return true;
-			}
+			return true;
 		}
 	}
 
