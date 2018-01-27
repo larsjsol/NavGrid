@@ -10,7 +10,10 @@ AGridPawn::AGridPawn()
 
 	Scene = CreateDefaultSubobject<USceneComponent>("SceneComponent");
 	SetRootComponent(Scene);
+
 	MovementComponent = CreateDefaultSubobject<UGridMovementComponent>("MovementComponent");
+	MovementComponent->OnMovementEnd().AddUObject(this, &AGridPawn::OnMoveEnd);
+
 	TurnComponent = CreateDefaultSubobject<UTurnComponent>("TurnComponent");
 
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
@@ -39,9 +42,11 @@ void AGridPawn::BeginPlay()
 	TurnComponent->OnTurnStart().BindUObject(this, &AGridPawn::OnTurnStart);
 	TurnComponent->OnTurnEnd().BindUObject(this, &AGridPawn::OnTurnEnd);
 
-	Grid = ANavGrid::GetNavGrid(GetWorld());
-	check(Grid);
+	auto *State = GetWorld()->GetGameState<ANavGridGameState>();
+	Grid = State->Grid;
 	SelectedHighlight->SetRelativeLocation(FVector(0, 0, Grid->UIOffset));
+
+	State->TurnManager->Register(TurnComponent);
 }
 
 void AGridPawn::OnRoundStart()
@@ -72,7 +77,13 @@ void AGridPawn::OnTurnStart()
 void AGridPawn::OnTurnEnd()
 {
 	SelectedHighlight->SetVisibility(false);
+}
+
+void AGridPawn::OnMoveEnd()
+{
+	//default implementation is simply to end turn
 	TurnComponent->bCanStillActThisRound = false;
+	TurnComponent->EndTurn();
 }
 
 bool AGridPawn::IsBusy()

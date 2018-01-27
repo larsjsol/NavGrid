@@ -13,3 +13,6 @@
 #include "../Classes/TileGeneratingVolume.h"
 #include "../Classes/NavTileActor.h"
 #include "../Classes/NavLadderActor.h"
+#include "../Classes/NavGridGameMode.h"
+#include "../Classes/NavGridGameState.h"
+#include "../Classes/NavGridPC.h"

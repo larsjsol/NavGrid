@@ -53,6 +53,9 @@ public:
 	virtual void OnTurnStart();
 	/* Called on turn end */
 	virtual void OnTurnEnd();
+	/* Called when done moving */
+	virtual void OnMoveEnd();
+
 
 	/* Is this pawn doing something that should not be interrupted by the player?
 	*  Base implentation only checks if the pawn is moving

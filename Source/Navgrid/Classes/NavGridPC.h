@@ -3,7 +3,7 @@
 #pragma once
 
 #include "GameFramework/PlayerController.h"
-#include "NavGridExamplePC.generated.h"
+#include "NavGridPC.generated.h"
 
 class ANavGrid;
 class ATurnManager;
@@ -16,13 +16,12 @@ class UNavTileComponent;
  * clicking on a NavGrid
  */
 UCLASS()
-class NAVGRID_API ANavGridExamplePC : public APlayerController
+class NAVGRID_API ANavGridPC : public APlayerController
 {
 	GENERATED_BODY()
 public:
-	ANavGridExamplePC(const FObjectInitializer& ObjectInitializer);
+	ANavGridPC(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
-	virtual void OnConstruction(const FTransform &Transform) override;
 
 	/*
 	Called when a tile is clicked
@@ -37,11 +36,17 @@ public:
 	/* Called when a new turn starts*/
 	UFUNCTION()
 	void OnTurnStart(UTurnComponent *Component);
-	/* Called when the current pawn is done moving*/
-	void OnMovementEnd();
-	
+
+	void SetTurnManager(ATurnManager * InTurnManager);
+	void SetGrid(ANavGrid * InGrid);
+
 	/* The pawn we're currently controlling */
-	AGridPawn *Pawn = NULL;
-	ANavGrid *Grid = NULL;
-	UPROPERTY() ATurnManager *TurnManager = NULL;
+	UPROPERTY(BlueprintReadWrite)
+	AGridPawn *GridPawn;
+	/* The NavGrid in the current game */
+	UPROPERTY(BlueprintReadWrite)
+	ANavGrid *Grid;
+	/* The TurnManager in the current game */
+	UPROPERTY(BlueprintReadWrite)
+	ATurnManager *TurnManager;
 };
