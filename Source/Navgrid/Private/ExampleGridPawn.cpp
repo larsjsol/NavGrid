@@ -17,5 +17,4 @@ AExampleGridPawn::AExampleGridPawn()
 
 	/* Show the arrow in game so we can which way the cone is facing */
 	Arrow->SetHiddenInGame(false);
-	Arrow->SetRelativeLocation(FVector(0, 0, 50));
 }
