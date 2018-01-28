@@ -97,3 +97,9 @@ bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
 
 	return false;
 }
+
+void AGridPawn::MoveTo(const UNavTileComponent & Tile)
+{
+	MovementComponent->MoveTo(Tile);
+	MovementComponent->HidePath();
+}

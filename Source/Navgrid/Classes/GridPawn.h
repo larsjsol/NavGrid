@@ -63,6 +63,7 @@ public:
 	virtual bool IsBusy();
 
 	virtual bool CanMoveTo(const UNavTileComponent & Tile);
+	virtual void MoveTo(const UNavTileComponent & Tile);
 
 protected:
 	UPROPERTY()
