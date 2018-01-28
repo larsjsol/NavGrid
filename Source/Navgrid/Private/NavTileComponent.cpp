@@ -56,17 +56,6 @@ void UNavTileComponent::SetPawnLocationOffset(const FVector &Offset)
 	PawnLocationOffset = Offset;
 }
 
-void UNavTileComponent::PostInitProperties()
-{
-	Super::PostInitProperties();
-
-	ANavGrid *MyGrid = ANavGrid::GetNavGrid(GetWorld());
-	if (MyGrid)
-	{
-		SetGrid(MyGrid);
-	}
-}
-
 void UNavTileComponent::SetGrid(ANavGrid * InGrid)
 {
 	Grid = InGrid;
@@ -175,29 +164,20 @@ void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &Colli
 
 void UNavTileComponent::Clicked(UPrimitiveComponent* TouchedComponent, FKey Key)
 {
-	if (Grid)
-	{
-		Grid->TileClicked(*this);
-	}
+	Grid->TileClicked(*this);
 }
 
 void UNavTileComponent::CursorOver(UPrimitiveComponent* TouchedComponent)
 {
-	if (Grid)
-	{
-		Grid->Cursor->SetWorldLocation(GetPawnLocation() + FVector(0, 0, Grid->UIOffset));
-		Grid->Cursor->SetVisibility(true);
-		Grid->TileCursorOver(*this);
-	}
+	Grid->Cursor->SetWorldLocation(GetPawnLocation() + FVector(0, 0, Grid->UIOffset));
+	Grid->Cursor->SetVisibility(true);
+	Grid->TileCursorOver(*this);
 }
 
 void UNavTileComponent::EndCursorOver(UPrimitiveComponent* TouchedComponent)
 {
-	if (Grid)
-	{
-		Grid->Cursor->SetVisibility(false);
-		Grid->EndTileCursorOver(*this);
-	}
+	Grid->Cursor->SetVisibility(false);
+	Grid->EndTileCursorOver(*this);
 }
 
 void UNavTileComponent::TouchEnter(ETouchIndex::Type Type, UPrimitiveComponent* TouchedComponent)
@@ -212,10 +192,7 @@ void UNavTileComponent::TouchLeave(ETouchIndex::Type Type, UPrimitiveComponent* 
 
 void UNavTileComponent::TouchEnd(ETouchIndex::Type Type, UPrimitiveComponent* TouchedComponent)
 {
-	if (Grid)
-	{
-		Grid->TileClicked(*this);
-	}
+	Grid->TileClicked(*this);
 }
 
 void UNavTileComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile) const
