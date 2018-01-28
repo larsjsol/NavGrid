@@ -135,19 +135,9 @@ bool UNavTileComponent::Obstructed(const FVector & From, const FVector & To, con
 	FCollisionShape CollisionShape = CollisionCapsule.GetCollisionShape();
 	FCollisionQueryParams CQP;
 	CQP.AddIgnoredActor(CollisionCapsule.GetOwner());
-	FCollisionResponseParams CRP;
-	bool HitSomething = CollisionCapsule.GetWorld()->SweepSingleByChannel(OutHit, Start, End, Rot, ECollisionChannel::ECC_Pawn, CollisionShape, CQP, CRP);
-/*
-	if (HitSomething)
-	{
-		DrawDebugLine(CollisionCapsule.GetWorld(), Start, End, FColor::Red, true);
-	}
-	else
-	{
-		DrawDebugLine(CollisionCapsule.GetWorld(), Start, End, FColor::Green, true);
-	}
-*/
-	return HitSomething;
+	CQP.TraceTag = "NavGridMovement";
+
+	return CollisionCapsule.GetWorld()->SweepSingleByChannel(OutHit, Start, End, Rot, ECollisionChannel::ECC_Pawn, CollisionShape, CQP);
 }
 
 void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours)
