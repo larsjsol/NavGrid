@@ -4,6 +4,9 @@
 
 void ANavGridGameState::HandleBeginPlay()
 {
+	//spawn turn manager
+	TurnManager = SpawnTurnManager();
+
 	// if a navgrid exists in the game world, grab it
 	TActorIterator<ANavGrid> GridItr(GetWorld());
 	if (GridItr)
@@ -12,11 +15,9 @@ void ANavGridGameState::HandleBeginPlay()
 	}
 	else
 	{
-		// spawn grid if it does not already exist
-		Grid = GetWorld()->SpawnActor<ANavGrid>();
-		Grid->SetOwner(this);
-		Grid->EnableVirtualTiles = true;
+		Grid = SpawnNavGrid();
 	}
+
 	// make sure that every tile belongs to a grid
 	TArray<UNavTileComponent *> AllTiles;
 	Grid->GetEveryTile(AllTiles, GetWorld());
@@ -28,10 +29,6 @@ void ANavGridGameState::HandleBeginPlay()
 		}
 	}
 
-	// Spawn and configure Turn Manager
-	TurnManager = GetWorld()->SpawnActor<ATurnManager>();
-	TurnManager->SetOwner(this);
-
 	/* Call parent */
 	Super::HandleBeginPlay();
 
@@ -39,3 +36,16 @@ void ANavGridGameState::HandleBeginPlay()
 	TurnManager->StartFirstRound();
 }
 
+ATurnManager * ANavGridGameState::SpawnTurnManager()
+{
+	ATurnManager *Manager = GetWorld()->SpawnActor<ATurnManager>();
+	Manager->SetOwner(this);
+	return Manager;
+}
+
+ANavGrid * ANavGridGameState::SpawnNavGrid()
+{
+	ANavGrid *Grid = GetWorld()->SpawnActor<ANavGrid>();
+	Grid->SetOwner(this);
+	return Grid;
+}
