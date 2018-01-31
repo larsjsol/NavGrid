@@ -79,7 +79,6 @@ protected:
 	FVector PawnLocationOffset;
 
 public:
-
 // User interface
 	UFUNCTION()
 	void Clicked(UPrimitiveComponent* TouchedComponent, FKey Key);
@@ -104,4 +103,7 @@ public:
 	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile) const;
 	/* Return a suitable upvector for a splinemesh moving across this tile */
 	virtual FVector GetSplineMeshUpVector();
+
+	/* Set a highlight for this tile */
+	void SetHighlight(FName HighlightType);
 };

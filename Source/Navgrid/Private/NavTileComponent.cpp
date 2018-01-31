@@ -194,3 +194,16 @@ FVector UNavTileComponent::GetSplineMeshUpVector()
 {
 	return FVector(0, 0, 1);
 }
+
+void UNavTileComponent::SetHighlight(FName HighlightType)
+{
+	if (Grid->TileHighlights.Contains(HighlightType))
+	{
+		UInstancedStaticMeshComponent *Comp = Grid->TileHighlights[HighlightType];
+		FTransform HighlightTransform = GetComponentTransform();
+		FVector HighlightLocation = HighlightTransform.GetLocation();
+		HighlightLocation.Z += Grid->UIOffset;
+		HighlightTransform.SetLocation(HighlightLocation);
+		Comp->AddInstanceWorldSpace(HighlightTransform);
+	}
+}

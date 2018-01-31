@@ -47,6 +47,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UStaticMeshComponent *Cursor;
 
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "NavGrid")
+	TMap<FName, UInstancedStaticMeshComponent *> TileHighlights;
+	void SetTileHighlight(UNavTileComponent &Tile, FName Type);
+	void ClearTileHighlights();
+
+protected:
+	void AddHighlightComponent(const TCHAR *Name, const TCHAR *FileName);
+public:
+
 	/* Number of tiles that exist in the current level */
 	UPROPERTY(VisibleAnywhere, Category = "NavGrid")
 	int32 NumPersistentTiles = 0;
@@ -72,7 +81,6 @@ public:
 	void GetTilesInRange(TArray<UNavTileComponent *> &OutTiles);
 protected:
 	/* Contains tiles found in the last call to CalculateTilesInRange() */
-	UPROPERTY(Transient)
 	TArray<UNavTileComponent *> TilesInRange;
 public:
 
@@ -97,7 +105,7 @@ public:
 	UNavTileComponent *ConsiderPlaceTile(const FVector &TraceStart, const FVector &TraceEnd, AActor *TileOwner = NULL);
 
 protected:
-	UPROPERTY(Transient)
+	UPROPERTY()
 	TArray<UNavTileComponent *> VirtualTiles;
 public:
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")

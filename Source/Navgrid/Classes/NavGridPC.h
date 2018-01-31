@@ -29,13 +29,13 @@ public:
 	- Highlight all tiles in range when we click on the character tile
 	- Clear highlights when any other tile is clicked
 	*/
-	void OnTileClicked(const UNavTileComponent &Tile);
-	void OnTileCursorOver(const UNavTileComponent &Tile);
-	void OnEndTileCursorOver(const UNavTileComponent &Tile);
+	virtual void OnTileClicked(const UNavTileComponent &Tile);
+	virtual void OnTileCursorOver(const UNavTileComponent &Tile);
+	virtual void OnEndTileCursorOver(const UNavTileComponent &Tile);
 
 	/* Called when a new turn starts*/
 	UFUNCTION()
-	void OnTurnStart(UTurnComponent *Component);
+	virtual void OnTurnStart(UTurnComponent *Component);
 
 	void SetTurnManager(ATurnManager * InTurnManager);
 	void SetGrid(ANavGrid * InGrid);

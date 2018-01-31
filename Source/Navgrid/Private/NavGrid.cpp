@@ -29,6 +29,36 @@ ANavGrid::ANavGrid()
 	{
 		UE_LOG(NavGrid, Error, TEXT("Error loading %s"), HCRef);
 	}
+
+	AddHighlightComponent(TEXT("Movable"), TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Movable.NavGrid_Movable'"));
+	AddHighlightComponent(TEXT("Dangerous"), TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Dangerous.NavGrid_Dangerous'"));
+	AddHighlightComponent(TEXT("Special"), TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Special.NavGrid_Special'"));
+}
+
+void ANavGrid::SetTileHighlight(UNavTileComponent & Tile, FName Type)
+{
+	Tile.SetHighlight(Type);
+}
+
+void ANavGrid::ClearTileHighlights()
+{
+	for (auto &H : TileHighlights)
+	{
+		H.Value->ClearInstances();
+	}
+}
+
+void ANavGrid::AddHighlightComponent(const TCHAR *Name, const TCHAR *FileName)
+{
+	UInstancedStaticMeshComponent *MeshComponent = CreateAbstractDefaultSubobject<UInstancedStaticMeshComponent>(Name);
+	auto Finder = ConstructorHelpers::FObjectFinder<UStaticMesh>(FileName);
+	if (Finder.Succeeded())
+	{
+		MeshComponent->SetupAttachment(SceneComponent);
+		MeshComponent->SetStaticMesh(Finder.Object);
+		MeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		TileHighlights.Add(FName(Name), MeshComponent);
+	}
 }
 
 ANavGrid * ANavGrid::GetNavGrid(UWorld *World)

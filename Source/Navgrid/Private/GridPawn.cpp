@@ -61,7 +61,6 @@ void AGridPawn::OnTurnStart()
 	{
 		MovementComponent->SnapToGrid();
 	}
-
 	Grid->CalculateTilesInRange(this, true);
 }
 
