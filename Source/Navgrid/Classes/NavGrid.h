@@ -28,10 +28,7 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
 	TEnumAsByte<ECollisionChannel> ECC_NavGridWalkable = ECollisionChannel::ECC_GameTraceChannel1;
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
-	float TileSize = 199;
-	/* Distance between the centers of two adjacent tiles */
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
-	float TileSpacing = 200;
+	float TileSize = 200;
 	/* Z-Offset for UI elements */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
 	float UIOffset = 30;
@@ -103,6 +100,8 @@ public:
 	UNavTileComponent *PlaceTile(const FVector &Location, AActor *TileOwner = NULL);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	UNavTileComponent *ConsiderPlaceTile(const FVector &TraceStart, const FVector &TraceEnd, AActor *TileOwner = NULL);
+	/* Find a place to put a tile that is close to Location and that matches the grid layout */
+	FVector AdjustToTileLocation(const FVector &Location);
 
 protected:
 	UPROPERTY()

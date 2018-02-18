@@ -47,6 +47,11 @@ void AGridPawn::BeginPlay()
 	SelectedHighlight->SetRelativeLocation(FVector(0, 0, Grid->UIOffset));
 
 	State->TurnManager->Register(TurnComponent);
+
+	if (SnapToGrid)
+	{
+		MovementComponent->SnapToGrid();
+	}
 }
 
 void AGridPawn::OnRoundStart()

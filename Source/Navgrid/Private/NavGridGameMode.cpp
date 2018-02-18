@@ -8,3 +8,13 @@ ANavGridGameMode::ANavGridGameMode()
 	PlayerControllerClass = ANavGridPC::StaticClass();
 	GameStateClass = ANavGridGameState::StaticClass();
 }
+
+void ANavGridGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Uncomment for trace debug lines
+	//GetWorld()->DebugDrawTraceTag = "NavGridMovement";
+	//GetWorld()->DebugDrawTraceTag = "NavGridTile";
+	//GetWorld()->DebugDrawTraceTag = "NavGridTilePlacement";
+}

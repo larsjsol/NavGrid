@@ -304,27 +304,19 @@ void UGridMovementComponent::TurnTo(const FRotator & Forward)
 
 void UGridMovementComponent::SnapToGrid()
 {
-	UNavTileComponent *SnapTile;
+	AGridPawn *GridPawnOwner = Cast<AGridPawn>(GetOwner());
+	check(GridPawnOwner);
+	/* generate virtual tiles to increase tha chance of the pawn beeing on a tile*/
+	if (Grid->EnableVirtualTiles)
+	{
+		Grid->GenerateVirtualTiles(GridPawnOwner);
+	}
 
-	AActor *Owner = GetOwner();
-	SnapTile = Grid->GetTile(Owner->GetActorLocation());
+	UNavTileComponent *SnapTile = Grid->GetTile(GridPawnOwner->GetActorLocation());
 	if (SnapTile)
 	{
-		Owner->SetActorLocation(SnapTile->GetPawnLocation());
+		GridPawnOwner->SetActorLocation(SnapTile->GetPawnLocation());
 	}
-	else if (Grid->EnableVirtualTiles)
-	{
-		// try to position the pawn so that it matches a regular grid
-		// we do not change the vertical location
-		FVector PawnOffset = Owner->GetActorLocation() - Grid->GetActorLocation();
-		int32 XRest = (int32) PawnOffset.X % (int32) Grid->TileSpacing;
-		int32 YRest = (int32) PawnOffset.Y % (int32) Grid->TileSpacing;
-		FVector NewLocation = Owner->GetActorLocation();
-		NewLocation.X += (Grid->TileSpacing / 2) - XRest;
-		NewLocation.Y += (Grid->TileSpacing / 2) - YRest;
-		Owner->SetActorLocation(NewLocation);
-	}
-
 }
 
 void UGridMovementComponent::ShowPath()

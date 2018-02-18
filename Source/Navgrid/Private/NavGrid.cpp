@@ -116,8 +116,10 @@ UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation, bool FindFloo
 UNavTileComponent *ANavGrid::LineTraceTile(const FVector &Start, const FVector &End)
 {
 	FHitResult HitResult;
+	FCollisionQueryParams CQP;
+	CQP.TraceTag = "NavGridTile";
 
-	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_NavGridWalkable);
+	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_NavGridWalkable, CQP);
 	UPrimitiveComponent *Comp = HitResult.GetComponent();
 	return Cast<UNavTileComponent>(Comp);
 }
@@ -234,6 +236,7 @@ bool ANavGrid::TraceTileLocation(const FVector & TraceStart, const FVector & Tra
 	FCollisionQueryParams CQP;
 	CQP.bFindInitialOverlaps = true;
 	CQP.bTraceComplex = true;
+	CQP.TraceTag = "NavGridTilePlacement";
 	FHitResult HitResult;
 
 	bool BlockingHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Pawn, CQP);
@@ -292,6 +295,25 @@ UNavTileComponent * ANavGrid::ConsiderPlaceTile(const FVector &TraceStart, const
 	return NULL;
 }
 
+FVector ANavGrid::AdjustToTileLocation(const FVector &Location)
+{
+	UNavTileComponent *SnapTile = GetTile(Location);
+	if (SnapTile)
+	{
+		return SnapTile->GetComponentLocation();
+	}
+
+	// try to position the pawn so that it matches a regular grid
+	// we do not change the vertical location
+	FVector Offset = Location - GetActorLocation();
+	int32 XRest = (int32)Offset.X % (int32)TileSize;
+	int32 YRest = (int32)Offset.Y % (int32)TileSize;
+	FVector AdjustedLocation = Location;
+	AdjustedLocation.X += (TileSize / 2) - XRest;
+	AdjustedLocation.Y += (TileSize / 2) - YRest;
+	return AdjustedLocation;
+}
+
 void ANavGrid::GenerateVirtualTiles(const AGridPawn *Pawn)
 {
 	// only keep a reasonable number
@@ -300,21 +322,17 @@ void ANavGrid::GenerateVirtualTiles(const AGridPawn *Pawn)
 		DestroyVirtualTiles();
 	}
 
-	// place a tile under the actor if it is not already one there
-	if (!GetTile(Pawn->GetActorLocation()))
-	{
-		VirtualTiles.Add(PlaceTile(Pawn->GetActorLocation()));
-	}
+	FVector Center = AdjustToTileLocation(Pawn->GetActorLocation());
 
-	FVector Min = Pawn->GetActorLocation() - FVector(Pawn->MovementComponent->MovementRange * TileSpacing);
-	FVector Max = Pawn->GetActorLocation() + FVector(Pawn->MovementComponent->MovementRange * TileSpacing);
-	for (float X = Min.X; X <= Max.X; X += TileSpacing)
+	FVector Min = Center - FVector(Pawn->MovementComponent->MovementRange * TileSize);
+	FVector Max = Center + FVector(Pawn->MovementComponent->MovementRange * TileSize);
+	for (float X = Min.X; X <= Max.X; X += TileSize)
 	{
-		for (float Y = Min.Y; Y <= Max.Y; Y += TileSpacing)
+		for (float Y = Min.Y; Y <= Max.Y; Y += TileSize)
 		{
-			for (float Z = Max.Z; Z >= Min.Z; Z -= TileSpacing)
+			for (float Z = Max.Z; Z >= Min.Z; Z -= TileSize)
 			{
-				UPROPERTY() UNavTileComponent *TileComp = ConsiderPlaceTile(FVector(X, Y, Z + TileSpacing + 25), FVector(X, Y, Z - 25));
+				UPROPERTY() UNavTileComponent *TileComp = ConsiderPlaceTile(FVector(X, Y, Z + TileSize + 25), FVector(X, Y, Z - 25));
 				if (TileComp)
 				{
 					VirtualTiles.Add(TileComp);
