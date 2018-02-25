@@ -17,7 +17,7 @@ void ANavGridPC::BeginPlay()
 {
 	// grab turn manager and grid from the game state
 	auto *State = GetWorld()->GetGameState<ANavGridGameState>();
-	SetTurnManager(State->TurnManager);
+	SetTurnManager(State->GetTurnManager());
 	SetGrid(State->Grid);
 }
 
@@ -60,12 +60,14 @@ void ANavGridPC::OnEndTileCursorOver(const UNavTileComponent &Tile)
 void ANavGridPC::OnTurnStart(UTurnComponent *Component)
 {
 	GridPawn = Cast<AGridPawn>(Component->GetOwner());
+	check(GridPawn);
 }
 
 void ANavGridPC::SetTurnManager(ATurnManager * InTurnManager)
 {
 	check(InTurnManager);
 	TurnManager = InTurnManager;
+	TurnManager->PlayerController = this;
 	TurnManager->OnTurnStart.AddDynamic(this, &ANavGridPC::OnTurnStart);
 }
 

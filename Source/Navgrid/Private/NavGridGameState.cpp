@@ -6,6 +6,11 @@ void ANavGridGameState::HandleBeginPlay()
 {
 	//spawn turn manager
 	TurnManager = SpawnTurnManager();
+	// register every pawn in the world
+	for (TActorIterator<AGridPawn> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		TurnManager->Register(ActorItr->TurnComponent);
+	}
 
 	// if a navgrid exists in the game world, grab it
 	TActorIterator<ANavGrid> GridItr(GetWorld());
@@ -29,10 +34,9 @@ void ANavGridGameState::HandleBeginPlay()
 		}
 	}
 
-	/* Call parent */
+	// with the essentials in place, continue with begin play
 	Super::HandleBeginPlay();
 
-	/* start the first round */
 	TurnManager->StartFirstRound();
 }
 

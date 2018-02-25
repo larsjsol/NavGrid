@@ -32,5 +32,6 @@ void UTurnComponent::TurnEnd()
 
 void UTurnComponent::RoundStart()
 {
+	bCanStillActThisRound = true;
 	OnRoundStart().ExecuteIfBound();
 }

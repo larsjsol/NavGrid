@@ -27,6 +27,9 @@ public:
 	AGridPawn();
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnyWhere, Category = "NavGrid")
+	int32 TeamId;
+
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USceneComponent *Scene;
 	UPROPERTY(VisibleAnywhere, Category = "Components")
@@ -48,7 +51,7 @@ public:
 	bool SnapToGrid = true;
 
 	/* Callend on round start */
-	virtual void OnRoundStart();
+	virtual void OnRoundStart() {}
 	/* Called on turn start */
 	virtual void OnTurnStart();
 	/* Called on turn end */
@@ -56,6 +59,8 @@ public:
 	/* Called when done moving */
 	virtual void OnMoveEnd();
 
+	/* override this class and implement your own AI here. The default implementation just ends the turn */
+	virtual void PlayAITurn();
 
 	/* Is this pawn doing something that should not be interrupted by the player?
 	*  Base implentation only checks if the pawn is moving

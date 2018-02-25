@@ -1,14 +1,5 @@
 #include "NavGridPrivatePCH.h"
 
-void ATurnManager::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void ATurnManager::StartFirstRound()
-{
-	StartNewRound();
-}
 
 void ATurnManager::Register(UTurnComponent *TurnComponent)
 {
@@ -18,21 +9,15 @@ void ATurnManager::Register(UTurnComponent *TurnComponent)
 
 void ATurnManager::EndTurn(UTurnComponent *Ender)
 {
-	if (Ender == TurnComponents[ComponentIndex])
+	check(Ender == TurnComponents[ComponentIndex])
+	if (Ender->bCanStillActThisRound)
 	{
-		if (Ender->bCanStillActThisRound)
-		{
-			// Ender get to keep going if it still can act this round
-			ChangeCurrent(ComponentIndex);
-		}
-		else
-		{
-			StartTurnNext();
-		}
+		// Ender get to keep going if it still can act this round
+		ChangeCurrent(ComponentIndex);
 	}
 	else
 	{
-		UE_LOG(NavGrid, Error, TEXT("EndTurn() called unexpectedly by %s"), *Ender->GetName());
+		StartTurnNext();
 	}
 }
 
@@ -45,8 +30,12 @@ void ATurnManager::StartTurnNext()
 	}
 	else
 	{
+		if (ComponentIndex >= 0 && ComponentIndex < TurnComponents.Num())
+		{
+			TurnComponents[ComponentIndex]->TurnEnd();
+			OnTurnEnd.Broadcast(TurnComponents[ComponentIndex]);
+		}
 		StartNewRound();
-
 	}
 }
 
@@ -55,20 +44,20 @@ UTurnComponent *ATurnManager::GetCurrentComponent()
 	return TurnComponents[ComponentIndex];
 }
 
+void ATurnManager::StartFirstRound()
+{
+	check(Round == 0);
+	StartNewRound();
+}
+
 void ATurnManager::ChangeCurrent(int32 NewIndex)
 {
-	if (NewIndex >= 0 && NewIndex < TurnComponents.Num())
-	{
-		TurnComponents[ComponentIndex]->TurnEnd();
-		OnTurnEnd.Broadcast(TurnComponents[ComponentIndex]);
-		ComponentIndex = NewIndex;
-		TurnComponents[ComponentIndex]->TurnStart();
-		OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
-	}
-	else
-	{
-		UE_LOG(NavGrid, Error, TEXT("ChangeCurrent: Illegal TurnComponent index %i"), NewIndex);
-	}
+	check(NewIndex >= 0 && NewIndex < TurnComponents.Num());
+	TurnComponents[ComponentIndex]->TurnEnd();
+	OnTurnEnd.Broadcast(TurnComponents[ComponentIndex]);
+	ComponentIndex = NewIndex;
+	TurnComponents[ComponentIndex]->TurnStart();
+	OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
 }
 
 int32 ATurnManager::GetNextIndexThatCanAct()

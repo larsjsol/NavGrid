@@ -17,33 +17,38 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundStart);
 *
 * Terms:
 *  'Turn' is used for a singe pawn doing one or more actions.
-*  'Round' is used for all active pawns having their Turn. Note that a pawn may have several Turns in a Round, 
-*  say if the player selects another pawn to go first.
+*  'Round' is used for all pawns managed by this turn manager having their Turn.
 */
 UCLASS(BlueprintType, Blueprintable, NotPlaceable)
 class NAVGRID_API ATurnManager : public AActor
 {
 	GENERATED_BODY()
 public:
-	virtual void BeginPlay() override;
-
-	/* Start the first round */
-	UFUNCTION(BlueprintCallable, Category = "TurnManager")
-	void StartFirstRound();
 	/* Add a turn component to be managed */
-	UFUNCTION(BlueprintCallable, Category = "TurnManager")
-	void Register(UTurnComponent *TurnComponent);
+	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
+	virtual void Register(UTurnComponent *TurnComponent);
 	/* End the turn for the current turn component */
-	UFUNCTION(BlueprintCallable, Category = "TurnManager")
-	void EndTurn(UTurnComponent *Ender);
+	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
+	virtual void EndTurn(UTurnComponent *Ender);
 	/* Move on to the next component in line */
-	UFUNCTION(BlueprintCallable, Category = "TurnManager")
-	void StartTurnNext();
+	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
+	virtual void StartTurnNext();
 	/* Return the component whos turn it is */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "TurnManager")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Turn Manager")
 	UTurnComponent *GetCurrentComponent();
+	/* Start the first round */
+	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
+	virtual void StartFirstRound();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "TurnManager")
+	/* Get the turn manager for a given team, the default implementation just returns this */
+	UFUNCTION(BlueprintPure, Category = "Turn Manager")
+	virtual ATurnManager *GetTurnManager(int32 TeamId = 0) { return this; }
+
+	/* Player controller controlling the pawns managed by this manager. Set to NULL if AI controlled */
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Turn Manager")
+	APlayerController *PlayerController;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Turn Manager")
 	int32 GetRound() const { return Round; }
 
 	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")

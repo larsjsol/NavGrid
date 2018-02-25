@@ -4,6 +4,7 @@
 
 // Sets default values
 AGridPawn::AGridPawn()
+	: Super()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -46,27 +47,33 @@ void AGridPawn::BeginPlay()
 	Grid = State->Grid;
 	SelectedHighlight->SetRelativeLocation(FVector(0, 0, Grid->UIOffset));
 
-	State->TurnManager->Register(TurnComponent);
+	ATurnManager *TM = State->GetTurnManager(TeamId);
+	check(TM);
+	TM->Register(TurnComponent);
 
 	if (SnapToGrid)
 	{
 		MovementComponent->SnapToGrid();
 	}
-}
-
-void AGridPawn::OnRoundStart()
-{
-	TurnComponent->bCanStillActThisRound = true;
 }
 
 void AGridPawn::OnTurnStart()
 {
-	SelectedHighlight->SetVisibility(true);
 	if (SnapToGrid)
 	{
 		MovementComponent->SnapToGrid();
 	}
-	Grid->CalculateTilesInRange(this, true);
+	SelectedHighlight->SetVisibility(true);
+
+	if (TurnComponent->GetPlayerController())
+	{
+		// figure out which tiles are in range and wait for player input
+		Grid->CalculateTilesInRange(this, true);
+	}
+	else
+	{
+		PlayAITurn();
+	}
 }
 
 void AGridPawn::OnTurnEnd()
@@ -75,6 +82,13 @@ void AGridPawn::OnTurnEnd()
 }
 
 void AGridPawn::OnMoveEnd()
+{
+	//default implementation is simply to end turn
+	TurnComponent->bCanStillActThisRound = false;
+	TurnComponent->EndTurn();
+}
+
+void AGridPawn::PlayAITurn()
 {
 	//default implementation is simply to end turn
 	TurnComponent->bCanStillActThisRound = false;

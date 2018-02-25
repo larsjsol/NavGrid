@@ -3,9 +3,10 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
+#include "TurnManager.h"
 #include "TurnComponent.generated.h"
 
-class ATurnManager;
+class APlayerController;
 
 /**
 * Actors with a turn component can be managed by a turn manager 
@@ -28,6 +29,8 @@ public:
 	/* All actors managed by the turn manager have had their turn and a new round begins */
 	FOnRoundStart& OnRoundStart() { return OnRoundStartDelegate; }
 
+	/* Get the PC that controls the Turn Manager. NULL if AI controlled. */
+	APlayerController *GetPlayerController() { return TurnManager->PlayerController; }
 	void SetTurnManager(ATurnManager *InTurnManager);
 protected:
 	UPROPERTY()
