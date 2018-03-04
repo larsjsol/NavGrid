@@ -1,6 +1,12 @@
 #include "NavGridPrivatePCH.h"
 
 
+ATurnManager::ATurnManager()
+	:Super()
+{
+	TurnDelay = 0.5;
+}
+
 void ATurnManager::Register(UTurnComponent *TurnComponent)
 {
 	TurnComponents.AddUnique(TurnComponent);
@@ -56,8 +62,7 @@ void ATurnManager::ChangeCurrent(int32 NewIndex)
 	TurnComponents[ComponentIndex]->TurnEnd();
 	OnTurnEnd.Broadcast(TurnComponents[ComponentIndex]);
 	ComponentIndex = NewIndex;
-	TurnComponents[ComponentIndex]->TurnStart();
-	OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
+	GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurnCurrent, FMath::Max(0.01f, TurnDelay));
 }
 
 int32 ATurnManager::GetNextIndexThatCanAct()
@@ -84,7 +89,12 @@ void ATurnManager::StartNewRound()
 	if (First >= 0)
 	{
 		ComponentIndex = First;
-		TurnComponents[ComponentIndex]->TurnStart();
-		OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
+		GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurnCurrent, FMath::Max(0.01f, TurnDelay));
 	}
+}
+
+void ATurnManager::StartTurnCurrent()
+{
+	TurnComponents[ComponentIndex]->TurnStart();
+	OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
 }

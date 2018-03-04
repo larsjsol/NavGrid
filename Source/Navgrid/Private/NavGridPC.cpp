@@ -63,12 +63,18 @@ void ANavGridPC::OnTurnStart(UTurnComponent *Component)
 	check(GridPawn);
 }
 
+void ANavGridPC::OnTurnEnd(UTurnComponent * Component)
+{
+	GridPawn = NULL;
+}
+
 void ANavGridPC::SetTurnManager(ATurnManager * InTurnManager)
 {
 	check(InTurnManager);
 	TurnManager = InTurnManager;
 	TurnManager->PlayerController = this;
 	TurnManager->OnTurnStart.AddDynamic(this, &ANavGridPC::OnTurnStart);
+	TurnManager->OnTurnEnd.AddDynamic(this, &ANavGridPC::OnTurnEnd);
 }
 
 void ANavGridPC::SetGrid(ANavGrid * InGrid)

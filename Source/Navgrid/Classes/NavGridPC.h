@@ -36,6 +36,9 @@ public:
 	/* Called when a new turn starts*/
 	UFUNCTION()
 	virtual void OnTurnStart(UTurnComponent *Component);
+	/* Called when a turn ends */
+	UFUNCTION()
+	virtual void OnTurnEnd(UTurnComponent *Component);
 
 	void SetTurnManager(ATurnManager * InTurnManager);
 	void SetGrid(ANavGrid * InGrid);

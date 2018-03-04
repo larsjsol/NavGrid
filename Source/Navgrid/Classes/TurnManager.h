@@ -24,6 +24,8 @@ class NAVGRID_API ATurnManager : public AActor
 {
 	GENERATED_BODY()
 public:
+	ATurnManager();
+
 	/* Add a turn component to be managed */
 	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
 	virtual void Register(UTurnComponent *TurnComponent);
@@ -58,6 +60,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
 	FOnRoundStart OnRoundStart;
 
+	/* wait for this long between each turn */
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Turn Manager")
+	float TurnDelay;
+
 protected:
 	UPROPERTY()
 	TArray<UTurnComponent *> TurnComponents;
@@ -69,4 +75,8 @@ protected:
 	// returns -1 if no components can act this round
 	int32 GetNextIndexThatCanAct();
 	void StartNewRound();
+
+	// start the turn for the current component
+	void StartTurnCurrent();
+	FTimerHandle TurnDelayHandle;
 };

@@ -70,19 +70,12 @@ void ATeamTurnManager::StartTurnNext()
 
 ATurnManager *ATeamTurnManager::GetTurnManager(int32 TeamId/* = 0*/)
 {
-	if (Master)
+	if (Master && Teams.Contains(TeamId))
 	{
-		if (Teams.Contains(TeamId))
-		{
-			return Teams[TeamId];
-		}
-		else
-		{
-			return NULL;
-		}
+		return Teams[TeamId];
 	}
 	else
 	{
-		return this;
+		return NULL;
 	}
 }
