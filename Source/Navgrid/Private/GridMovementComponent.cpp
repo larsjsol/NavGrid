@@ -20,6 +20,8 @@ UGridMovementComponent::UGridMovementComponent(const FObjectInitializer &ObjectI
 
 void UGridMovementComponent::BeginPlay()
 {
+	Super::BeginPlay();
+
 	/* I dont know why, but if we use createdefaultsubobject in the constructor this is sometimes reset to NULL*/
 	if (!IsValid(Spline))
 	{
