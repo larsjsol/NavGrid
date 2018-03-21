@@ -38,9 +38,9 @@ protected:
 	ATurnManager *TurnManager;
 public:
 	/* The number of actions this pawn can perform in a single round */
-	UPROPERTY(EditAnyWhere, Category = "Turn Component")
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Turn Component")
 	int32 ActionPoints;
-	UPROPERTY(VisibleAnywhere, Category = "Turn Component")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Turn Component")
 	int32 RemainingActionPoints;
 
 	/* Tell the manager that we are done acting for this round*/

@@ -32,18 +32,18 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USceneComponent *Scene;
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UGridMovementComponent *MovementComponent;
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTurnComponent *TurnComponent;
 	/* Used to test if thre's room for pawn on a tile*/
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UCapsuleComponent *CapsuleComponent;
 	/* Shown when the pawn is selected/has its turn */
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UStaticMeshComponent *SelectedHighlight;
 	/* An arrow pointing forward */
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UArrowComponent *Arrow;
 
 	/* Should this pawn snap to grid at the start of each turn */
