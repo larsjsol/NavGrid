@@ -20,6 +20,8 @@ AGridPawn::AGridPawn()
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
 	CapsuleComponent->SetupAttachment(Scene);
 	CapsuleComponent->SetRelativeLocation(FVector(0, 0, 100)); //Above the ground to avoid collisions
+	CapsuleComponent->SetCapsuleHalfHeight(50);
+	CapsuleComponent->SetCapsuleRadius(30);
 	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 
 	SelectedHighlight = CreateDefaultSubobject<UStaticMeshComponent>("SelectedHighlight");
