@@ -25,6 +25,7 @@ void ATeamTurnManager::Register(UTurnComponent *TurnComponent)
 				NewManager->SetOwner(this);
 				NewManager->Master = false;
 				NewManager->TurnComponent->SetTurnManager(this);
+				NewManager->TurnDelay = TurnDelay;
 				// one round for the slave is a single turn for the master
 				NewManager->TurnComponent->OnTurnStart().BindUObject(NewManager, &ATeamTurnManager::StartNewRound);
 				
