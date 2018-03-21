@@ -2,6 +2,12 @@
 
 #include "NavGridPrivatePCH.h"
 
+UTurnComponent::UTurnComponent()
+	:Super()
+{
+	ActionPoints = 1;
+}
+
 void UTurnComponent::SetTurnManager(ATurnManager *InTurnManager)
 {
 	check(InTurnManager);
@@ -32,6 +38,6 @@ void UTurnComponent::TurnEnd()
 
 void UTurnComponent::RoundStart()
 {
-	bCanStillActThisRound = true;
+	RemainingActionPoints = ActionPoints;
 	OnRoundStart().ExecuteIfBound();
 }

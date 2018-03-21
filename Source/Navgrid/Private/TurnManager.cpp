@@ -16,7 +16,7 @@ void ATurnManager::Register(UTurnComponent *TurnComponent)
 void ATurnManager::EndTurn(UTurnComponent *Ender)
 {
 	check(Ender == TurnComponents[ComponentIndex])
-	if (Ender->bCanStillActThisRound)
+	if (Ender->RemainingActionPoints > 0)
 	{
 		// Ender get to keep going if it still can act this round
 		ChangeCurrent(ComponentIndex);
@@ -69,7 +69,7 @@ int32 ATurnManager::GetNextIndexThatCanAct()
 {
 	for (int32 Candidate = 0; Candidate < TurnComponents.Num(); Candidate++)
 	{
-		if (TurnComponents[Candidate]->bCanStillActThisRound)
+		if (TurnComponents[Candidate]->RemainingActionPoints > 0)
 		{
 			return Candidate;
 		}

@@ -16,6 +16,7 @@ class NAVGRID_API UTurnComponent : public UActorComponent
 {
 	GENERATED_BODY()
 public:
+	UTurnComponent();
 
 	//Event delegates
 	DECLARE_DELEGATE(FOnTurnStart);
@@ -36,8 +37,11 @@ protected:
 	UPROPERTY()
 	ATurnManager *TurnManager;
 public:
+	/* The number of actions this pawn can perform in a single round */
+	UPROPERTY(EditAnyWhere, Category = "Turn Component")
+	int32 ActionPoints;
 	UPROPERTY(VisibleAnywhere, Category = "Turn Component")
-	bool bCanStillActThisRound = true;
+	int32 RemainingActionPoints;
 
 	/* Tell the manager that we are done acting for this round*/
 	void EndTurn();

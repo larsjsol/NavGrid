@@ -62,7 +62,7 @@ void ATeamTurnManager::StartTurnNext()
 		}
 		else
 		{
-			TurnComponent->bCanStillActThisRound = false;
+			TurnComponent->RemainingActionPoints--;
 			TurnComponent->EndTurn();
 		}
 	}

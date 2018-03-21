@@ -83,15 +83,15 @@ void AGridPawn::OnTurnEnd()
 
 void AGridPawn::OnMoveEnd()
 {
-	//default implementation is simply to end turn
-	TurnComponent->bCanStillActThisRound = false;
+	//Moving costs one action point
+	TurnComponent->RemainingActionPoints--;
 	TurnComponent->EndTurn();
 }
 
 void AGridPawn::PlayAITurn()
 {
 	//default implementation is simply to end turn
-	TurnComponent->bCanStillActThisRound = false;
+	TurnComponent->RemainingActionPoints = 0;
 	TurnComponent->EndTurn();
 }
 
