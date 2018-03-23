@@ -41,6 +41,9 @@ public:
 	/* Start the first round */
 	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
 	virtual void StartFirstRound();
+	/* End the current round */
+	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
+	virtual void EndRound();
 
 	/* Get the turn manager for a given team, the default implementation just returns this */
 	UFUNCTION(BlueprintPure, Category = "Turn Manager")

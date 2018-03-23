@@ -36,12 +36,7 @@ void ATurnManager::StartTurnNext()
 	}
 	else
 	{
-		if (ComponentIndex >= 0 && ComponentIndex < TurnComponents.Num())
-		{
-			TurnComponents[ComponentIndex]->TurnEnd();
-			OnTurnEnd.Broadcast(TurnComponents[ComponentIndex]);
-		}
-		StartNewRound();
+		EndRound();
 	}
 }
 
@@ -53,6 +48,16 @@ UTurnComponent *ATurnManager::GetCurrentComponent()
 void ATurnManager::StartFirstRound()
 {
 	check(Round == 0);
+	StartNewRound();
+}
+
+void ATurnManager::EndRound()
+{
+	if (ComponentIndex >= 0 && ComponentIndex < TurnComponents.Num())
+	{
+		TurnComponents[ComponentIndex]->TurnEnd();
+		OnTurnEnd.Broadcast(TurnComponents[ComponentIndex]);
+	}
 	StartNewRound();
 }
 
