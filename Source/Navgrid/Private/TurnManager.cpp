@@ -72,8 +72,10 @@ void ATurnManager::ChangeCurrent(int32 NewIndex)
 
 int32 ATurnManager::GetNextIndexThatCanAct()
 {
-	for (int32 Candidate = 0; Candidate < TurnComponents.Num(); Candidate++)
+	// start searching from the next component in the list
+	for (int32 Count = 1; Count <= TurnComponents.Num(); Count++)
 	{
+		int32 Candidate = (ComponentIndex + Count) % TurnComponents.Num();
 		if (TurnComponents[Candidate]->RemainingActionPoints > 0)
 		{
 			return Candidate;
@@ -90,6 +92,7 @@ void ATurnManager::StartNewRound()
 		TC->RoundStart();
 	}
 	OnRoundStart.Broadcast();
+	ComponentIndex = 0; // start searching for eligible components from the start of the array 
 	int32 First = GetNextIndexThatCanAct();
 	if (First >= 0)
 	{
