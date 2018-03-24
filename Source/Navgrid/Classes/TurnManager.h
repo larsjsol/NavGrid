@@ -17,7 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundEnd);
 * Coordinates a set of turn components.
 *
 * Terms:
-*  'Turn' is used for a singe pawn doing one or more actions.
+*  'Turn' is used for a singe pawn doing a single action.
 *  'Round' is used for all pawns managed by this turn manager having their Turn.
 */
 UCLASS(BlueprintType, Blueprintable, NotPlaceable)
