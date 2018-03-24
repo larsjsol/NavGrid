@@ -58,6 +58,7 @@ void ATurnManager::EndRound()
 		TurnComponents[ComponentIndex]->TurnEnd();
 		OnTurnEnd.Broadcast(TurnComponents[ComponentIndex]);
 	}
+	OnRoundEnd.Broadcast();
 	StartNewRound();
 }
 

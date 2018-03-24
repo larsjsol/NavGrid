@@ -11,6 +11,7 @@ class UTurnComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnStart, UTurnComponent *, TurnComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnEnd, UTurnComponent *, TurnComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundStart);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundEnd);
 
 /**
 * Coordinates a set of turn components.
@@ -62,6 +63,8 @@ public:
 	FOnTurnEnd OnTurnEnd;
 	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
 	FOnRoundStart OnRoundStart;
+	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
+	FOnRoundStart OnRoundEnd;
 
 	/* wait for this long between each turn */
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Turn Manager")
