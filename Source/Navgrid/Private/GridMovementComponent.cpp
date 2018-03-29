@@ -465,6 +465,7 @@ void UGridMovementComponent::AddSplineMesh(float From, float To)
 	SplineMesh->SetStaticMesh(PathMesh);
 	SplineMesh->RegisterComponentWithWorld(GetWorld());
 	SplineMesh->SetSplineUpDir(UpVector);
+	SplineMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SplineMeshes.Add(SplineMesh);
 }
 

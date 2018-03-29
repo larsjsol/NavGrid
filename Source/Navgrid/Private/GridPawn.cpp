@@ -29,12 +29,13 @@ AGridPawn::AGridPawn()
 	UStaticMesh *Selected = ConstructorHelpers::FObjectFinder<UStaticMesh>(
 		TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Cursor.NavGrid_Cursor'")).Object;
 	SelectedHighlight->SetStaticMesh(Selected);
-	SelectedHighlight->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	SelectedHighlight->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SelectedHighlight->SetVisibility(false);
 
 	Arrow = CreateDefaultSubobject<UArrowComponent>("Arrow");
 	Arrow->SetupAttachment(Scene);
 	Arrow->SetRelativeLocation(FVector(0, 0, 50));
+	Arrow->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGridPawn::BeginPlay()
