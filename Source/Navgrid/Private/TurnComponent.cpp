@@ -28,16 +28,16 @@ void UTurnComponent::StartTurnNext()
 
 void UTurnComponent::TurnStart()
 {
-	OnTurnStart().ExecuteIfBound();
+	OnTurnStart().Broadcast();
 }
 
 void UTurnComponent::TurnEnd()
 {
-	OnTurnEnd().ExecuteIfBound();
+	OnTurnEnd().Broadcast();
 }
 
 void UTurnComponent::RoundStart()
 {
 	RemainingActionPoints = ActionPoints;
-	OnRoundStart().ExecuteIfBound();
+	OnRoundStart().Broadcast();
 }

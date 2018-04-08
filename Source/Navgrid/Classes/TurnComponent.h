@@ -19,9 +19,9 @@ public:
 	UTurnComponent();
 
 	//Event delegates
-	DECLARE_DELEGATE(FOnTurnStart);
-	DECLARE_DELEGATE(FOnTurnEnd);
-	DECLARE_DELEGATE(FOnRoundStart);
+	DECLARE_MULTICAST_DELEGATE(FOnTurnStart);
+	DECLARE_MULTICAST_DELEGATE(FOnTurnEnd);
+	DECLARE_MULTICAST_DELEGATE(FOnRoundStart);
 
 	/* The Owners turn have started */
 	FOnTurnStart& OnTurnStart() { return OnTurnStartDelegate; }

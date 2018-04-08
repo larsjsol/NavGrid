@@ -42,9 +42,9 @@ void AGridPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TurnComponent->OnRoundStart().BindUObject(this, &AGridPawn::OnRoundStart);
-	TurnComponent->OnTurnStart().BindUObject(this, &AGridPawn::OnTurnStart);
-	TurnComponent->OnTurnEnd().BindUObject(this, &AGridPawn::OnTurnEnd);
+	TurnComponent->OnRoundStart().AddUObject(this, &AGridPawn::OnRoundStart);
+	TurnComponent->OnTurnStart().AddUObject(this, &AGridPawn::OnTurnStart);
+	TurnComponent->OnTurnEnd().AddUObject(this, &AGridPawn::OnTurnEnd);
 
 	auto *State = GetWorld()->GetGameState<ANavGridGameState>();
 	Grid = State->Grid;
