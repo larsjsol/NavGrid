@@ -81,7 +81,6 @@ public:
 	/* Should we straighten out the path to avoid zigzaging */
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Movement")
 	bool bStringPullPath = true;
-
 	void StringPull(TArray<const UNavTileComponent *> &InOutPath, TArray<const UNavTileComponent*>& OutPath);
 
 	/*
@@ -151,6 +150,10 @@ protected:
 	/* the grid we're currently on */
 	UPROPERTY()
 	ANavGrid *Grid = NULL;
+public:
+	/* Get the grid we're moving on */
+	ANavGrid *GetGrid() { return Grid; }
+protected:
 
 	UPROPERTY()
 	UAnimInstance *AnimInstance;
