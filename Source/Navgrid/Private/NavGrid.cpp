@@ -142,6 +142,7 @@ void ANavGrid::EndTileCursorOver(UNavTileComponent &Tile)
 void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 {
 	check(Pawn);
+	check(TilesInRange.Num() == 0);
 
 	if (EnableVirtualTiles)
 	{
@@ -154,15 +155,6 @@ void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 		UE_LOG(NavGrid, Error, TEXT("ANavGrid::CalculateTilesInRange(): %s is off the grid"), *Pawn->GetName());
 		return;
 	}
-
-	TilesInRange.Empty();
-	TArray<UNavTileComponent *> AllTiles;
-	GetEveryTile(AllTiles, GetWorld());
-	for (auto *T : AllTiles)
-	{
-		T->ResetPath();
-	}
-	NumPersistentTiles = AllTiles.Num() - NumVirtualTiles;
 
 	UNavTileComponent *Current = Tile;
 	Current->Distance = 0;
@@ -229,6 +221,20 @@ void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 void ANavGrid::GetTilesInRange(TArray<UNavTileComponent*>& OutTiles)
 {
 	OutTiles = TilesInRange;
+}
+
+void ANavGrid::ClearTiles()
+{
+	TilesInRange.Empty();
+	TArray<UNavTileComponent *> AllTiles;
+	GetEveryTile(AllTiles, GetWorld());
+	for (auto *T : AllTiles)
+	{
+		T->ResetPath();
+	}
+
+	ClearTileHighlights();
+	NumPersistentTiles = AllTiles.Num() - NumVirtualTiles;
 }
 
 bool ANavGrid::TraceTileLocation(const FVector & TraceStart, const FVector & TraceEnd, FVector & OutTilePos)

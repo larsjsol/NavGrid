@@ -183,6 +183,22 @@ FTransform UGridMovementComponent::TransformFromRotation(float DeltaTime)
 	return NewTransform;
 }
 
+void UGridMovementComponent::GetTilesInRange(TArray<UNavTileComponent *> &OutTiles)
+{
+	check(Grid);
+	Grid->GetTilesInRange(OutTiles);
+	if (OutTiles.Num() == 0)
+	{
+		Grid->CalculateTilesInRange(Cast<AGridPawn>(GetOwner()), true);
+		Grid->GetTilesInRange(OutTiles);
+	}
+}
+
+UNavTileComponent *UGridMovementComponent::GetTile()
+{
+	return Grid->GetTile(GetOwner()->GetActorLocation());
+}
+
 void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath, TArray<const UNavTileComponent*>& OutPath)
 {
 	AGridPawn *GridPawnOwner = Cast<AGridPawn>(GetOwner());

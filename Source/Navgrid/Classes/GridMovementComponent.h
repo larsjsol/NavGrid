@@ -41,6 +41,10 @@ protected:
 	FTransform TransformFromRotation(float DeltaTime);
 public:
 
+	/* Return the tiles that are in range */
+	void GetTilesInRange(TArray<UNavTileComponent *> &OutTiles);
+	/* Get the tile the pawn is on, may return null if no tile is found */
+	UNavTileComponent *GetTile();
 	/* How far (in tile cost) the actor can move in one go */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement")
 	float MovementRange = 4;
@@ -150,10 +154,6 @@ protected:
 	/* the grid we're currently on */
 	UPROPERTY()
 	ANavGrid *Grid = NULL;
-public:
-	/* Get the grid we're moving on */
-	ANavGrid *GetGrid() { return Grid; }
-protected:
 
 	UPROPERTY()
 	UAnimInstance *AnimInstance;

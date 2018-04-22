@@ -76,6 +76,9 @@ public:
 	virtual void CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests);
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void GetTilesInRange(TArray<UNavTileComponent *> &OutTiles);
+	/* Reset all pathfinding information in tiles */
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	void ClearTiles();
 protected:
 	/* Contains tiles found in the last call to CalculateTilesInRange() */
 	TArray<UNavTileComponent *> TilesInRange;
