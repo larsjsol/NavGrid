@@ -21,6 +21,14 @@ enum class EGridMovementMode : uint8
 	InPlaceTurn     UMETA(DisplayName = "Turn in place"),
 };
 
+UENUM(BlueprintType)
+enum class EGridMovementPhase : uint8
+{
+	Beginning		UMETA(DisplayName = "Beginning"),
+	Middle			UMETA(DisplayName = "Middle"),
+	Ending			UMETA(DisplayName = "Ending")
+};
+
 
 /**
  * A movement component that operates on a NavGrid
@@ -120,10 +128,12 @@ public:
 	FTransform ConsumeRootMotion();
 
 	EGridMovementMode GetMovementMode();
+	EGridMovementPhase GetMovementPhase() { return MovementPhase; }
 protected:
-	EGridMovementMode MovementMode = EGridMovementMode::Stationary;
+	EGridMovementMode MovementMode;
 	void ConsiderUpdateMovementMode();
 	void ChangeMovementMode(EGridMovementMode NewMode);
+	EGridMovementPhase MovementPhase;
 public:
 	/* Return the point the the pawn will reach if it continues moving for ForwardDistance */
 	FVector GetForwardLocation(float ForwardDistance);

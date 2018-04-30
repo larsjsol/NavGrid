@@ -16,6 +16,10 @@ UGridMovementComponent::UGridMovementComponent(const FObjectInitializer &ObjectI
 	AvailableMovementModes.Add(EGridMovementMode::Stationary);
 	AvailableMovementModes.Add(EGridMovementMode::Walking);
 	AvailableMovementModes.Add(EGridMovementMode::InPlaceTurn);
+
+	Distance = 0;
+	MovementMode = EGridMovementMode::Stationary;
+	MovementPhase = EGridMovementPhase::Middle;
 }
 
 void UGridMovementComponent::BeginPlay()
@@ -61,6 +65,11 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 
 	AActor *Owner = GetOwner();
 	FTransform NewTransform = Owner->GetActorTransform();
+
+	if (MovementPhase == EGridMovementPhase::Beginning)
+	{
+		MovementPhase = EGridMovementPhase::Middle;
+	}
 
 	ConsiderUpdateMovementMode();
 	switch (MovementMode)
@@ -157,11 +166,17 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 	FRotator NewRotation = LimitRotation(OldTransform.GetRotation().Rotator(), DesiredRotation, DeltaTime);
 	NewTransform.SetRotation(NewRotation.Quaternion());
 
-	/* Check if we're reached our destination*/
+	/* Check if we are in the end phase of this movement mode */
 	if (Distance + StoppingDistance >= Spline->GetSplineLength())
 	{
-		Distance = 0;
+		MovementPhase = EGridMovementPhase::Ending;
+	}
+	/* clear path if we have traversed it all (we might not get here if StoppingDistance is set) */
+	if (Distance >= Spline->GetSplineLength())
+	{
 		ChangeMovementMode(EGridMovementMode::Stationary);
+		Distance = 0;
+		Spline->ClearSplinePoints();
 	}
 
 	return NewTransform;
@@ -449,6 +464,7 @@ void UGridMovementComponent::ChangeMovementMode(EGridMovementMode NewMode)
 	{
 		OnMovementModeChangedEvent.Broadcast(MovementMode, NewMode);
 		MovementMode = NewMode;
+		MovementPhase = EGridMovementPhase::Beginning;
 
 		if (MovementMode == EGridMovementMode::Stationary)
 		{
