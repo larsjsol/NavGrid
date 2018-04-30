@@ -48,6 +48,11 @@ UTurnComponent *ATurnManager::GetCurrentComponent()
 void ATurnManager::StartFirstRound()
 {
 	check(Round == 0);
+
+	// order components by their team id. Lowest team goes first
+	TurnComponents.Sort([](const UTurnComponent& LHS, const UTurnComponent& RHS) {
+		return LHS.TeamId() > RHS.TeamId();
+	});
 	StartNewRound();
 }
 

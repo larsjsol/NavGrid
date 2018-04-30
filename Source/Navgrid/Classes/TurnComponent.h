@@ -58,6 +58,10 @@ public:
 	UFUNCTION(BLueprintPure, Category = "Turn Component")
 	inline bool MyTurn() { return bMyTurn; }
 
+	/* which team this component is a part of. Lower teamid will get to move first */
+	UFUNCTION(BLueprintPure, Category = "Turn Component")
+	int32 TeamId() const;
+
 protected:
 	bool bMyTurn;
 

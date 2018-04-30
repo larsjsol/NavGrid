@@ -6,6 +6,7 @@ ATeamTurnManager::ATeamTurnManager()
 {
 	Master = true;
 	TurnComponent = CreateDefaultSubobject<UTurnComponent>("Turn Component");
+	TeamId = -1;
 }
 
 void ATeamTurnManager::Register(UTurnComponent *TurnComponent)
@@ -26,6 +27,7 @@ void ATeamTurnManager::Register(UTurnComponent *TurnComponent)
 				NewManager->Master = false;
 				NewManager->TurnComponent->SetTurnManager(this);
 				NewManager->TurnDelay = TurnDelay;
+				NewManager->TeamId = Id;
 				// one round for the slave is a single turn for the master
 				NewManager->TurnComponent->OnTurnStart().AddUObject(NewManager, &ATeamTurnManager::StartNewRound);
 				

@@ -18,16 +18,21 @@ class NAVGRID_API ATeamTurnManager : public ATurnManager
 
 public:
 	ATeamTurnManager();
+
 	virtual void Register(UTurnComponent *TurnComponent) override;
 	virtual void StartTurnNext() override;
 	virtual void EndRound() override;
-	virtual ATurnManager *GetTurnManager(int32 TeamId = 0) override;
 
+	virtual ATurnManager *GetTurnManager(int32 TeamId = 0) override;
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "Turn Manager")
 	bool Master;
 
 	UFUNCTION(BlueprintPure, Category = "Turn Manager")
 	bool MyTurn() { return TurnComponent->MyTurn(); }
+
+	/* team that is manage by this instance */
+	UPROPERTY(BlueprintReadWrite, Category = "Turn Manager")
+	int32 TeamId;
 	
 protected:
 	UPROPERTY(VisibleAnyWhere, Category = "Turn Manager", meta = (AllowPrivateAccess = "true"))
