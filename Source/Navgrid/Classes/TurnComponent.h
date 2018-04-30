@@ -54,6 +54,13 @@ public:
 	/* Called when a new round starts (i.e. everyone has acted and its time to start over) */
 	void RoundStart();
 
+	/* is it this components turn? */
+	UFUNCTION(BLueprintPure, Category = "Turn Component")
+	inline bool MyTurn() { return bMyTurn; }
+
+protected:
+	bool bMyTurn;
+
 private:
 	FOnTurnStart OnTurnStartDelegate;
 	FOnTurnEnd OnTurnEndDelegate;

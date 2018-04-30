@@ -6,6 +6,7 @@ UTurnComponent::UTurnComponent()
 	:Super()
 {
 	ActionPoints = 1;
+	bMyTurn = false;
 }
 
 void UTurnComponent::SetTurnManager(ATurnManager *InTurnManager)
@@ -28,11 +29,13 @@ void UTurnComponent::StartTurnNext()
 
 void UTurnComponent::TurnStart()
 {
+	bMyTurn = true;
 	OnTurnStart().Broadcast();
 }
 
 void UTurnComponent::TurnEnd()
 {
+	bMyTurn = false;
 	OnTurnEnd().Broadcast();
 }
 

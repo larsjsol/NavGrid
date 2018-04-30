@@ -69,6 +69,26 @@ void ATeamTurnManager::StartTurnNext()
 	}
 }
 
+void ATeamTurnManager::EndRound()
+{
+	if (ComponentIndex >= 0 && ComponentIndex < TurnComponents.Num())
+	{
+		TurnComponents[ComponentIndex]->TurnEnd();
+		OnTurnEnd.Broadcast(TurnComponents[ComponentIndex]);
+	}
+	OnRoundEnd.Broadcast();
+
+	if (Master)
+	{
+		StartNewRound();
+	}
+	else
+	{
+		TurnComponent->RemainingActionPoints = 0;
+		TurnComponent->EndTurn();
+	}
+}
+
 ATurnManager *ATeamTurnManager::GetTurnManager(int32 TeamId/* = 0*/)
 {
 	if (Master && Teams.Contains(TeamId))
