@@ -33,6 +33,10 @@ ANavGrid::ANavGrid()
 	AddHighlightComponent(TEXT("Movable"), TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Movable.NavGrid_Movable'"));
 	AddHighlightComponent(TEXT("Dangerous"), TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Dangerous.NavGrid_Dangerous'"));
 	AddHighlightComponent(TEXT("Special"), TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Special.NavGrid_Special'"));
+
+	CurrentPawn = NULL;
+	CurrentTile = NULL;
+	bCurrentDoCollisionTests = false;
 }
 
 void ANavGrid::SetTileHighlight(UNavTileComponent & Tile, FName Type)
@@ -142,8 +146,8 @@ void ANavGrid::EndTileCursorOver(UNavTileComponent &Tile)
 void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 {
 	check(Pawn);
-	check(TilesInRange.Num() == 0);
 
+	ClearTiles();
 	if (EnableVirtualTiles)
 	{
 		GenerateVirtualTiles(Pawn);
@@ -218,8 +222,22 @@ void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 	}
 }
 
-void ANavGrid::GetTilesInRange(TArray<UNavTileComponent*>& OutTiles)
+void ANavGrid::GetTilesInRange(AGridPawn *Pawn, bool DoCollisionTests, TArray<UNavTileComponent*>& OutTiles)
 {
+	UNavTileComponent * Tile = GetTile(Pawn->GetActorLocation());
+	if (!Tile && EnableVirtualTiles)
+	{
+		GenerateVirtualTiles(Pawn);
+		Tile = GetTile(Pawn->GetActorLocation());
+	}
+
+	if (Pawn != CurrentPawn || DoCollisionTests != bCurrentDoCollisionTests || Tile != CurrentTile)
+	{
+		CurrentPawn = Pawn;
+		bCurrentDoCollisionTests = DoCollisionTests;
+		CurrentTile = Tile;
+		CalculateTilesInRange(CurrentPawn, bCurrentDoCollisionTests);
+	}
 	OutTiles = TilesInRange;
 }
 
@@ -338,7 +356,7 @@ void ANavGrid::GenerateVirtualTiles(const AGridPawn *Pawn)
 		{
 			for (float Z = Max.Z; Z >= Min.Z; Z -= TileSize)
 			{
-				UPROPERTY() UNavTileComponent *TileComp = ConsiderPlaceTile(FVector(X, Y, Z + TileSize + 25), FVector(X, Y, Z - 25));
+				UNavTileComponent *TileComp = ConsiderPlaceTile(FVector(X, Y, Z + TileSize + 25), FVector(X, Y, Z - 25));
 				if (TileComp)
 				{
 					VirtualTiles.Add(TileComp);

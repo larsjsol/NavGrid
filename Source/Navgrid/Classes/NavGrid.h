@@ -71,17 +71,28 @@ public:
 	void TileCursorOver(UNavTileComponent &Tile);
 	void EndTileCursorOver(UNavTileComponent &Tile);
 
-	/* Find all tiles in range */
-	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+protected:
+	/* Do pathfinding and and store all tiles that Pawn can reach in TilesInRange */
 	virtual void CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests);
+public:
+	/* Find all tiles in range. Call CalculateTilesInRange if neccecary */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void GetTilesInRange(TArray<UNavTileComponent *> &OutTiles);
+	void GetTilesInRange(AGridPawn *Pawn, bool DoCollisionTests, TArray<UNavTileComponent *> &OutTiles);
 	/* Reset all pathfinding information in tiles */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void ClearTiles();
 protected:
 	/* Contains tiles found in the last call to CalculateTilesInRange() */
+	UPROPERTY()
 	TArray<UNavTileComponent *> TilesInRange;
+	/* Latest Pawn passed to CalculcateTilesInRange() */
+	UPROPERTY()
+	AGridPawn *CurrentPawn;
+	/* Starting Tile for the latest call to CalculcateTilesInRange() */
+	UPROPERTY()
+	UNavTileComponent *CurrentTile;
+	/* whether or not we did collision tests in the latest call to CalculateTilesInRange() */
+	bool bCurrentDoCollisionTests;
 public:
 
 	//Event delegates

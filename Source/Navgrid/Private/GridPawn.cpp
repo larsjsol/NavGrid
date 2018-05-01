@@ -69,12 +69,7 @@ void AGridPawn::OnTurnStart()
 	}
 	SelectedHighlight->SetVisibility(true);
 
-	if (TurnComponent->GetPlayerController())
-	{
-		// figure out which tiles are in range and wait for player input
-		Grid->CalculateTilesInRange(this, true);
-	}
-	else
+	if (!TurnComponent->GetPlayerController())
 	{
 		PlayAITurn();
 	}
@@ -110,7 +105,7 @@ bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
 	if (Location && Location != &Tile && Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
 	{
 		TArray<UNavTileComponent *> InRange;
-		Grid->GetTilesInRange(InRange);
+		Grid->GetTilesInRange(this, true, InRange);
 		if (InRange.Contains(&Tile) && MovementComponent->CreatePath(Tile))
 		{
 			return true;

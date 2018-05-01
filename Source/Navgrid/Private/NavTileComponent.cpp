@@ -23,6 +23,8 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block); // So we get mouse over events
 
 	ShapeColor = FColor::Magenta;
+
+	ResetPath();
 }
 
 bool UNavTileComponent::Traversable(float MaxWalkAngle, const TArray<EGridMovementMode>& AvailableMovementModes) const

@@ -29,11 +29,13 @@ public:
 
 // Pathing
 	/* Cost of moving into this tile*/
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Pathfinding") float Cost = 1;
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Pathfinding")
+	float Cost = 1;
 	/* Distance from starting point of path */
 	float Distance;
 	/* Previous tile in path */
-	UNavTileComponent *Backpointer = NULL;
+	UPROPERTY()
+	UNavTileComponent *Backpointer;
 	/* Is this node in the 'visited' set? - Helper var for pathfinding */
 	bool Visited;
 	/* Reset variables used in pathfinding */

@@ -109,10 +109,6 @@ void ATurnManager::StartNewRound()
 
 void ATurnManager::StartTurnCurrent()
 {
-	for (TActorIterator<ANavGrid> GridIter(GetWorld()); GridIter; ++GridIter)
-	{
-		GridIter->ClearTiles();
-	}
 	TurnComponents[ComponentIndex]->TurnStart();
 	OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
 }

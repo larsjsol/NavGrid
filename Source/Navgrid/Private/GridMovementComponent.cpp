@@ -201,12 +201,7 @@ FTransform UGridMovementComponent::TransformFromRotation(float DeltaTime)
 void UGridMovementComponent::GetTilesInRange(TArray<UNavTileComponent *> &OutTiles)
 {
 	check(Grid);
-	Grid->GetTilesInRange(OutTiles);
-	if (OutTiles.Num() == 0)
-	{
-		Grid->CalculateTilesInRange(Cast<AGridPawn>(GetOwner()), true);
-		Grid->GetTilesInRange(OutTiles);
-	}
+	Grid->GetTilesInRange(Cast<AGridPawn>(GetOwner()), true, OutTiles);
 }
 
 UNavTileComponent *UGridMovementComponent::GetTile()
@@ -270,7 +265,7 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 	}
 
 	TArray<UNavTileComponent *> InRange;
-	Grid->GetTilesInRange(InRange);
+	Grid->GetTilesInRange(Cast<AGridPawn>(GetOwner()), true, InRange);
 	if (InRange.Contains(&Target))
 	{
 		// create a list of tiles from the destination to the starting point and reverse it
