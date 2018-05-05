@@ -38,6 +38,9 @@ void ANavGridPC::OnTileCursorOver(const UNavTileComponent &Tile)
 	/* If the pawn is not moving, try to create a path to the hovered tile and show it */
 	if (GridPawn && !GridPawn->IsBusy())
 	{
+		Grid->Cursor->SetWorldLocation(Tile.GetPawnLocation() + FVector(0, 0, Grid->UIOffset));
+		Grid->Cursor->SetVisibility(true);
+
 		UGridMovementComponent *MovementComponent = GridPawn->MovementComponent;
 		if (GridPawn->CanMoveTo(Tile))
 		{
@@ -49,6 +52,7 @@ void ANavGridPC::OnTileCursorOver(const UNavTileComponent &Tile)
 
 void ANavGridPC::OnEndTileCursorOver(const UNavTileComponent &Tile)
 {
+	Grid->Cursor->SetVisibility(false);
 	/* Hide the previously shown path */
 	if (GridPawn)
 	{

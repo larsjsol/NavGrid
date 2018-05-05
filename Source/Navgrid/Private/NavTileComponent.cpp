@@ -161,14 +161,11 @@ void UNavTileComponent::Clicked(UPrimitiveComponent* TouchedComponent, FKey Key)
 
 void UNavTileComponent::CursorOver(UPrimitiveComponent* TouchedComponent)
 {
-	Grid->Cursor->SetWorldLocation(GetPawnLocation() + FVector(0, 0, Grid->UIOffset));
-	Grid->Cursor->SetVisibility(true);
 	Grid->TileCursorOver(*this);
 }
 
 void UNavTileComponent::EndCursorOver(UPrimitiveComponent* TouchedComponent)
 {
-	Grid->Cursor->SetVisibility(false);
 	Grid->EndTileCursorOver(*this);
 }
 
