@@ -30,8 +30,6 @@ public:
 	/* All actors managed by the turn manager have had their turn and a new round begins */
 	FOnRoundStart& OnRoundStart() { return OnRoundStartDelegate; }
 
-	/* Get the PC that controls the Turn Manager. NULL if AI controlled. */
-	APlayerController *GetPlayerController() { return TurnManager->PlayerController; }
 	void SetTurnManager(ATurnManager *InTurnManager);
 protected:
 	UPROPERTY()
@@ -58,9 +56,9 @@ public:
 	UFUNCTION(BLueprintPure, Category = "Turn Component")
 	inline bool MyTurn() { return bMyTurn; }
 
-	/* which team this component is a part of. Lower teamid will get to move first */
+	/* which team this component is a part of */
 	UFUNCTION(BLueprintPure, Category = "Turn Component")
-	int32 TeamId() const;
+	FGenericTeamId TeamId() const { return FGenericTeamId::GetTeamIdentifier(GetOwner()); }
 
 protected:
 	bool bMyTurn;

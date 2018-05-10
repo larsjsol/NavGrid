@@ -37,6 +37,8 @@ AGridPawn::AGridPawn()
 	Arrow->SetupAttachment(Scene);
 	Arrow->SetRelativeLocation(FVector(0, 0, 50));
 	Arrow->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	bHumanControlled = true;
 }
 
 void AGridPawn::BeginPlay()
@@ -51,7 +53,7 @@ void AGridPawn::BeginPlay()
 	Grid = State->Grid;
 	SelectedHighlight->SetRelativeLocation(FVector(0, 0, Grid->UIOffset));
 
-	ATurnManager *TM = State->GetTurnManager(TeamId);
+	ATurnManager *TM = State->GetTurnManager(TeamID);
 	check(TM);
 	TM->Register(TurnComponent);
 
@@ -69,7 +71,7 @@ void AGridPawn::OnTurnStart()
 	}
 	SelectedHighlight->SetVisibility(true);
 
-	if (!TurnComponent->GetPlayerController())
+	if (!bHumanControlled)
 	{
 		PlayAITurn();
 	}

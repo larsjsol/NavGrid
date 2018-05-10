@@ -17,7 +17,7 @@ void ANavGridPC::BeginPlay()
 {
 	// grab turn manager and grid from the game state
 	auto *State = GetWorld()->GetGameState<ANavGridGameState>();
-	SetTurnManager(State->GetTurnManager());
+	SetTurnManager(State->GetTurnManager(FGenericTeamId()));
 	SetGrid(State->Grid);
 }
 
@@ -75,8 +75,15 @@ void ANavGridPC::OnTurnEnd(UTurnComponent * Component)
 void ANavGridPC::SetTurnManager(ATurnManager * InTurnManager)
 {
 	check(InTurnManager);
+
+	// unregister any delegates from the previous manager
+	if (TurnManager)
+	{
+		TurnManager->OnTurnStart.RemoveDynamic(this, &ANavGridPC::OnTurnStart);
+		TurnManager->OnTurnEnd.RemoveDynamic(this, &ANavGridPC::OnTurnEnd);
+	}
+
 	TurnManager = InTurnManager;
-	TurnManager->PlayerController = this;
 	TurnManager->OnTurnStart.AddDynamic(this, &ANavGridPC::OnTurnStart);
 	TurnManager->OnTurnEnd.AddDynamic(this, &ANavGridPC::OnTurnEnd);
 }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "GenericTeamAgentInterface.h"
 #include "TurnManager.generated.h"
 
 class UTurnComponent;
@@ -48,11 +49,7 @@ public:
 
 	/* Get the turn manager for a given team, the default implementation just returns this */
 	UFUNCTION(BlueprintPure, Category = "Turn Manager")
-	virtual ATurnManager *GetTurnManager(int32 TeamId = 0) { return this; }
-
-	/* Player controller controlling the pawns managed by this manager. Set to NULL if AI controlled */
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Turn Manager")
-	APlayerController *PlayerController;
+	virtual ATurnManager *GetTurnManager(const FGenericTeamId& TeamID) { return this; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Turn Manager")
 	int32 GetRound() const { return Round; }

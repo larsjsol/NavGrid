@@ -4,7 +4,7 @@ using System.IO;
 public class NavGrid : ModuleRules
 {
     public NavGrid(ReadOnlyTargetRules TargetRules) : base(TargetRules) {
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AIModule" });
 
         if (TargetRules.bBuildEditor)
         {

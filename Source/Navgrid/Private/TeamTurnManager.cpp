@@ -6,7 +6,6 @@ ATeamTurnManager::ATeamTurnManager()
 {
 	Master = true;
 	TurnComponent = CreateDefaultSubobject<UTurnComponent>("Turn Component");
-	TeamId = -1;
 }
 
 void ATeamTurnManager::Register(UTurnComponent *TurnComponent)
@@ -18,7 +17,7 @@ void ATeamTurnManager::Register(UTurnComponent *TurnComponent)
 			AGridPawn *GridPawnOwner = Cast<AGridPawn>(TurnComponent->GetOwner());
 			check(GridPawnOwner);
 
-			int32 &Id = GridPawnOwner->TeamId;
+			uint8 Id = GridPawnOwner->GetGenericTeamId().GetId();
 			if (!Teams.Contains(Id))
 			{
 				UPROPERTY()
@@ -27,7 +26,6 @@ void ATeamTurnManager::Register(UTurnComponent *TurnComponent)
 				NewManager->Master = false;
 				NewManager->TurnComponent->SetTurnManager(this);
 				NewManager->TurnDelay = TurnDelay;
-				NewManager->TeamId = Id;
 				// one round for the slave is a single turn for the master
 				NewManager->TurnComponent->OnTurnStart().AddUObject(NewManager, &ATeamTurnManager::StartNewRound);
 				
@@ -91,11 +89,11 @@ void ATeamTurnManager::EndRound()
 	}
 }
 
-ATurnManager *ATeamTurnManager::GetTurnManager(int32 TeamId/* = 0*/)
+ATurnManager *ATeamTurnManager::GetTurnManager(const FGenericTeamId& TeamID)
 {
-	if (Master && Teams.Contains(TeamId))
+	if (Master && Teams.Contains(TeamID.GetId()))
 	{
-		return Teams[TeamId];
+		return Teams[TeamID.GetId()];
 	}
 	else
 	{

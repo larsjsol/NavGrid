@@ -23,21 +23,16 @@ public:
 	virtual void StartTurnNext() override;
 	virtual void EndRound() override;
 
-	virtual ATurnManager *GetTurnManager(int32 TeamId = 0) override;
+	virtual ATurnManager *GetTurnManager(const FGenericTeamId& TeamID) override;
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "Turn Manager")
 	bool Master;
 
 	UFUNCTION(BlueprintPure, Category = "Turn Manager")
 	bool MyTurn() { return TurnComponent->MyTurn(); }
-
-	/* team that is manage by this instance */
-	UPROPERTY(BlueprintReadWrite, Category = "Turn Manager")
-	int32 TeamId;
-	
 protected:
 	UPROPERTY(VisibleAnyWhere, Category = "Turn Manager", meta = (AllowPrivateAccess = "true"))
 	UTurnComponent *TurnComponent;
 
 	UPROPERTY()
-	TMap<int32, ATeamTurnManager *> Teams;
+	TMap<uint8, ATeamTurnManager *> Teams;
 };

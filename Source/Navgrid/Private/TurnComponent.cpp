@@ -44,21 +44,3 @@ void UTurnComponent::RoundStart()
 	RemainingActionPoints = ActionPoints;
 	OnRoundStart().Broadcast();
 }
-
-int32 UTurnComponent::TeamId() const
-{
-	// TODO: consider turning this into an interface
-	AActor *Owner = GetOwner();
-	if (Owner->IsA(AGridPawn::StaticClass()))
-	{
-		return Cast<AGridPawn>(Owner)->TeamId;
-	}
-	else if (Owner->IsA(ATeamTurnManager::StaticClass()))
-	{
-		return Cast<ATeamTurnManager>(Owner)->TeamId;
-	}
-	else
-	{
-		return -1;
-	}
-}

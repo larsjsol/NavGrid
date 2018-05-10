@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "GenericTeamAgentInterface.h"
 
 #include "TurnManager.h"
 
@@ -31,7 +32,7 @@ public:
 	ANavGrid *Grid;
 
 	UFUNCTION(BlueprintCallable, Category = "NavGrid")
-	virtual ATurnManager *GetTurnManager(int32 TeamId = 0) const { return TurnManager->GetTurnManager(TeamId); }
+	virtual ATurnManager *GetTurnManager(const FGenericTeamId& TeamID) const { return TurnManager->GetTurnManager(TeamID); }
 
 protected:
 	UPROPERTY(BlueprintReadWrite, VisibleAnyWhere, Category = "NavGrid")

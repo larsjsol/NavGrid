@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Pawn.h"
+#include "GenericTeamAgentInterface.h"
 #include "GridPawn.generated.h"
 
 class UGridMovementComponent;
@@ -18,7 +19,7 @@ class ANavGrid;
  * Currently simply a pawn with a GridMovementComponent.
  */
 UCLASS()
-class NAVGRID_API AGridPawn : public APawn
+class NAVGRID_API AGridPawn : public APawn, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -27,9 +28,15 @@ public:
 	AGridPawn();
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnyWhere, Category = "NavGrid")
-	int32 TeamId;
+	// IGenericTeamAgentInterface start
+	virtual void SetGenericTeamId(const FGenericTeamId& TeamID) override { this->TeamID = TeamID; }
+	virtual FGenericTeamId GetGenericTeamId() const override { return TeamID; }
+	// IGenericTeamAgentInterface end
+protected:
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
+	FGenericTeamId TeamID;
 
+public:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USceneComponent *Scene;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -66,6 +73,9 @@ public:
 	*  Base implentation only checks if the pawn is moving
 	*/
 	virtual bool IsBusy();
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
+	bool bHumanControlled;
 
 	virtual bool CanMoveTo(const UNavTileComponent & Tile);
 	virtual void MoveTo(const UNavTileComponent & Tile);
