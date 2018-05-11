@@ -35,6 +35,9 @@ public:
 	/* Should virtual tiles be placed on empty areas */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
 	bool EnableVirtualTiles = false;
+	/* Class used for virtual tiles */
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
+	TSubclassOf<UNavTileComponent> TileClass;
 
 	/* Scene Component (root) */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Components")
@@ -44,13 +47,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components")
 	UStaticMeshComponent *Cursor;
 
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "NavGrid")
+protected:
+	UPROPERTY()
 	TMap<FName, UInstancedStaticMeshComponent *> TileHighlights;
+	TMap<FName, const TCHAR *> TileHighLightPaths;
+public:
 	void SetTileHighlight(UNavTileComponent &Tile, FName Type);
 	void ClearTileHighlights();
-
-protected:
-	void AddHighlightComponent(const TCHAR *Name, const TCHAR *FileName);
+	void AddHighlightType(const FName &Type, const TCHAR *FileName);
+	UInstancedStaticMeshComponent *GetHighlightComponent(FName Type);
 public:
 
 	/* Number of tiles that exist in the current level */

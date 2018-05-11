@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NavGridPrivatePCH.h"
+#include "AssetRegistryModule.h"
 
 #include <limits>
 
@@ -11,6 +12,8 @@ ANavGrid::ANavGrid()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+
+	TileClass = UNavTileComponent::StaticClass();
 
 	SceneComponent = CreateDefaultSubobject<USceneComponent>("RootComponent");
 	RootComponent = SceneComponent;
@@ -30,9 +33,9 @@ ANavGrid::ANavGrid()
 		UE_LOG(NavGrid, Error, TEXT("Error loading %s"), HCRef);
 	}
 
-	AddHighlightComponent(TEXT("Movable"), TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Movable.NavGrid_Movable'"));
-	AddHighlightComponent(TEXT("Dangerous"), TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Dangerous.NavGrid_Dangerous'"));
-	AddHighlightComponent(TEXT("Special"), TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Special.NavGrid_Special'"));
+	AddHighlightType("Movable", TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Movable.NavGrid_Movable'"));
+	AddHighlightType("Dangerous", TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Dangerous.NavGrid_Dangerous'"));
+	AddHighlightType("Special", TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Special.NavGrid_Special'"));
 
 	CurrentPawn = NULL;
 	CurrentTile = NULL;
@@ -52,16 +55,34 @@ void ANavGrid::ClearTileHighlights()
 	}
 }
 
-void ANavGrid::AddHighlightComponent(const TCHAR *Name, const TCHAR *FileName)
+void ANavGrid::AddHighlightType(const FName &Type, const TCHAR *FileName)
 {
-	UInstancedStaticMeshComponent *MeshComponent = CreateAbstractDefaultSubobject<UInstancedStaticMeshComponent>(Name);
-	auto Finder = ConstructorHelpers::FObjectFinder<UStaticMesh>(FileName);
-	if (Finder.Succeeded())
+	TileHighLightPaths.Add(Type, FileName);
+}
+
+UInstancedStaticMeshComponent * ANavGrid::GetHighlightComponent(FName Type)
+{
+	/* build the instanced mesh component if we have not already done so */
+	if (!TileHighlights.Contains(Type) && TileHighLightPaths.Contains(Type))
 	{
-		MeshComponent->SetupAttachment(SceneComponent);
-		MeshComponent->SetStaticMesh(Finder.Object);
-		MeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-		TileHighlights.Add(FName(Name), MeshComponent);
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+		UStaticMesh *Mesh = LoadObject<UStaticMesh>(this, TileHighLightPaths[Type]);
+		check(Mesh);
+		auto *Comp = NewObject<UInstancedStaticMeshComponent>(this);
+		Comp->SetupAttachment(GetRootComponent());
+		Comp->SetStaticMesh(Mesh);
+		Comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Comp->RegisterComponent();
+		TileHighlights.Add(Type, Comp);
+	}
+	/* we *should* now have the object we need*/
+	if (TileHighlights.Contains(Type))
+	{
+		return TileHighlights[Type];
+	}
+	else
+	{
+		return NULL;
 	}
 }
 
@@ -291,7 +312,7 @@ UNavTileComponent * ANavGrid::PlaceTile(const FVector & Location, AActor * TileO
 		TileOwner = this;
 	}
 
-	UPROPERTY() UNavTileComponent *TileComp = NewObject<UNavTileComponent>(this);
+	UNavTileComponent *TileComp = NewObject<UNavTileComponent>(TileOwner, TileClass);
 	TileComp->SetupAttachment(TileOwner->GetRootComponent());
 	TileComp->SetWorldTransform(FTransform::Identity);
 	TileComp->SetWorldLocation(Location);

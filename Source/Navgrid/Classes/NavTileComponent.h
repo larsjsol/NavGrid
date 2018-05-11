@@ -107,5 +107,5 @@ public:
 	virtual FVector GetSplineMeshUpVector();
 
 	/* Set a highlight for this tile */
-	void SetHighlight(FName HighlightType);
+	virtual void SetHighlight(FName NewHighlightType);
 };
