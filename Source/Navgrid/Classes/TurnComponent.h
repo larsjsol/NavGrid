@@ -51,6 +51,8 @@ public:
 	void TurnEnd();
 	/* Called when a new round starts (i.e. everyone has acted and its time to start over) */
 	void RoundStart();
+	/* Broadcast that this component is ready for player input */
+	void BroadcastReadyForPlayerInput();
 
 	/* is it this components turn? */
 	UFUNCTION(BLueprintPure, Category = "Turn Component")

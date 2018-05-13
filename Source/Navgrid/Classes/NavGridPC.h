@@ -40,8 +40,8 @@ public:
 	UFUNCTION()
 	virtual void OnTurnEnd(UTurnComponent *Component);
 
-	void SetTurnManager(ATurnManager * InTurnManager);
-	void SetGrid(ANavGrid * InGrid);
+	virtual void SetTurnManager(ATurnManager * InTurnManager);
+	virtual void SetGrid(ANavGrid * InGrid);
 
 	/* The pawn we're currently controlling */
 	UPROPERTY(BlueprintReadWrite)

@@ -71,7 +71,11 @@ void AGridPawn::OnTurnStart()
 	}
 	SelectedHighlight->SetVisibility(true);
 
-	if (!bHumanControlled)
+	if (bHumanControlled)
+	{
+		TurnComponent->BroadcastReadyForPlayerInput();
+	}
+	else
 	{
 		PlayAITurn();
 	}

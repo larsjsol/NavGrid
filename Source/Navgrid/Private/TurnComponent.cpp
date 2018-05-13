@@ -44,3 +44,8 @@ void UTurnComponent::RoundStart()
 	RemainingActionPoints = ActionPoints;
 	OnRoundStart().Broadcast();
 }
+
+void UTurnComponent::BroadcastReadyForPlayerInput()
+{
+	TurnManager->OnReadyForPlayerInput.Broadcast(this);
+}

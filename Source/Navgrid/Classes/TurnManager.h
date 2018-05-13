@@ -11,6 +11,7 @@ class UTurnComponent;
 //Declare delegates
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnStart, UTurnComponent *, TurnComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnEnd, UTurnComponent *, TurnComponent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReadyForPlayerInput, UTurnComponent *, TurnComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundStart);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundEnd);
 
@@ -58,6 +59,8 @@ public:
 	FOnTurnStart OnTurnStart;
 	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
 	FOnTurnEnd OnTurnEnd;
+	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
+	FOnReadyForPlayerInput OnReadyForPlayerInput;
 	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
 	FOnRoundStart OnRoundStart;
 	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
