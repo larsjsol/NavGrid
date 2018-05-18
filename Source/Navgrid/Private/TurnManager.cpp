@@ -13,6 +13,12 @@ void ATurnManager::Register(UTurnComponent *TurnComponent)
 	TurnComponent->SetTurnManager(this);
 }
 
+void ATurnManager::UnRegister(UTurnComponent *TurnComponent)
+{
+	TurnComponents.Remove(TurnComponent);
+	TurnComponent->SetTurnManager(NULL);
+}
+
 void ATurnManager::EndTurn(UTurnComponent *Ender)
 {
 	check(Ender == TurnComponents[ComponentIndex])

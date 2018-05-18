@@ -11,7 +11,6 @@ UTurnComponent::UTurnComponent()
 
 void UTurnComponent::SetTurnManager(ATurnManager *InTurnManager)
 {
-	check(InTurnManager);
 	TurnManager = InTurnManager;
 }
 
@@ -48,4 +47,12 @@ void UTurnComponent::RoundStart()
 void UTurnComponent::BroadcastReadyForPlayerInput()
 {
 	TurnManager->OnReadyForPlayerInput.Broadcast(this);
+}
+
+void UTurnComponent::UnRegister()
+{
+	if (TurnManager)
+	{
+		TurnManager->UnRegister(this);
+	}
 }

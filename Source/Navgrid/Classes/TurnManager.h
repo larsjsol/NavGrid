@@ -32,6 +32,9 @@ public:
 	/* Add a turn component to be managed */
 	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
 	virtual void Register(UTurnComponent *TurnComponent);
+	/* remove a component from this manager */
+	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
+	virtual void UnRegister(UTurnComponent *TurnComponent);
 	/* End the turn for the current turn component */
 	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
 	virtual void EndTurn(UTurnComponent *Ender);

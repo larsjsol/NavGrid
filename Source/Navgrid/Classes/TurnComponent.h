@@ -54,6 +54,9 @@ public:
 	/* Broadcast that this component is ready for player input */
 	void BroadcastReadyForPlayerInput();
 
+	/* Remove the entry for this component in the turn manager */
+	void UnRegister();
+
 	/* is it this components turn? */
 	UFUNCTION(BLueprintPure, Category = "Turn Component")
 	inline bool MyTurn() { return bMyTurn; }
