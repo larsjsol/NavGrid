@@ -156,17 +156,17 @@ void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &Colli
 
 void UNavTileComponent::Clicked(UPrimitiveComponent* TouchedComponent, FKey Key)
 {
-	Grid->TileClicked(*this);
+	Grid->TileClicked(this);
 }
 
 void UNavTileComponent::CursorOver(UPrimitiveComponent* TouchedComponent)
 {
-	Grid->TileCursorOver(*this);
+	Grid->TileCursorOver(this);
 }
 
 void UNavTileComponent::EndCursorOver(UPrimitiveComponent* TouchedComponent)
 {
-	Grid->EndTileCursorOver(*this);
+	Grid->EndTileCursorOver(this);
 }
 
 void UNavTileComponent::TouchEnter(ETouchIndex::Type Type, UPrimitiveComponent* TouchedComponent)
@@ -181,7 +181,7 @@ void UNavTileComponent::TouchLeave(ETouchIndex::Type Type, UPrimitiveComponent* 
 
 void UNavTileComponent::TouchEnd(ETouchIndex::Type Type, UPrimitiveComponent* TouchedComponent)
 {
-	Grid->TileClicked(*this);
+	Grid->TileClicked(this);
 }
 
 void UNavTileComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile) const

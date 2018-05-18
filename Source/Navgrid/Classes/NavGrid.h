@@ -12,6 +12,10 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(NavGrid, Log, All);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTileClicked, const UNavTileComponent*, Tile);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTileCursorOver, const UNavTileComponent*, Tile);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEndTileCursorOver, const UNavTileComponent*, Tile);
+
 /**
  * A grid that pawns can move around on.
  *
@@ -65,16 +69,19 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "NavGrid")
 	int32 NumVirtualTiles = 0;
 
+	UFUNCTION(BlueprintCallable, Category = "NavGrid")
+	static ANavGrid *GetNavGrid(AActor *ActorInWorld);
 	static ANavGrid *GetNavGrid(UWorld *World);
 
 	/* Get tile from world location, may return NULL */
 	virtual UNavTileComponent *GetTile(const FVector &WorldLocation, bool FindFloor = true);
 protected:
 	UNavTileComponent *LineTraceTile(const FVector &Start, const FVector &End);
+
 public:
-	void TileClicked(UNavTileComponent &Tile);
-	void TileCursorOver(UNavTileComponent &Tile);
-	void EndTileCursorOver(UNavTileComponent &Tile);
+	void TileClicked(const UNavTileComponent *Tile);
+	void TileCursorOver(const UNavTileComponent *Tile);
+	void EndTileCursorOver(const UNavTileComponent *Tile);
 
 protected:
 	/* Do pathfinding and and store all tiles that Pawn can reach in TilesInRange */
@@ -98,21 +105,18 @@ protected:
 	UNavTileComponent *CurrentTile;
 	/* whether or not we did collision tests in the latest call to CalculateTilesInRange() */
 	bool bCurrentDoCollisionTests;
+
 public:
-
-	//Event delegates
-	DECLARE_EVENT_OneParam(ANavGrid, FOnTileClicked, const UNavTileComponent& );
-	DECLARE_EVENT_OneParam(ANavGrid, FOnTileCursorOver, const UNavTileComponent&);
-	DECLARE_EVENT_OneParam(ANavGrid, FOnEndTileCursorOver, const UNavTileComponent&);
-
 	/* Triggered by mouse clicks on tiles*/
-	FOnTileClicked& OnTileClicked() { return OnTileClickedEvent; }	
+	UPROPERTY(BlueprintAssignable, Category = "NavGrid")
+	FOnTileClicked OnTileClicked;
 	/* Triggered when the cursor enters a tile */
-	FOnTileCursorOver& OnTileCursorOver() { return OnTileCursorOverEvent; }
+	UPROPERTY(BlueprintAssignable, Category = "NavGrid")
+	FOnTileCursorOver OnTileCursorOver;
 	/* Triggered when the cursor leaves a tile */
-	FOnEndTileCursorOver& OnEndTileCursorOver() { return OnEndTileCursorOverEvent; }
+	UPROPERTY(BlueprintAssignable, Category = "NavGrid")
+	FOnEndTileCursorOver OnEndTileCursorOver;
 
-public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
 	bool TraceTileLocation(const FVector & TraceStart, const FVector & TraceEnd, FVector & OutTilePos);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pathfinding")
@@ -132,9 +136,7 @@ public:
 
 	virtual void Destroyed() override;
 private:
-	FOnTileClicked OnTileClickedEvent;
-	FOnTileCursorOver OnTileCursorOverEvent;
-	FOnEndTileCursorOver OnEndTileCursorOverEvent;
+
 
 public:
 	/** return every tile in the supplied world */

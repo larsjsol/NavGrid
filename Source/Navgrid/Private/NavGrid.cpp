@@ -86,6 +86,11 @@ UInstancedStaticMeshComponent * ANavGrid::GetHighlightComponent(FName Type)
 	}
 }
 
+ANavGrid *ANavGrid::GetNavGrid(AActor *ActorInWorld)
+{
+	return GetNavGrid(ActorInWorld->GetWorld());
+}
+
 ANavGrid * ANavGrid::GetNavGrid(UWorld *World)
 {
 	if (World)
@@ -149,19 +154,19 @@ UNavTileComponent *ANavGrid::LineTraceTile(const FVector &Start, const FVector &
 	return Cast<UNavTileComponent>(Comp);
 }
 
-void ANavGrid::TileClicked(UNavTileComponent &Tile)
+void ANavGrid::TileClicked(const UNavTileComponent *Tile)
 {
-	OnTileClickedEvent.Broadcast(Tile);
+	OnTileClicked.Broadcast(Tile);
 }
 
-void ANavGrid::TileCursorOver(UNavTileComponent &Tile)
+void ANavGrid::TileCursorOver(const UNavTileComponent *Tile)
 {
-	OnTileCursorOverEvent.Broadcast(Tile);
+	OnTileCursorOver.Broadcast(Tile);
 }
 
-void ANavGrid::EndTileCursorOver(UNavTileComponent &Tile)
+void ANavGrid::EndTileCursorOver(const UNavTileComponent *Tile)
 {
-	OnEndTileCursorOverEvent.Broadcast(Tile);
+	OnEndTileCursorOver.Broadcast(Tile);
 }
 
 void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)

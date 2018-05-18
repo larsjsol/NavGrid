@@ -23,15 +23,12 @@ public:
 	ANavGridPC(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 
-	/*
-	Called when a tile is clicked
-
-	- Highlight all tiles in range when we click on the character tile
-	- Clear highlights when any other tile is clicked
-	*/
-	virtual void OnTileClicked(const UNavTileComponent &Tile);
-	virtual void OnTileCursorOver(const UNavTileComponent &Tile);
-	virtual void OnEndTileCursorOver(const UNavTileComponent &Tile);
+	UFUNCTION()
+	virtual void OnTileClicked(const UNavTileComponent *Tile);
+	UFUNCTION()
+	virtual void OnTileCursorOver(const UNavTileComponent *Tile);
+	UFUNCTION()
+	virtual void OnEndTileCursorOver(const UNavTileComponent *Tile);
 
 	/* Called when a new turn starts*/
 	UFUNCTION()

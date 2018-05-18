@@ -21,36 +21,36 @@ void ANavGridPC::BeginPlay()
 	SetGrid(State->Grid);
 }
 
-void ANavGridPC::OnTileClicked(const UNavTileComponent &Tile)
+void ANavGridPC::OnTileClicked(const UNavTileComponent *Tile)
 {
 	/* Try to move the current pawn to the clicked tile */
 	if (GridPawn && !GridPawn->IsBusy())
 	{
-		if (GridPawn->CanMoveTo(Tile))
+		if (GridPawn->CanMoveTo(*Tile))
 		{
-			GridPawn->MoveTo(Tile);
+			GridPawn->MoveTo(*Tile);
 		}
 	}
 }
 
-void ANavGridPC::OnTileCursorOver(const UNavTileComponent &Tile)
+void ANavGridPC::OnTileCursorOver(const UNavTileComponent *Tile)
 {
 	/* If the pawn is not moving, try to create a path to the hovered tile and show it */
 	if (GridPawn && !GridPawn->IsBusy())
 	{
-		Grid->Cursor->SetWorldLocation(Tile.GetPawnLocation() + FVector(0, 0, Grid->UIOffset));
+		Grid->Cursor->SetWorldLocation(Tile->GetPawnLocation() + FVector(0, 0, Grid->UIOffset));
 		Grid->Cursor->SetVisibility(true);
 
 		UGridMovementComponent *MovementComponent = GridPawn->MovementComponent;
-		if (GridPawn->CanMoveTo(Tile))
+		if (GridPawn->CanMoveTo(*Tile))
 		{
-			MovementComponent->CreatePath((UNavTileComponent &)Tile);
+			MovementComponent->CreatePath(*Tile);
 			MovementComponent->ShowPath();
 		}
 	}
 }
 
-void ANavGridPC::OnEndTileCursorOver(const UNavTileComponent &Tile)
+void ANavGridPC::OnEndTileCursorOver(const UNavTileComponent *Tile)
 {
 	Grid->Cursor->SetVisibility(false);
 	/* Hide the previously shown path */
@@ -91,9 +91,16 @@ void ANavGridPC::SetTurnManager(ATurnManager * InTurnManager)
 void ANavGridPC::SetGrid(ANavGrid * InGrid)
 {
 	check(InGrid);
+	if (Grid)
+	{
+		Grid->OnTileClicked.RemoveDynamic(this, &ANavGridPC::OnTileClicked);
+		Grid->OnTileCursorOver.RemoveDynamic(this, &ANavGridPC::OnTileCursorOver);
+		Grid->OnEndTileCursorOver.RemoveDynamic(this, &ANavGridPC::OnEndTileCursorOver);
+	}
+
 	Grid = InGrid;
-	Grid->OnTileClicked().AddUObject(this, &ANavGridPC::OnTileClicked);
-	Grid->OnTileCursorOver().AddUObject(this, &ANavGridPC::OnTileCursorOver);
-	Grid->OnEndTileCursorOver().AddUObject(this, &ANavGridPC::OnEndTileCursorOver);
+	Grid->OnTileClicked.AddDynamic(this, &ANavGridPC::OnTileClicked);
+	Grid->OnTileCursorOver.AddDynamic(this, &ANavGridPC::OnTileCursorOver);
+	Grid->OnEndTileCursorOver.AddDynamic(this, &ANavGridPC::OnEndTileCursorOver);
 	DefaultClickTraceChannel = Grid->ECC_NavGridWalkable;
 }
