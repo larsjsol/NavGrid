@@ -107,17 +107,15 @@ bool AGridPawn::IsBusy()
 
 bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
 {
-	UNavTileComponent *Location = Grid->GetTile(GetActorLocation());
-	if (Location && Location != &Tile && Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
+	if (Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
 	{
 		TArray<UNavTileComponent *> InRange;
 		Grid->GetTilesInRange(this, true, InRange);
-		if (InRange.Contains(&Tile) && MovementComponent->CreatePath(Tile))
+		if (Tile.Distance <= MovementComponent->MovementRange)
 		{
 			return true;
 		}
 	}
-
 	return false;
 }
 
