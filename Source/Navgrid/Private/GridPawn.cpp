@@ -39,6 +39,7 @@ AGridPawn::AGridPawn()
 	Arrow->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	bHumanControlled = true;
+	CurrentTile = NULL;
 }
 
 void AGridPawn::BeginPlay()
@@ -69,6 +70,8 @@ void AGridPawn::OnTurnStart()
 	{
 		MovementComponent->SnapToGrid();
 	}
+	UpdateTile();
+
 	SelectedHighlight->SetVisibility(true);
 
 	if (bHumanControlled)
@@ -123,4 +126,9 @@ void AGridPawn::MoveTo(const UNavTileComponent & Tile)
 {
 	MovementComponent->MoveTo(Tile);
 	MovementComponent->HidePath();
+}
+
+void AGridPawn::UpdateTile()
+{
+	CurrentTile = MovementComponent->GetTile();
 }
