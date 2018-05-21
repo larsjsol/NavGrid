@@ -41,6 +41,9 @@ public:
 	/* Move on to the next component in line */
 	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
 	virtual void StartTurnNext();
+	/* request to immediatly start the turn for the supplied component. Return false if the request is denied */
+	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
+	virtual bool RequestStartTurn(UTurnComponent *TurnComponent);
 	/* Return the component whos turn it is */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Turn Manager")
 	UTurnComponent *GetCurrentComponent();

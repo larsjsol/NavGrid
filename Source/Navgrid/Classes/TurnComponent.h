@@ -9,7 +9,7 @@
 class APlayerController;
 
 /**
-* Actors with a turn component can be managed by a turn manager 
+* Actors with a turn component can be managed by a turn manager
 */
 UCLASS(meta = (BlueprintSpawnableComponent))
 class NAVGRID_API UTurnComponent : public UActorComponent
@@ -45,6 +45,8 @@ public:
 	void EndTurn();
 	/* Tell the manager that the turn should pass to the next component*/
 	void StartTurnNext();
+	/* request the turn manager to start a turn for this component */
+	bool RequestStartTurn() { return TurnManager->RequestStartTurn(this); }
 	/* Callend when a turn starts */
 	void TurnStart();
 	/* Called when a turn ends */

@@ -9,7 +9,7 @@
 
 
 /**
- * 
+ *
  */
 UCLASS()
 class NAVGRID_API ATeamTurnManager : public ATurnManager
@@ -22,6 +22,7 @@ public:
 	virtual void Register(UTurnComponent *TurnComponent) override;
 	virtual void StartTurnNext() override;
 	virtual void EndRound() override;
+	virtual bool RequestStartTurn(UTurnComponent *TurnComponent) override;
 
 	virtual ATurnManager *GetTurnManager(const FGenericTeamId& TeamID) override;
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "Turn Manager")

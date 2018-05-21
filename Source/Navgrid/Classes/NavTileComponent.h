@@ -21,7 +21,7 @@ public:
 	UNavTileComponent(const FObjectInitializer &ObjectInitializer);
 
 protected:
-	UPROPERTY() 
+	UPROPERTY()
 	ANavGrid *Grid;
 public:
 	void SetGrid(ANavGrid *InGrid);
@@ -41,8 +41,8 @@ public:
 	/* Reset variables used in pathfinding */
 	virtual void ResetPath();
 
-	/* 
-		Nodes are considered neighbours if at least one 
+	/*
+		Nodes are considered neighbours if at least one
 		of their contact points are close to each other
 	*/
 	virtual TArray<FVector> *GetContactPoints();

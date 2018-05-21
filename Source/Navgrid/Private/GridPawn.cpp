@@ -24,6 +24,7 @@ AGridPawn::AGridPawn()
 	CapsuleComponent->SetCapsuleRadius(30);
 	CapsuleComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block); // So we get mouse events
 
 	SelectedHighlight = CreateDefaultSubobject<UStaticMeshComponent>("SelectedHighlight");
 	SelectedHighlight->SetupAttachment(Scene);
@@ -40,6 +41,9 @@ AGridPawn::AGridPawn()
 
 	bHumanControlled = true;
 	CurrentTile = NULL;
+
+	/* bind mouse events*/
+	OnClicked.AddDynamic(this, &AGridPawn::Clicked);
 }
 
 void AGridPawn::BeginPlay()
@@ -131,4 +135,9 @@ void AGridPawn::MoveTo(const UNavTileComponent & Tile)
 void AGridPawn::UpdateTile()
 {
 	CurrentTile = MovementComponent->GetTile();
+}
+
+void AGridPawn::Clicked(AActor *ClickedActor, FKey PressedKey)
+{
+	TurnComponent->RequestStartTurn();
 }

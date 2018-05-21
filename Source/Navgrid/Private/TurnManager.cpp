@@ -46,6 +46,21 @@ void ATurnManager::StartTurnNext()
 	}
 }
 
+bool ATurnManager::RequestStartTurn(UTurnComponent * TurnComponent)
+{
+	int32 Index;
+	bool Found = TurnComponents.Find(TurnComponent, Index);
+	if (Found)
+	{
+		ChangeCurrent(Index);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 UTurnComponent *ATurnManager::GetCurrentComponent()
 {
 	return TurnComponents[ComponentIndex];
@@ -104,7 +119,7 @@ void ATurnManager::StartNewRound()
 		TC->RoundStart();
 	}
 	OnRoundStart.Broadcast();
-	ComponentIndex = 0; // start searching for eligible components from the start of the array 
+	ComponentIndex = 0; // start searching for eligible components from the start of the array
 	int32 First = GetNextIndexThatCanAct();
 	if (First >= 0)
 	{

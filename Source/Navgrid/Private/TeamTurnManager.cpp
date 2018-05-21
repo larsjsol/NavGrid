@@ -28,7 +28,7 @@ void ATeamTurnManager::Register(UTurnComponent *TurnComponent)
 				NewManager->TurnDelay = TurnDelay;
 				// one round for the slave is a single turn for the master
 				NewManager->TurnComponent->OnTurnStart().AddUObject(NewManager, &ATeamTurnManager::StartNewRound);
-				
+
 				Teams.Add(Id, NewManager);
 				TurnComponents.Add(NewManager->TurnComponent);
 			}
@@ -86,6 +86,18 @@ void ATeamTurnManager::EndRound()
 	{
 		TurnComponent->RemainingActionPoints = 0;
 		TurnComponent->EndTurn();
+	}
+}
+
+bool ATeamTurnManager::RequestStartTurn(UTurnComponent *InTurnComponent)
+{
+	if (!Master && TurnComponent->MyTurn())
+	{
+		return Super::RequestStartTurn(InTurnComponent);
+	}
+	else
+	{
+		return false;
 	}
 }
 
