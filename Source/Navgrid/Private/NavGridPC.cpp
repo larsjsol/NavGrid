@@ -24,7 +24,7 @@ void ANavGridPC::BeginPlay()
 void ANavGridPC::OnTileClicked(const UNavTileComponent *Tile)
 {
 	/* Try to move the current pawn to the clicked tile */
-	if (GridPawn && !GridPawn->IsBusy())
+	if (GridPawn && GridPawn->GetState() == EGridPawnState::Ready)
 	{
 		if (GridPawn->CanMoveTo(*Tile))
 		{
@@ -36,7 +36,7 @@ void ANavGridPC::OnTileClicked(const UNavTileComponent *Tile)
 void ANavGridPC::OnTileCursorOver(const UNavTileComponent *Tile)
 {
 	/* If the pawn is not moving, try to create a path to the hovered tile and show it */
-	if (GridPawn && !GridPawn->IsBusy())
+	if (GridPawn && GridPawn->GetState() == EGridPawnState::Ready)
 	{
 		Grid->Cursor->SetWorldLocation(Tile->GetPawnLocation() + FVector(0, 0, Grid->UIOffset));
 		Grid->Cursor->SetVisibility(true);

@@ -24,8 +24,8 @@ UCLASS()
 class NAVGRID_API ANavGrid : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	ANavGrid();
 
 	/* Collision channel used when tracing for tiles */

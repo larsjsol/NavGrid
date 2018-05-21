@@ -108,9 +108,20 @@ void AGridPawn::PlayAITurn()
 	TurnComponent->EndTurn();
 }
 
-bool AGridPawn::IsBusy()
+EGridPawnState AGridPawn::GetState() const
 {
-	return MovementComponent->Velocity.Size() > 0;
+	if (!TurnComponent->MyTurn())
+	{
+		return EGridPawnState::WaitingForTurn;
+	}
+	else if (MovementComponent->Velocity.Size() > 0)
+	{
+		return EGridPawnState::Busy;
+	}
+	else
+	{
+		return EGridPawnState::Ready;
+	}
 }
 
 bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
