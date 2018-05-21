@@ -19,7 +19,7 @@ void UNavLadderComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// it seems like 'BoxExtent' still has the default values in PostInitProperties() 
+	// it seems like 'BoxExtent' still has the default values in PostInitProperties()
 	PawnLocationOffset = GetComponentRotation().RotateVector(FVector(90, 0, 0));
 	BottomPathPoint->SetRelativeLocation(FVector(60, 0, -BoxExtent.Z + 50));
 	TopPathPoint->SetRelativeLocation(FVector(60, 0, BoxExtent.Z - 25));

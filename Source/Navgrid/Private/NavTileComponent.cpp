@@ -77,7 +77,7 @@ void UNavTileComponent::ResetPath()
 }
 
 TArray<FVector>* UNavTileComponent::GetContactPoints()
-{	
+{
 	if (!ContactPoints.Num())
 	{
 		int32 XExtent = GetScaledBoxExtent().X;
@@ -147,8 +147,8 @@ void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &Colli
 	OutNeighbours.Empty();
 	for (auto N : *GetNeighbours())
 	{
-		if (!N->Obstructed(PawnLocationOffset + GetComponentLocation(), CollisionCapsule)) 
-		{ 
+		if (!N->Obstructed(PawnLocationOffset + GetComponentLocation(), CollisionCapsule))
+		{
 			OutNeighbours.Add(N);
 		}
 	}

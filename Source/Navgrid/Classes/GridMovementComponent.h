@@ -86,7 +86,7 @@ public:
 	/* Should we extract root motion for speed and rotation even if we are not moving*/
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement")
 	bool bAlwaysUseRootMotion = false;
-	/* Set this to stop moving a certain distance from the path end point, useful if 
+	/* Set this to stop moving a certain distance from the path end point, useful if
 	you bAlwaysUseRootMotion and have a walk-end animation that contains some movement */
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Movement")
 	float StoppingDistance = 0;
@@ -97,7 +97,7 @@ public:
 
 	/*
 	Spline that is used as a path. The points are in world coords.
-	
+
 	We use ESplineCoordinateSpace::Local in the getters and setters to avoid any extra coord translation
 	*/
 	UPROPERTY(BlueprintReadOnly, Category = "Visualization")
