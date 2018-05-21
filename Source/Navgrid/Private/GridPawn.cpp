@@ -91,6 +91,7 @@ void AGridPawn::OnTurnStart()
 void AGridPawn::OnTurnEnd()
 {
 	SelectedHighlight->SetVisibility(false);
+	MovementComponent->HidePath();
 }
 
 void AGridPawn::OnMoveEnd()
