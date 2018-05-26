@@ -10,7 +10,7 @@ UGridMovementComponent::UGridMovementComponent(const FObjectInitializer &ObjectI
 	:Super(ObjectInitializer)
 {
 	PathMesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Path.NavGrid_Path'")).Object;
-	
+
 	AvailableMovementModes.Add(EGridMovementMode::ClimbingDown);
 	AvailableMovementModes.Add(EGridMovementMode::ClimbingUp);
 	AvailableMovementModes.Add(EGridMovementMode::Stationary);
@@ -42,7 +42,7 @@ void UGridMovementComponent::BeginPlay()
 	/* Grab a reference to (a) AnimInstace */
 	for (UActorComponent *Comp : GetOwner()->GetComponentsByClass(USkeletalMeshComponent::StaticClass()))
 	{
-		USkeletalMeshComponent *Mesh = Cast<USkeletalMeshComponent>(Comp);	
+		USkeletalMeshComponent *Mesh = Cast<USkeletalMeshComponent>(Comp);
 		if (Mesh)
 		{
 			MeshRotation = Mesh->GetRelativeTransform().Rotator();
@@ -95,7 +95,7 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		break;
 	}
 
-	// update velocity so it can be fetched by the pawn 
+	// update velocity so it can be fetched by the pawn
 	Velocity = (NewTransform.GetLocation() - Owner->GetActorLocation()) * (1 / DeltaTime);
 	UpdateComponentVelocity();
 	NewTransform.SetScale3D(Owner->GetActorScale3D()); // dont ever change the scale
@@ -183,7 +183,7 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 }
 
 FTransform UGridMovementComponent::TransformFromRotation(float DeltaTime)
-{ 
+{
 	AActor *Owner = GetOwner();
 	FTransform NewTransform = Owner->GetActorTransform();
 	if (Owner->GetActorRotation().Equals(DesiredForwardRotation))
@@ -259,7 +259,7 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 		Tile = Grid->GetTile(Owner->GetActorLocation());
 	}
 	if (!Tile)
-	{ 
+	{
 		UE_LOG(NavGrid, Error, TEXT("%s: Not on grid"), *Owner->GetName());
 		return false;
 	}
@@ -380,7 +380,7 @@ FTransform UGridMovementComponent::ConsumeRootMotion()
 	{
 		return FTransform();
 	}
-	
+
 	FRootMotionMovementParams RootMotionParams = AnimInstance->ConsumeExtractedRootMotion(1);
 	return RootMotionParams.GetRootMotionTransform();
 }
@@ -419,7 +419,7 @@ EGridMovementMode UGridMovementComponent::GetMovementMode()
 
 void UGridMovementComponent::ConsiderUpdateMovementMode()
 {
-	
+
 	// we need to do some calculations for certain modes
 	switch (MovementMode)
 	{

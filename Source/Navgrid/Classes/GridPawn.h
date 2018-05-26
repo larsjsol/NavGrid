@@ -4,9 +4,10 @@
 
 #include "GameFramework/Pawn.h"
 #include "GenericTeamAgentInterface.h"
+
+#include "GridMovementComponent.h"
 #include "GridPawn.generated.h"
 
-class UGridMovementComponent;
 class UTurnComponent;
 class UCapsuleComponent;
 class UArrowComponent;
@@ -92,17 +93,13 @@ public:
 	virtual void MoveTo(const UNavTileComponent & Tile);
 	/* get the tile occupied at the start of this pawns turn */
 	UFUNCTION(BlueprintCallable, Category = "NavGrid")
-	UNavTileComponent *GetTile() { return CurrentTile; }
+	UNavTileComponent *GetTile() { return MovementComponent->GetTile(); }
 	template <class T>
-	T *GetTile() { return Cast<T>(CurrentTile); }
-	void UpdateTile();
+	T *GetTile() { return Cast<T>(GetTile()); }
 
 	/* Called when the user clicks on this actor, default implementation is to change the the current turn taker to this */
 	UFUNCTION()
 	virtual void Clicked(AActor *ClickedActor, FKey PressedKey);
-
-protected:
-	UNavTileComponent *CurrentTile;
 
 protected:
 	UPROPERTY()

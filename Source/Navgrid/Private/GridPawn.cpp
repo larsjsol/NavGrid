@@ -40,7 +40,6 @@ AGridPawn::AGridPawn()
 	Arrow->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	bHumanControlled = true;
-	CurrentTile = NULL;
 
 	/* bind mouse events*/
 	OnClicked.AddDynamic(this, &AGridPawn::Clicked);
@@ -74,7 +73,6 @@ void AGridPawn::OnTurnStart()
 	{
 		MovementComponent->SnapToGrid();
 	}
-	UpdateTile();
 
 	SelectedHighlight->SetVisibility(true);
 
@@ -142,11 +140,6 @@ void AGridPawn::MoveTo(const UNavTileComponent & Tile)
 {
 	MovementComponent->MoveTo(Tile);
 	MovementComponent->HidePath();
-}
-
-void AGridPawn::UpdateTile()
-{
-	CurrentTile = MovementComponent->GetTile();
 }
 
 void AGridPawn::Clicked(AActor *ClickedActor, FKey PressedKey)
