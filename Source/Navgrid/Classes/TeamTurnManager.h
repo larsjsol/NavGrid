@@ -28,8 +28,7 @@ public:
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "Turn Manager")
 	bool Master;
 
-	UFUNCTION(BlueprintPure, Category = "Turn Manager")
-	bool MyTurn() { return TurnComponent->MyTurn(); }
+	virtual bool MyTurn() override { return TurnComponent->MyTurn(); }
 protected:
 	UPROPERTY(VisibleAnyWhere, Category = "Turn Manager", meta = (AllowPrivateAccess = "true"))
 	UTurnComponent *TurnComponent;

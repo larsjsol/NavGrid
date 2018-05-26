@@ -122,6 +122,20 @@ EGridPawnState AGridPawn::GetState() const
 	}
 }
 
+bool AGridPawn::CanBeSelected()
+{
+	ANavGridGameState *GameState = Cast<ANavGridGameState>(GetWorld()->GetGameState());
+	if (GameState)
+	{
+		ATurnManager *TurnManager = GameState->GetTurnManager(TeamID);
+		if (TurnManager && TurnManager->MyTurn() && GetState() == EGridPawnState::WaitingForTurn)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
 {
 	if (Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
@@ -144,5 +158,8 @@ void AGridPawn::MoveTo(const UNavTileComponent & Tile)
 
 void AGridPawn::Clicked(AActor *ClickedActor, FKey PressedKey)
 {
-	TurnComponent->RequestStartTurn();
+	if (CanBeSelected())
+	{
+		TurnComponent->RequestStartTurn();
+	}
 }

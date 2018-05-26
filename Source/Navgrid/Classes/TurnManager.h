@@ -61,6 +61,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Turn Manager")
 	int32 GetRound() const { return Round; }
 
+	UFUNCTION(BlueprintPure, Category = "Turn Manager")
+	virtual bool MyTurn() { return true; }
+
 	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
 	FOnTurnStart OnTurnStart;
 	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")

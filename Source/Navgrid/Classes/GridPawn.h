@@ -82,12 +82,14 @@ public:
 
 	/* override this class and implement your own AI here. The default implementation just ends the turn */
 	virtual void PlayAITurn();
-
+	/* Get the current state for this pawn */
 	UFUNCTION(BlueprintCallable, Category = "NavGrid")
 	virtual EGridPawnState GetState() const;
-
+	/* is this pawn controlled by a human player? */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
 	bool bHumanControlled;
+	/* can the we request to start our turn now? The turn manager may still deny our request even if this returns true */
+	virtual bool CanBeSelected();
 
 	virtual bool CanMoveTo(const UNavTileComponent & Tile);
 	virtual void MoveTo(const UNavTileComponent & Tile);

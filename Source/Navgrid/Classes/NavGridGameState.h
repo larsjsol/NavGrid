@@ -14,7 +14,7 @@
 class ANavGrid;
 
 /**
- * 
+ *
  */
 UCLASS()
 class NAVGRID_API ANavGridGameState : public AGameStateBase
@@ -33,6 +33,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "NavGrid")
 	virtual ATurnManager *GetTurnManager(const FGenericTeamId& TeamID) const { return TurnManager->GetTurnManager(TeamID); }
+	template <class T>
+	T *GetTurnManager(const FGenericTeamId& TeamID) const { return Cast<T>(GetTurnManager(TeamID)); }
 
 protected:
 	UPROPERTY(BlueprintReadWrite, VisibleAnyWhere, Category = "NavGrid")
