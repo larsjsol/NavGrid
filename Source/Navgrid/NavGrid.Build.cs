@@ -1,6 +1,6 @@
 using UnrealBuildTool;
 using System.IO;
- 
+
 public class NavGrid : ModuleRules
 {
     public NavGrid(ReadOnlyTargetRules TargetRules) : base(TargetRules) {

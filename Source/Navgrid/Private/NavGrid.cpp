@@ -306,7 +306,7 @@ bool ANavGrid::TraceTileLocation(const FVector & TraceStart, const FVector & Tra
 		OutTilePos = HitResult.ImpactPoint;
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -397,7 +397,7 @@ void ANavGrid::DestroyVirtualTiles()
 {
 	for (UNavTileComponent *T : VirtualTiles)
 	{
-		if (T && T->IsValidLowLevel())
+		if (IsValid(T))
 		{
 			T->DestroyComponent();
 		}
