@@ -407,20 +407,23 @@ void UGridMovementComponent::ConsiderUpdateMovementMode()
 		// try to get the tile the pawn will occupy when it moves a bit further
 		FVector ForwardPoint = GetForwardLocation(50);
 		UNavTileComponent *CurrentTile = GetTile(ForwardPoint);
-		if (CurrentTile && CurrentTile->IsA<UNavLadderComponent>())
+		if (CurrentTile)
 		{
-			if (ForwardPoint.Z > GetActorLocation().Z)
+			if (CurrentTile->IsA<UNavLadderComponent>())
 			{
-				ChangeMovementMode(EGridMovementMode::ClimbingUp);
+				if (ForwardPoint.Z > GetActorLocation().Z)
+				{
+					ChangeMovementMode(EGridMovementMode::ClimbingUp);
+				}
+				else
+				{
+					ChangeMovementMode(EGridMovementMode::ClimbingDown);
+				}
 			}
 			else
 			{
-				ChangeMovementMode(EGridMovementMode::ClimbingDown);
+				ChangeMovementMode(EGridMovementMode::Walking);
 			}
-		}
-		else
-		{
-			ChangeMovementMode(EGridMovementMode::Walking);
 		}
 	}
 }
