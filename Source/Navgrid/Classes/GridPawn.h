@@ -97,9 +97,9 @@ public:
 	virtual void MoveTo(const UNavTileComponent & Tile);
 	/* get the tile occupied at the start of this pawns turn */
 	UFUNCTION(BlueprintCallable, Category = "NavGrid")
-	UNavTileComponent *GetTile() { return MovementComponent->GetTile(); }
+	UNavTileComponent *GetTile() const { return MovementComponent->GetTile(); }
 	template <class T>
-	T *GetTile() { return Cast<T>(GetTile()); }
+	T *GetTile() const { return Cast<T>(GetTile()); }
 
 	/* Called when the user clicks on this actor, default implementation is to change the the current turn taker to this */
 	UFUNCTION()
