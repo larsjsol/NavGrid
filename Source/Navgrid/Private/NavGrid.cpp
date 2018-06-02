@@ -108,7 +108,7 @@ UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation, bool FindFloo
 {
 	if (FindFloor)
 	{
-		return LineTraceTile(WorldLocation + FVector(0, 0, 50), WorldLocation - FVector(0, 0, 500));
+		return LineTraceTile(WorldLocation + FVector(0, 0, 50), WorldLocation - FVector(0, 0, 25));
 	}
 	else
 	{

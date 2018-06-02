@@ -206,7 +206,19 @@ void UGridMovementComponent::GetTilesInRange(TArray<UNavTileComponent *> &OutTil
 
 UNavTileComponent *UGridMovementComponent::GetTile()
 {
-	return Grid->GetTile(GetOwner()->GetActorLocation());
+	return GetTile(GetOwner()->GetActorLocation());
+}
+
+UNavTileComponent * UGridMovementComponent::GetTile(const FVector &Position)
+{
+	UNavTileComponent *CurrentTile = Grid->GetTile(Position, true);
+	if (!CurrentTile &&
+		(AvailableMovementModes.Contains(EGridMovementMode::ClimbingDown) ||
+		AvailableMovementModes.Contains(EGridMovementMode::ClimbingUp)))
+	{
+		CurrentTile = Grid->GetTile(Position, false);
+	}
+	return CurrentTile;
 }
 
 void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath, TArray<const UNavTileComponent*>& OutPath)
@@ -340,7 +352,7 @@ void UGridMovementComponent::SnapToGrid()
 		Grid->GenerateVirtualTiles(GridPawnOwner);
 	}
 
-	UNavTileComponent *SnapTile = Grid->GetTile(GridPawnOwner->GetActorLocation());
+	UNavTileComponent *SnapTile = GetTile();
 	if (SnapTile)
 	{
 		GridPawnOwner->SetActorLocation(SnapTile->GetPawnLocation());
@@ -385,71 +397,31 @@ FTransform UGridMovementComponent::ConsumeRootMotion()
 	return RootMotionParams.GetRootMotionTransform();
 }
 
-EGridMovementMode UGridMovementComponent::GetMovementMode()
-{
-	// we need to do some calculations for certain modes
-	switch (MovementMode)
-	{
-	case EGridMovementMode::Stationary:
-	case EGridMovementMode::InPlaceTurn:
-	default:
-		return MovementMode;
-	case EGridMovementMode::Walking:
-	case EGridMovementMode::ClimbingUp:
-	case EGridMovementMode::ClimbingDown:
-		FVector ForwardLoc = GetForwardLocation(50);
-		ForwardLoc -= GetOwner()->GetActorLocation();
-		ForwardLoc = ForwardLoc.GetSafeNormal();
-		float UpAngle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(ForwardLoc, FVector(0, 0, 1))));
-
-		if (UpAngle < 90 - MaxWalkAngle)
-		{
-			return EGridMovementMode::ClimbingUp;
-		}
-		else if (UpAngle > 90 + MaxWalkAngle)
-		{
-			return EGridMovementMode::ClimbingDown;
-		}
-		else
-		{
-			return EGridMovementMode::Walking;
-		}
-	}
-}
 
 void UGridMovementComponent::ConsiderUpdateMovementMode()
 {
-
-	// we need to do some calculations for certain modes
-	switch (MovementMode)
+	if (MovementMode == EGridMovementMode::Walking ||
+		MovementMode == EGridMovementMode::ClimbingDown ||
+		MovementMode == EGridMovementMode::ClimbingUp)
 	{
-	case EGridMovementMode::Stationary:
-	case EGridMovementMode::InPlaceTurn:
-	default:
-		break;
-	case EGridMovementMode::Walking:
-	case EGridMovementMode::ClimbingUp:
-	case EGridMovementMode::ClimbingDown:
-		FVector ForwardLoc = GetForwardLocation(50);
-		ForwardLoc -= GetOwner()->GetActorLocation();
-		ForwardLoc = ForwardLoc.GetSafeNormal();
-		float UpAngle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(ForwardLoc, FVector(0, 0, 1))));
-
-		EGridMovementMode NewMode;
-		if (UpAngle < 90 - MaxWalkAngle)
+		// try to get the tile the pawn will occupy when it moves a bit further
+		FVector ForwardPoint = GetForwardLocation(50);
+		UNavTileComponent *CurrentTile = GetTile(ForwardPoint);
+		if (CurrentTile && CurrentTile->IsA<UNavLadderComponent>())
 		{
-			NewMode = EGridMovementMode::ClimbingUp;
-		}
-		else if (UpAngle > 90 + MaxWalkAngle)
-		{
-			NewMode = EGridMovementMode::ClimbingDown;
+			if (ForwardPoint.Z > GetActorLocation().Z)
+			{
+				ChangeMovementMode(EGridMovementMode::ClimbingUp);
+			}
+			else
+			{
+				ChangeMovementMode(EGridMovementMode::ClimbingDown);
+			}
 		}
 		else
 		{
-			NewMode = EGridMovementMode::Walking;
+			ChangeMovementMode(EGridMovementMode::Walking);
 		}
-		ChangeMovementMode(NewMode);
-		break;
 	}
 }
 

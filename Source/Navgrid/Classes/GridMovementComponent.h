@@ -53,6 +53,9 @@ public:
 	void GetTilesInRange(TArray<UNavTileComponent *> &OutTiles);
 	/* Get the tile the pawn is on, may return null if no tile is found */
 	UNavTileComponent *GetTile();
+	/* Get the tile the pawn would occupy of it was located at a different position.
+	May return NULL if no tile is found.*/
+	UNavTileComponent *GetTile(const FVector &Position);
 	/* How far (in tile cost) the actor can move in one go */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement")
 	float MovementRange = 4;
@@ -127,7 +130,7 @@ public:
 
 	FTransform ConsumeRootMotion();
 
-	EGridMovementMode GetMovementMode();
+	EGridMovementMode GetMovementMode() { return MovementMode; }
 	EGridMovementPhase GetMovementPhase() { return MovementPhase; }
 protected:
 	EGridMovementMode MovementMode;
