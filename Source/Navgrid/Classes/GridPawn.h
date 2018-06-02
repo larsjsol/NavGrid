@@ -79,6 +79,8 @@ public:
 	virtual void OnTurnEnd();
 	/* Called when done moving */
 	virtual void OnMoveEnd();
+	/* Called when this pawn is ready for player input */
+	virtual void OnPawnReady() {};
 
 	/* override this class and implement your own AI here. The default implementation just ends the turn */
 	virtual void PlayAITurn();

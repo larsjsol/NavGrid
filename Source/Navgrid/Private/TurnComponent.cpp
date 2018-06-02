@@ -47,6 +47,7 @@ void UTurnComponent::RoundStart()
 void UTurnComponent::BroadcastReadyForPlayerInput()
 {
 	TurnManager->OnReadyForPlayerInput.Broadcast(this);
+	OnPawnReady().Broadcast();
 }
 
 void UTurnComponent::UnRegister()

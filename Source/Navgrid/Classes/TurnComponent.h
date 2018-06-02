@@ -22,6 +22,7 @@ public:
 	DECLARE_MULTICAST_DELEGATE(FOnTurnStart);
 	DECLARE_MULTICAST_DELEGATE(FOnTurnEnd);
 	DECLARE_MULTICAST_DELEGATE(FOnRoundStart);
+	DECLARE_MULTICAST_DELEGATE(FOnPawnReady);
 
 	/* The Owners turn have started */
 	FOnTurnStart& OnTurnStart() { return OnTurnStartDelegate; }
@@ -29,6 +30,8 @@ public:
 	FOnTurnEnd& OnTurnEnd() { return OnTurnEndDelegate; }
 	/* All actors managed by the turn manager have had their turn and a new round begins */
 	FOnRoundStart& OnRoundStart() { return OnRoundStartDelegate; }
+	/* The pawn is ready for player input */
+	FOnPawnReady& OnPawnReady() { return OnPawnReadyDelegate; }
 
 	void SetTurnManager(ATurnManager *InTurnManager);
 protected:
@@ -74,4 +77,5 @@ private:
 	FOnTurnStart OnTurnStartDelegate;
 	FOnTurnEnd OnTurnEndDelegate;
 	FOnRoundStart OnRoundStartDelegate;
+	FOnPawnReady OnPawnReadyDelegate;
 };

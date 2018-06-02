@@ -127,7 +127,7 @@ public:
 	FVector AdjustToTileLocation(const FVector &Location);
 
 protected:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, Category = "NavGrid")
 	TArray<UNavTileComponent *> VirtualTiles;
 public:
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
