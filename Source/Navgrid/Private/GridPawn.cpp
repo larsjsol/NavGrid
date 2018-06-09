@@ -123,6 +123,11 @@ EGridPawnState AGridPawn::GetState() const
 	}
 }
 
+/** Can this pawn start its turn right now?
+  *  1) It's turn manager must be in its turn
+  *  2) It must be in the WaitingForTurn state
+  *  3) The pawn currently in its turn must be idle
+*/
 bool AGridPawn::CanBeSelected()
 {
 	ANavGridGameState *GameState = Cast<ANavGridGameState>(GetWorld()->GetGameState());
@@ -131,7 +136,8 @@ bool AGridPawn::CanBeSelected()
 		ATurnManager *TurnManager = GameState->GetTurnManager(TeamID);
 		if (TurnManager && TurnManager->MyTurn() && GetState() == EGridPawnState::WaitingForTurn)
 		{
-			return true;
+			AGridPawn *CurrentPawn = Cast<AGridPawn>(TurnManager->GetCurrentComponent()->GetOwner());
+			return CurrentPawn->GetState() != EGridPawnState::Busy;
 		}
 	}
 	return false;
