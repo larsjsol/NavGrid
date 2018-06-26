@@ -9,18 +9,18 @@ The quickest way to get started is probably to download the [demo project](https
 ## Compiling
 1. Save/clone into the `Plugins/` directory at the project root
 2. Compile. You will need to right click on the `.uproject` in your project and select `Generate Visual Studio project files` so VS is aware of the new source files.
-3.  Add `NavGrid` to `PublicDependencyModuleNames` in your `.Build.cs` to access or extend the classes from C++
+3. Add `NavGrid` and `AIModule` to `PublicDependencyModuleNames` in your `.Build.cs`
 
 ## Project Integration
 A few more steps are needed after compiling the plugin:
 1. Enable the plugin for your project in the plugin-browser (`Edit->Plugins`)
 2. Create a Collision Channel in the project setting and set its default response to `Ignore`
-3. Place a `ANavGrid`, some `ANavTileActor`s and a few `AExampleGridPawn`s in your level
-4. Set the PlayerController class to `ANavGridExamplePC`
+3. Place some `ANavTileActor`s and a few `AExampleGridPawn`s in your level
+4. Set the PlayerController class to `ANavGridPC`
 7. Hit Play!
 
 ## Class Overview
-Examining the headers for `AGridPawn`, `ANavGridExamplePC` and `UGridMovementComponent` are probably good starting points for figuring out how this plugin works. You probably want to extend `AGridPawn` and create you own player controller for your project. 
+Examining the headers for `AGridPawn`, `ANavGridPC` and `UGridMovementComponent` are probably good starting points for figuring out how this plugin works. You probably want to extend `AGridPawn` and create you own player controller for your project. 
 
 A few of the classes are summarized below.
 
