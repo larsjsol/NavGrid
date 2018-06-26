@@ -55,6 +55,7 @@ void AGridPawn::BeginPlay()
 	TurnComponent->OnPawnReady().AddUObject(this, &AGridPawn::OnPawnReady);
 
 	auto *State = GetWorld()->GetGameState<ANavGridGameState>();
+	check(State && State->Grid);
 	Grid = State->Grid;
 	SelectedHighlight->SetRelativeLocation(FVector(0, 0, Grid->UIOffset));
 
