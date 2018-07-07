@@ -102,5 +102,4 @@ void ANavGridPC::SetGrid(ANavGrid * InGrid)
 	Grid->OnTileClicked.AddDynamic(this, &ANavGridPC::OnTileClicked);
 	Grid->OnTileCursorOver.AddDynamic(this, &ANavGridPC::OnTileCursorOver);
 	Grid->OnEndTileCursorOver.AddDynamic(this, &ANavGridPC::OnEndTileCursorOver);
-	DefaultClickTraceChannel = Grid->ECC_NavGridWalkable;
 }
