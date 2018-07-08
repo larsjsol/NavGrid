@@ -19,7 +19,7 @@ UGridMovementComponent::UGridMovementComponent(const FObjectInitializer &ObjectI
 
 	Distance = 0;
 	MovementMode = EGridMovementMode::Stationary;
-	MovementPhase = EGridMovementPhase::Middle;
+	MovementPhase = EGridMovementPhase::Done;
 }
 
 void UGridMovementComponent::BeginPlay()
@@ -67,11 +67,7 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 
 	AActor *Owner = GetOwner();
 	FTransform NewTransform = Owner->GetActorTransform();
-
-	if (MovementPhase == EGridMovementPhase::Beginning)
-	{
-		MovementPhase = EGridMovementPhase::Middle;
-	}
+	FRotator ActorRotation = Owner->GetActorRotation();
 
 	ConsiderUpdateMovementMode();
 	switch (MovementMode)
@@ -97,12 +93,30 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		break;
 	}
 
+	/* reset rotation if we have any rotation locks */
+	FRotator NewRotation = NewTransform.GetRotation().Rotator();
+	NewRotation.Roll = LockRoll ? ActorRotation.Roll : NewRotation.Roll;
+	NewRotation.Pitch = LockPitch ? ActorRotation.Pitch: NewRotation.Pitch;
+	NewRotation.Yaw = LockYaw ? ActorRotation.Yaw : NewRotation.Yaw;
+	NewTransform.SetRotation(NewRotation.Quaternion());
+	/* never change the scale */
+	NewTransform.SetScale3D(Owner->GetActorScale3D());
+
 	// update velocity so it can be fetched by the pawn
 	Velocity = (NewTransform.GetLocation() - Owner->GetActorLocation()) * (1 / DeltaTime);
 	UpdateComponentVelocity();
-	NewTransform.SetScale3D(Owner->GetActorScale3D()); // dont ever change the scale
 	// actually move the the actor
 	Owner->SetActorTransform(NewTransform);
+
+	if (MovementPhase == EGridMovementPhase::Beginning)
+	{
+		MovementPhase = EGridMovementPhase::Middle;
+	}
+	else if (MovementPhase == EGridMovementPhase::Ending && Velocity.Size() < 25)
+	{
+		OnMovementEndEvent.Broadcast();
+		MovementPhase = EGridMovementPhase::Done;
+	}
 }
 
 FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
@@ -141,9 +155,6 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 	if (MovementMode == EGridMovementMode::Walking)
 	{
 		DesiredRotation = NewTransform.Rotator();
-		DesiredRotation.Roll = LockRoll ? 0 : DesiredRotation.Roll;
-		DesiredRotation.Pitch = LockPitch ? 0 : DesiredRotation.Pitch;
-		DesiredRotation.Yaw = LockYaw ? 0 : DesiredRotation.Yaw;
 	}
 	/* Use the rotation from the ladder if we're climbing */
 	else if (MovementMode == EGridMovementMode::ClimbingUp || MovementMode == EGridMovementMode::ClimbingDown)
@@ -178,6 +189,7 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 	if (CurrentSpeed == 0 || Distance >= Spline->GetSplineLength())
 	{
 		ChangeMovementMode(EGridMovementMode::Stationary);
+		MovementPhase = EGridMovementPhase::Ending;
 		Distance = 0;
 		Spline->ClearSplinePoints();
 	}
@@ -338,9 +350,6 @@ void UGridMovementComponent::TurnTo(const FRotator & Forward)
 	if (AvailableMovementModes.Contains(EGridMovementMode::InPlaceTurn))
 	{
 		DesiredForwardRotation = Forward;
-		DesiredForwardRotation.Roll = LockRoll ? 0 : Forward.Roll;
-		DesiredForwardRotation.Pitch = LockPitch ? 0 : Forward.Pitch;
-		DesiredForwardRotation.Yaw = LockYaw ? 0 : Forward.Yaw;
 		ChangeMovementMode(EGridMovementMode::InPlaceTurn);
 	}
 }
@@ -437,11 +446,9 @@ void UGridMovementComponent::ChangeMovementMode(EGridMovementMode NewMode)
 	{
 		OnMovementModeChangedEvent.Broadcast(MovementMode, NewMode);
 		MovementMode = NewMode;
-		MovementPhase = EGridMovementPhase::Beginning;
-
-		if (MovementMode == EGridMovementMode::Stationary)
+		if (MovementMode != EGridMovementMode::Stationary)
 		{
-			OnMovementEndEvent.Broadcast();
+			MovementPhase = EGridMovementPhase::Beginning;
 		}
 	}
 }

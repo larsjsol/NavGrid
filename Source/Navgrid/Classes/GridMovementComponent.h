@@ -26,7 +26,8 @@ enum class EGridMovementPhase : uint8
 {
 	Beginning		UMETA(DisplayName = "Beginning"),
 	Middle			UMETA(DisplayName = "Middle"),
-	Ending			UMETA(DisplayName = "Ending")
+	Ending			UMETA(DisplayName = "Ending"),
+	Done			UMETA(DisplayName = "Done")
 };
 
 
