@@ -56,6 +56,8 @@ void UGridMovementComponent::BeginPlay()
 	if (!AnimInstance)
 	{
 		UE_LOG(NavGrid, Error, TEXT("%s: Unable to get reference to AnimInstance"), *GetName());
+		bUseRootMotion = false;
+		bAlwaysUseRootMotion = false;
 	}
 }
 
@@ -76,7 +78,7 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	{
 	default:
 	case EGridMovementMode::Stationary:
-		if (bAlwaysUseRootMotion)
+		if (bAlwaysUseRootMotion && MovementPhase != EGridMovementPhase::Ending)
 		{
 			FTransform RootMotion = ConsumeRootMotion();
 			NewTransform.SetRotation(NewTransform.GetRotation() * RootMotion.GetRotation());
@@ -112,7 +114,7 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 		FTransform RootMotion = ConsumeRootMotion();
 		CurrentSpeed = RootMotion.GetLocation().Size();
 	}
-	/* Root motion is either not available or there is really little movement, use manually set values */
+
 	if (CurrentSpeed < 25 * DeltaTime)
 	{
 		if (MovementMode == EGridMovementMode::ClimbingDown || MovementMode == EGridMovementMode::ClimbingUp)
@@ -124,6 +126,7 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 			CurrentSpeed = MaxWalkSpeed * DeltaTime;
 		}
 	}
+
 	Distance = FMath::Min(Spline->GetSplineLength(), Distance + CurrentSpeed);
 
 	/* Grab our current transform so we can find the velocity if we need it later */
@@ -172,7 +175,7 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 		MovementPhase = EGridMovementPhase::Ending;
 	}
 	/* clear path if we have traversed it all (we might not get here if StoppingDistance is set) */
-	if (Distance >= Spline->GetSplineLength())
+	if (CurrentSpeed == 0 || Distance >= Spline->GetSplineLength())
 	{
 		ChangeMovementMode(EGridMovementMode::Stationary);
 		Distance = 0;
