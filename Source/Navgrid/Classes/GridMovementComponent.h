@@ -94,6 +94,12 @@ public:
 	you bAlwaysUseRootMotion and have a walk-end animation that contains some movement */
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Movement")
 	float StoppingDistance = 0;
+	/* Set this to the length of the stopping animation if you want the component to adjust
+	the movent speed during the movement end-phase in order to excately stop at the path enpoint.
+	Useful if you are not able to find an exact number for StoppingDistance */
+	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Movement")
+	float StoppingTime = 0;
+
 	/* Should we straighten out the path to avoid zigzaging */
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Movement")
 	bool bStringPullPath = true;
@@ -121,6 +127,8 @@ public:
 	void TurnTo(const FRotator &Forward);
 	/* Snap actor the grid */
 	void SnapToGrid();
+	/* Get the remaining distance of the current path (zero if the pawn is currently not moving) */
+	float GetRemainingDistance();
 protected:
 	FRotator DesiredForwardRotation;
 public:

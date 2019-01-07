@@ -127,6 +127,12 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 	{
 		FTransform RootMotion = ConsumeRootMotion();
 		CurrentSpeed = RootMotion.GetLocation().Size();
+
+		/* adjust the speed if we know the length and root motion in the ending animation */
+		if (StoppingDistance > 0 && StoppingTime > 0 && EGridMovementPhase::Ending == MovementPhase)
+		{
+			CurrentSpeed = FMath::Max(DeltaTime * StoppingDistance / StoppingTime, CurrentSpeed);
+		}
 	}
 
 	if (CurrentSpeed < 25 * DeltaTime)
@@ -189,7 +195,7 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 	if (CurrentSpeed == 0 || Distance >= Spline->GetSplineLength())
 	{
 		ChangeMovementMode(EGridMovementMode::Stationary);
-		MovementPhase = EGridMovementPhase::Ending;
+		MovementPhase = EGridMovementPhase::Done;
 		Distance = 0;
 		Spline->ClearSplinePoints();
 	}
@@ -369,6 +375,11 @@ void UGridMovementComponent::SnapToGrid()
 	{
 		GridPawnOwner->SetActorLocation(SnapTile->GetPawnLocation());
 	}
+}
+
+float UGridMovementComponent::GetRemainingDistance()
+{
+	return FMath::Max(Spline->GetSplineLength() - Distance, 0.0f);
 }
 
 void UGridMovementComponent::ShowPath()
