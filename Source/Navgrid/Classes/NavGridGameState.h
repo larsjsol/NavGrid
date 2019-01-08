@@ -10,7 +10,6 @@
 
 #include "NavGridGameState.generated.h"
 
-
 class ANavGrid;
 
 /**

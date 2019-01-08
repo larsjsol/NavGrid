@@ -20,13 +20,14 @@ void ATeamTurnManager::Register(UTurnComponent *TurnComponent)
 			uint8 Id = GridPawnOwner->GetGenericTeamId().GetId();
 			if (!Teams.Contains(Id))
 			{
-				UPROPERTY()
-				ATeamTurnManager *NewManager = GetWorld()->SpawnActor<ATeamTurnManager>();
+				// in case this function is called on a subclass, make sure tha the spawned slaves are of the same type
+				ATeamTurnManager *NewManager = (ATeamTurnManager *) GetWorld()->SpawnActor(this->GetClass());
 				NewManager->SetOwner(this);
 				NewManager->Master = false;
 				NewManager->TurnComponent->SetTurnManager(this);
 				NewManager->TurnDelay = TurnDelay;
-				// one round for the slave is a single turn for the master
+				NewManager->TeamId = GridPawnOwner->GetGenericTeamId();
+				// one complete round for the slave is a single turn for the master
 				NewManager->TurnComponent->OnTurnStart().AddUObject(NewManager, &ATeamTurnManager::StartNewRound);
 
 				Teams.Add(Id, NewManager);

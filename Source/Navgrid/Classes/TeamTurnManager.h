@@ -35,4 +35,5 @@ protected:
 
 	UPROPERTY()
 	TMap<uint8, ATeamTurnManager *> Teams;
+	FGenericTeamId TeamId;
 };
