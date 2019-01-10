@@ -95,6 +95,7 @@ public:
 
 	virtual bool CanMoveTo(const UNavTileComponent & Tile);
 	virtual void MoveTo(const UNavTileComponent & Tile);
+
 	/* get the tile occupied at the start of this pawns turn */
 	UFUNCTION(BlueprintCallable, Category = "NavGrid")
 	UNavTileComponent *GetTile() const { return MovementComponent->GetTile(); }

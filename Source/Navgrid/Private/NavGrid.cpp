@@ -104,11 +104,11 @@ ANavGrid * ANavGrid::GetNavGrid(UWorld *World)
 	return NULL;
 }
 
-UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation, bool FindFloor/*= true*/)
+UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation, bool FindFloor/*= true*/, float UpwardTraceLength/* = 25*/, float DownwardTraceLength/* = 25*/)
 {
 	if (FindFloor)
 	{
-		return LineTraceTile(WorldLocation + FVector(0, 0, 50), WorldLocation - FVector(0, 0, 25));
+		return LineTraceTile(WorldLocation + FVector(0, 0, UpwardTraceLength), WorldLocation - FVector(0, 0, DownwardTraceLength));
 	}
 	else
 	{
