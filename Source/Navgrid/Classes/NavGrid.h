@@ -74,7 +74,7 @@ public:
 	static ANavGrid *GetNavGrid(UWorld *World);
 
 	/* Get tile from world location, may return NULL */
-	virtual UNavTileComponent *GetTile(const FVector &WorldLocation, bool FindFloor = true, float UpwardTraceLength = 25, float DownwardTraceLength = 25);
+	virtual UNavTileComponent *GetTile(const FVector &WorldLocation, bool FindFloor = true, float UpwardTraceLength = 25, float DownwardTraceLength = 100);
 protected:
 	UNavTileComponent *LineTraceTile(const FVector &Start, const FVector &End);
 
