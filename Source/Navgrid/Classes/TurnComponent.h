@@ -18,6 +18,8 @@ class NAVGRID_API UTurnComponent : public UActorComponent
 public:
 	UTurnComponent();
 
+	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
+
 	//Event delegates
 	DECLARE_MULTICAST_DELEGATE(FOnTurnStart);
 	DECLARE_MULTICAST_DELEGATE(FOnTurnEnd);

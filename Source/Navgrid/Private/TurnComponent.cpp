@@ -9,6 +9,12 @@ UTurnComponent::UTurnComponent()
 	bMyTurn = false;
 }
 
+void UTurnComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+{
+	Super::OnComponentDestroyed(bDestroyingHierarchy);
+	UnRegister();
+}
+
 void UTurnComponent::SetTurnManager(ATurnManager *InTurnManager)
 {
 	TurnManager = InTurnManager;

@@ -77,9 +77,15 @@ void AGridPawn::SetGenericTeamId(const FGenericTeamId & InTeamId)
 {
 	ANavGridGameState *State = GetWorld()->GetGameState<ANavGridGameState>();
 	ATurnManager *OldTM = State->GetTurnManager(TeamId);
-	OldTM->UnRegister(TurnComponent);
+	if (IsValid(OldTM))
+	{
+		OldTM->UnRegister(TurnComponent);
+	}
 	ATurnManager *NewTM = State->GetTurnManager(InTeamId);
-	NewTM->Register(TurnComponent);
+	if (IsValid(NewTM))
+	{
+		NewTM->Register(TurnComponent);
+	}
 
 	TeamId = InTeamId;
 }

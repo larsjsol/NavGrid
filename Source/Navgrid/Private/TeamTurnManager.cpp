@@ -51,6 +51,31 @@ void ATeamTurnManager::Register(UTurnComponent *TurnComponent)
 	}
 }
 
+void ATeamTurnManager::UnRegister(UTurnComponent *TurnComponent)
+{
+	if (Master)
+	{
+		AGridPawn *GridPawnOwner = Cast<AGridPawn>(TurnComponent->GetOwner());
+		if (GridPawnOwner)
+		{
+			uint8 Id = GridPawnOwner->GetGenericTeamId().GetId();
+			if (Teams.Contains(Id))
+			{
+				Teams[Id]->UnRegister(TurnComponent);
+			}
+		}
+		ATeamTurnManager *ManagerOwner = Cast<ATeamTurnManager>(TurnComponent->GetOwner());
+		if (ManagerOwner)
+		{
+			Super::UnRegister(TurnComponent);
+		}
+	}
+	else
+	{
+		Super::UnRegister(TurnComponent);
+	}
+}
+
 void ATeamTurnManager::StartTurnNext()
 {
 	int32 NewIndex = GetNextIndexThatCanAct();
@@ -112,9 +137,16 @@ bool ATeamTurnManager::RequestStartTurn(UTurnComponent *InTurnComponent)
 
 ATurnManager *ATeamTurnManager::GetTurnManager(const FGenericTeamId& TeamID)
 {
-	if (Master && Teams.Contains(TeamID.GetId()))
+	if (Master)
 	{
-		return Teams[TeamID.GetId()];
+		if (Teams.Contains(TeamID.GetId()))
+		{
+			return Teams[TeamID.GetId()];
+		}
+		else
+		{
+			return this;
+		}
 	}
 	else
 	{

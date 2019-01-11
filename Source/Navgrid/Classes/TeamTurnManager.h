@@ -21,6 +21,7 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void Register(UTurnComponent *TurnComponent) override;
+	virtual void UnRegister(UTurnComponent *TurnComponent) override;
 	virtual void StartTurnNext() override;
 	virtual void EndRound() override;
 	virtual bool RequestStartTurn(UTurnComponent *TurnComponent) override;
