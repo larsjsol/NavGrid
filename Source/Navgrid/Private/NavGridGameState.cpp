@@ -36,8 +36,6 @@ void ANavGridGameState::HandleBeginPlay()
 
 	// with the essentials in place, continue with begin play
 	Super::HandleBeginPlay();
-
-	TurnManager->StartFirstRound();
 }
 
 ATurnManager * ANavGridGameState::SpawnTurnManager()

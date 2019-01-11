@@ -7,6 +7,11 @@ ATurnManager::ATurnManager()
 	TurnDelay = 0.5;
 }
 
+void ATurnManager::BeginPlay()
+{
+	StartFirstRound();
+}
+
 void ATurnManager::Register(UTurnComponent *TurnComponent)
 {
 	TurnComponents.AddUnique(TurnComponent);

@@ -8,6 +8,14 @@ ATeamTurnManager::ATeamTurnManager()
 	TurnComponent = CreateDefaultSubobject<UTurnComponent>("Turn Component");
 }
 
+void ATeamTurnManager::BeginPlay()
+{
+	if (Master)
+	{
+		StartFirstRound();
+	}
+}
+
 void ATeamTurnManager::Register(UTurnComponent *TurnComponent)
 {
 	if (!TurnComponents.Contains(TurnComponent))

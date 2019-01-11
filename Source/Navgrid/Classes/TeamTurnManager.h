@@ -18,6 +18,7 @@ class NAVGRID_API ATeamTurnManager : public ATurnManager
 
 public:
 	ATeamTurnManager();
+	virtual void BeginPlay() override;
 
 	virtual void Register(UTurnComponent *TurnComponent) override;
 	virtual void StartTurnNext() override;

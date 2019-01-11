@@ -43,12 +43,12 @@ public:
 	virtual void BeginPlay() override;
 
 	// IGenericTeamAgentInterface start
-	virtual void SetGenericTeamId(const FGenericTeamId& TeamID) override { this->TeamID = TeamID; }
-	virtual FGenericTeamId GetGenericTeamId() const override { return TeamID; }
+	virtual void SetGenericTeamId(const FGenericTeamId& InTeamId) override;
+	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; }
 	// IGenericTeamAgentInterface end
 protected:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
-	FGenericTeamId TeamID;
+	FGenericTeamId TeamId;
 
 public:
 	UPROPERTY(VisibleAnywhere, Category = "Components")

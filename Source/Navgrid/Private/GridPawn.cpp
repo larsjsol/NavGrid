@@ -24,6 +24,7 @@ AGridPawn::AGridPawn()
 	CapsuleComponent->SetCapsuleRadius(30);
 	CapsuleComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+	MovementComponent->SetUpdatedComponent(CapsuleComponent);
 
 	SelectedHighlight = CreateDefaultSubobject<UStaticMeshComponent>("SelectedHighlight");
 	SelectedHighlight->SetupAttachment(Scene);
@@ -50,6 +51,12 @@ void AGridPawn::BeginPlay()
 
 	TurnComponent->OnRoundStart().AddUObject(this, &AGridPawn::OnRoundStart);
 	TurnComponent->OnTurnStart().AddUObject(this, &AGridPawn::OnTurnStart);
+	// manually fire OnRoundStart() and OnTurnStart() if its our turn as that means we have missed the event
+	if (TurnComponent->MyTurn())
+	{
+		OnRoundStart();
+		OnTurnStart();
+	}
 	TurnComponent->OnTurnEnd().AddUObject(this, &AGridPawn::OnTurnEnd);
 	TurnComponent->OnPawnReady().AddUObject(this, &AGridPawn::OnPawnReady);
 
@@ -58,14 +65,23 @@ void AGridPawn::BeginPlay()
 	Grid = State->Grid;
 	SelectedHighlight->SetRelativeLocation(FVector(0, 0, Grid->UIOffset));
 
-	ATurnManager *TM = State->GetTurnManager(TeamID);
-	check(TM);
-	TM->Register(TurnComponent);
+	SetGenericTeamId(TeamId);
 
 	if (SnapToGrid)
 	{
 		MovementComponent->SnapToGrid();
 	}
+}
+
+void AGridPawn::SetGenericTeamId(const FGenericTeamId & InTeamId)
+{
+	ANavGridGameState *State = GetWorld()->GetGameState<ANavGridGameState>();
+	ATurnManager *OldTM = State->GetTurnManager(TeamId);
+	OldTM->UnRegister(TurnComponent);
+	ATurnManager *NewTM = State->GetTurnManager(InTeamId);
+	NewTM->Register(TurnComponent);
+
+	TeamId = InTeamId;
 }
 
 void AGridPawn::OnTurnStart()
@@ -133,7 +149,7 @@ bool AGridPawn::CanBeSelected()
 	ANavGridGameState *GameState = Cast<ANavGridGameState>(GetWorld()->GetGameState());
 	if (GameState)
 	{
-		ATurnManager *TurnManager = GameState->GetTurnManager(TeamID);
+		ATurnManager *TurnManager = GameState->GetTurnManager(TeamId);
 		if (TurnManager && TurnManager->MyTurn() && GetState() == EGridPawnState::WaitingForTurn)
 		{
 			AGridPawn *CurrentPawn = Cast<AGridPawn>(TurnManager->GetCurrentComponent()->GetOwner());

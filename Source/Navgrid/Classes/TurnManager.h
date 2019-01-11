@@ -28,6 +28,7 @@ class NAVGRID_API ATurnManager : public AActor
 	GENERATED_BODY()
 public:
 	ATurnManager();
+	virtual void BeginPlay() override;
 
 	/* Add a turn component to be managed */
 	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
