@@ -117,6 +117,18 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		OnMovementEndEvent.Broadcast();
 		MovementPhase = EGridMovementPhase::Done;
 	}
+
+	// try to grab the tile we're on and store it in CurrentTile. Take care to not overwrite a pointer to an
+	// actual tile with NULL as that would mean we have moved off the grid
+	if (IsValid(Grid))
+	{
+		UNavTileComponent *NewTile = Grid->GetTile(GetActorLocation(), MovementMode != EGridMovementMode::ClimbingDown &&
+			MovementMode != EGridMovementMode::ClimbingUp);
+		if (IsValid(NewTile))
+		{
+			CurrentTile = NewTile;
+		}
+	}
 }
 
 FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
@@ -167,10 +179,10 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 	{
 		if (Grid)
 		{
-			UNavTileComponent *CurrentTile = Grid->GetTile(PawnOwner->GetActorLocation(), false);
-			if (CurrentTile)
+			UNavTileComponent *LadderTile = Grid->GetTile(PawnOwner->GetActorLocation(), false);
+			if (LadderTile)
 			{
-				DesiredRotation = CurrentTile->GetComponentRotation();
+				DesiredRotation = LadderTile->GetComponentRotation();
 				DesiredRotation.Yaw -= 180;
 			}
 		}
@@ -227,19 +239,19 @@ void UGridMovementComponent::GetTilesInRange(TArray<UNavTileComponent *> &OutTil
 
 UNavTileComponent *UGridMovementComponent::GetTile()
 {
-	return GetTile(GetOwner()->GetActorLocation());
+	return CurrentTile;
 }
 
 UNavTileComponent * UGridMovementComponent::GetTile(const FVector &Position)
 {
-	UNavTileComponent *CurrentTile = Grid->GetTile(Position, true);
-	if (!CurrentTile &&
+	UNavTileComponent *Tile = Grid->GetTile(Position, true);
+	if (!Tile &&
 		(AvailableMovementModes.Contains(EGridMovementMode::ClimbingDown) ||
 		AvailableMovementModes.Contains(EGridMovementMode::ClimbingUp)))
 	{
-		CurrentTile = Grid->GetTile(Position, false);
+		Tile = Grid->GetTile(Position, false);
 	}
-	return CurrentTile;
+	return Tile;
 }
 
 void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath, TArray<const UNavTileComponent*>& OutPath)
@@ -286,12 +298,7 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 	Spline->ClearSplinePoints();
 	AGridPawn *Owner = Cast<AGridPawn>(GetOwner());
 
-	UNavTileComponent *Tile = NULL;
-	if (Grid)
-	{
-		Tile = Grid->GetTile(Owner->GetActorLocation());
-	}
-	if (!Tile)
+	if (!IsValid(CurrentTile))
 	{
 		UE_LOG(NavGrid, Error, TEXT("%s: Not on grid"), *Owner->GetName());
 		return false;

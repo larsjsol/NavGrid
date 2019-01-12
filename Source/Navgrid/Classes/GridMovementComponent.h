@@ -52,7 +52,7 @@ public:
 
 	/* Return the tiles that are in range */
 	void GetTilesInRange(TArray<UNavTileComponent *> &OutTiles);
-	/* Get the tile the pawn is on, may return null if no tile is found */
+	/* Get the tile the pawn is on, returns NULL if the pawn is not on a tile */
 	UNavTileComponent *GetTile();
 	/* Get the tile the pawn would occupy of it was located at a different position.
 	May return NULL if no tile is found.*/
@@ -176,6 +176,10 @@ protected:
 	/* the grid we're currently on */
 	UPROPERTY()
 	ANavGrid *Grid = NULL;
+
+	/* The tile we're currently on */
+	UPROPERTY()
+	UNavTileComponent *CurrentTile = NULL;
 
 	UPROPERTY()
 	UAnimInstance *AnimInstance;
