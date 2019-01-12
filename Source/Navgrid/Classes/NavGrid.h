@@ -68,6 +68,8 @@ public:
 	/* Current number of virtual tiles */
 	UPROPERTY(VisibleAnywhere, Category = "NavGrid")
 	int32 NumVirtualTiles = 0;
+	UPROPERTY(EditAnyWhere)
+	int32 MaxVirtualTiles = 10000;
 
 	UFUNCTION(BlueprintCallable, Category = "NavGrid")
 	static ANavGrid *GetNavGrid(AActor *ActorInWorld);

@@ -367,8 +367,9 @@ FVector ANavGrid::AdjustToTileLocation(const FVector &Location)
 void ANavGrid::GenerateVirtualTiles(const AGridPawn *Pawn)
 {
 	// only keep a reasonable number
-	if (VirtualTiles.Num() > 10000)
+	if (VirtualTiles.Num() > MaxVirtualTiles)
 	{
+		UE_LOG(NavGrid, Log, TEXT("Limit reached (%i), removing all virtual tiles"), MaxVirtualTiles);
 		DestroyVirtualTiles();
 	}
 
