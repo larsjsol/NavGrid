@@ -250,18 +250,11 @@ void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 
 void ANavGrid::GetTilesInRange(AGridPawn *Pawn, bool DoCollisionTests, TArray<UNavTileComponent*>& OutTiles)
 {
-	UNavTileComponent * Tile = GetTile(Pawn->GetActorLocation());
-	if (!Tile && EnableVirtualTiles)
-	{
-		GenerateVirtualTiles(Pawn);
-		Tile = GetTile(Pawn->GetActorLocation());
-	}
-
-	if (Pawn != CurrentPawn || DoCollisionTests != bCurrentDoCollisionTests || Tile != CurrentTile)
+	if (Pawn != CurrentPawn || DoCollisionTests != bCurrentDoCollisionTests || Pawn->GetTile() != CurrentTile)
 	{
 		CurrentPawn = Pawn;
 		bCurrentDoCollisionTests = DoCollisionTests;
-		CurrentTile = Tile;
+		CurrentTile = Pawn->GetTile();
 		CalculateTilesInRange(CurrentPawn, bCurrentDoCollisionTests);
 	}
 	OutTiles = TilesInRange;
@@ -383,7 +376,7 @@ void ANavGrid::GenerateVirtualTiles(const AGridPawn *Pawn)
 		{
 			for (float Z = Max.Z; Z >= Min.Z; Z -= TileSize)
 			{
-				UNavTileComponent *TileComp = ConsiderPlaceTile(FVector(X, Y, Z + TileSize + 25), FVector(X, Y, Z - 25));
+				UNavTileComponent *TileComp = ConsiderPlaceTile(FVector(X, Y, Z + TileSize), FVector(X, Y, Z - 0.1));
 				if (TileComp)
 				{
 					VirtualTiles.Add(TileComp);
