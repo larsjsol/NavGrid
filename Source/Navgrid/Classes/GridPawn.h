@@ -102,6 +102,8 @@ public:
 	template <class T>
 	T *GetTile() const { return Cast<T>(GetTile()); }
 
+	void GenerateVirtualTiles();
+
 	/* Called when the user clicks on this actor, default implementation is to change the the current turn taker to this */
 	UFUNCTION()
 	virtual void Clicked(AActor *ClickedActor, FKey PressedKey);

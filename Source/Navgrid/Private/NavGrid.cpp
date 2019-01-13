@@ -174,19 +174,13 @@ void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 	check(Pawn);
 
 	ClearTiles();
-	if (EnableVirtualTiles)
+	UNavTileComponent *Current = Pawn->GetTile();
+	/* if we're not on the grid, the number of tiles in range is zero */
+	if (!Current)
 	{
-		GenerateVirtualTiles(Pawn);
-	}
-
-	UNavTileComponent * Tile = GetTile(Pawn->GetActorLocation());
-	if (!Tile)
-	{
-		UE_LOG(NavGrid, Error, TEXT("ANavGrid::CalculateTilesInRange(): %s is off the grid"), *Pawn->GetName());
 		return;
 	}
 
-	UNavTileComponent *Current = Tile;
 	Current->Distance = 0;
 	TArray<UNavTileComponent *> NeighbouringTiles;
 	Current->GetUnobstructedNeighbours(*Pawn->CapsuleComponent, NeighbouringTiles);
@@ -236,7 +230,7 @@ void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 		}
 		Current->Visited = true;
 		TentativeSet.Remove(Current);
-		if (Current != Tile) { TilesInRange.Add(Current); } // dont include the starting tile
+		if (Current != Pawn->GetTile()) { TilesInRange.Add(Current); } // dont include the starting tile
 		if (TentativeSet.Num())
 		{
 			Current = TentativeSet[0];

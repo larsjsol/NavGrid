@@ -48,6 +48,11 @@ protected:
 	FTransform TransformFromPath(float DeltaTime);
 	/* return an tranfrom usable for rotation in place */
 	FTransform TransformFromRotation(float DeltaTime);
+
+	void ConsiderUpdateCurrentTile();
+	/* The tile we're currently on */
+	UPROPERTY()
+	UNavTileComponent *CurrentTile = NULL;
 public:
 
 	/* Return the tiles that are in range */
@@ -176,10 +181,6 @@ protected:
 	/* the grid we're currently on */
 	UPROPERTY()
 	ANavGrid *Grid = NULL;
-
-	/* The tile we're currently on */
-	UPROPERTY()
-	UNavTileComponent *CurrentTile = NULL;
 
 	UPROPERTY()
 	UAnimInstance *AnimInstance;

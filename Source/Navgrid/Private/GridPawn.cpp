@@ -66,11 +66,6 @@ void AGridPawn::BeginPlay()
 	SelectedHighlight->SetRelativeLocation(FVector(0, 0, Grid->UIOffset));
 
 	SetGenericTeamId(TeamId);
-
-	if (SnapToGrid)
-	{
-		MovementComponent->SnapToGrid();
-	}
 }
 
 void AGridPawn::SetGenericTeamId(const FGenericTeamId & InTeamId)
@@ -92,6 +87,10 @@ void AGridPawn::SetGenericTeamId(const FGenericTeamId & InTeamId)
 
 void AGridPawn::OnTurnStart()
 {
+	if (IsValid(Grid) && Grid->EnableVirtualTiles)
+	{
+		GenerateVirtualTiles();
+	}
 	if (SnapToGrid)
 	{
 		MovementComponent->SnapToGrid();
@@ -183,6 +182,12 @@ void AGridPawn::MoveTo(const UNavTileComponent & Tile)
 {
 	MovementComponent->MoveTo(Tile);
 	MovementComponent->HidePath();
+}
+
+void AGridPawn::GenerateVirtualTiles()
+{
+	check(Grid);
+	Grid->GenerateVirtualTiles(this);
 }
 
 void AGridPawn::Clicked(AActor *ClickedActor, FKey PressedKey)

@@ -90,6 +90,7 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	case EGridMovementMode::ClimbingDown:
 	case EGridMovementMode::ClimbingUp:
 		NewTransform = TransformFromPath(DeltaTime);
+		ConsiderUpdateCurrentTile();
 		break;
 	}
 
@@ -116,18 +117,6 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	{
 		OnMovementEndEvent.Broadcast();
 		MovementPhase = EGridMovementPhase::Done;
-	}
-
-	// try to grab the tile we're on and store it in CurrentTile. Take care to not overwrite a pointer to an
-	// actual tile with NULL as that would mean we have moved off the grid
-	if (IsValid(Grid))
-	{
-		UNavTileComponent *NewTile = Grid->GetTile(GetActorLocation(), MovementMode != EGridMovementMode::ClimbingDown &&
-			MovementMode != EGridMovementMode::ClimbingUp);
-		if (IsValid(NewTile))
-		{
-			CurrentTile = NewTile;
-		}
 	}
 }
 
@@ -177,14 +166,10 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 	/* Use the rotation from the ladder if we're climbing */
 	else if (MovementMode == EGridMovementMode::ClimbingUp || MovementMode == EGridMovementMode::ClimbingDown)
 	{
-		if (Grid)
+		if (IsValid(CurrentTile) && CurrentTile->IsA<UNavLadderComponent>())
 		{
-			UNavTileComponent *LadderTile = Grid->GetTile(PawnOwner->GetActorLocation(), false);
-			if (LadderTile)
-			{
-				DesiredRotation = LadderTile->GetComponentRotation();
-				DesiredRotation.Yaw -= 180;
-			}
+			DesiredRotation = CurrentTile->GetComponentRotation();
+			DesiredRotation.Yaw -= 180;
 		}
 		else
 			// Dont update the rotation if we have no idea of what it should be
@@ -229,6 +214,21 @@ FTransform UGridMovementComponent::TransformFromRotation(float DeltaTime)
 		NewTransform.SetRotation(NewRotation.Quaternion());
 	}
 	return NewTransform;
+}
+
+void UGridMovementComponent::ConsiderUpdateCurrentTile()
+{
+	// try to grab the tile we're on and store it in CurrentTile. Take care to not overwrite a pointer to an
+	// actual tile with NULL as that would mean we have moved off the grid
+	if (IsValid(Grid))
+	{
+		UNavTileComponent *NewTile = Grid->GetTile(GetActorLocation(), MovementMode != EGridMovementMode::ClimbingDown &&
+			MovementMode != EGridMovementMode::ClimbingUp);
+		if (IsValid(NewTile))
+		{
+			CurrentTile = NewTile;
+		}
+	}
 }
 
 void UGridMovementComponent::GetTilesInRange(TArray<UNavTileComponent *> &OutTiles)
@@ -371,16 +371,13 @@ void UGridMovementComponent::SnapToGrid()
 {
 	AGridPawn *GridPawnOwner = Cast<AGridPawn>(GetOwner());
 	check(GridPawnOwner);
-	/* generate virtual tiles to increase tha chance of the pawn beeing on a tile*/
-	if (Grid->EnableVirtualTiles)
-	{
-		Grid->GenerateVirtualTiles(GridPawnOwner);
-	}
 
-	UNavTileComponent *SnapTile = GetTile();
-	if (SnapTile)
+	ConsiderUpdateCurrentTile();
+
+	// move owner to the tile's pawn location
+	if (IsValid(CurrentTile))
 	{
-		GridPawnOwner->SetActorLocation(SnapTile->GetPawnLocation());
+		GridPawnOwner->SetActorLocation(CurrentTile->GetPawnLocation());
 	}
 }
 
