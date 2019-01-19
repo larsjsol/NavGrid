@@ -438,7 +438,8 @@ void UGridMovementComponent::ConsiderUpdateMovementMode()
 		{
 			if (CurrentTile->IsA<UNavLadderComponent>())
 			{
-				if (ForwardPoint.Z > GetActorLocation().Z)
+				FVector ActorLocation = GetOwner()->GetActorLocation();
+				if (ForwardPoint.Z > ActorLocation.Z)
 				{
 					ChangeMovementMode(EGridMovementMode::ClimbingUp);
 				}
