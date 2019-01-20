@@ -95,10 +95,7 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	}
 
 	/* reset rotation if we have any rotation locks */
-	FRotator NewRotation = NewTransform.GetRotation().Rotator();
-	NewRotation.Roll = LockRoll ? ActorRotation.Roll : NewRotation.Roll;
-	NewRotation.Pitch = LockPitch ? ActorRotation.Pitch: NewRotation.Pitch;
-	NewRotation.Yaw = LockYaw ? ActorRotation.Yaw : NewRotation.Yaw;
+	FRotator NewRotation = ApplyRotationLocks(NewTransform.GetRotation().Rotator());
 	NewTransform.SetRotation(NewRotation.Quaternion());
 	/* never change the scale */
 	NewTransform.SetScale3D(Owner->GetActorScale3D());
@@ -384,6 +381,16 @@ void UGridMovementComponent::SnapToGrid()
 float UGridMovementComponent::GetRemainingDistance()
 {
 	return FMath::Max(Spline->GetSplineLength() - Distance, 0.0f);
+}
+
+FRotator UGridMovementComponent::ApplyRotationLocks(const FRotator & InRotation)
+{
+	FRotator OwnerRot = GetOwner()->GetActorRotation();
+	FRotator Ret;
+	Ret.Pitch = LockPitch ? OwnerRot.Pitch : InRotation.Pitch;
+	Ret.Roll = LockRoll ? OwnerRot.Roll : InRotation.Roll;
+	Ret.Yaw = LockYaw ? OwnerRot.Yaw : InRotation.Yaw;
+	return Ret;
 }
 
 void UGridMovementComponent::ShowPath()

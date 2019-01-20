@@ -134,6 +134,8 @@ public:
 	void SnapToGrid();
 	/* Get the remaining distance of the current path (zero if the pawn is currently not moving) */
 	float GetRemainingDistance();
+	/* Use actor rotation for components where we have an rotation locks, use InRotation for the rest */
+	FRotator ApplyRotationLocks(const FRotator &InRotation);
 protected:
 	FRotator DesiredForwardRotation;
 public:
