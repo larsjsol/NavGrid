@@ -59,7 +59,7 @@ public:
 	UTurnComponent *TurnComponent;
 	/* Used to test if thre's room for pawn on a tile*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	UCapsuleComponent *CapsuleComponent;
+	UCapsuleComponent *MovementCollisionCapsule;
 	/* Shown when the pawn is selected/has its turn */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UStaticMeshComponent *SelectedHighlight;

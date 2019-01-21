@@ -258,7 +258,7 @@ void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath
 	OutPath.Empty();
 	if (GridPawnOwner && InPath.Num() > 2)
 	{
-		const UCapsuleComponent &Capsule = *GridPawnOwner->CapsuleComponent;
+		const UCapsuleComponent &Capsule = *GridPawnOwner->MovementCollisionCapsule;
 		int32 CurrentIdx = 0;
 		OutPath.Add(InPath[0]);
 		for (int32 Idx = 1; Idx < InPath.Num(); Idx++)

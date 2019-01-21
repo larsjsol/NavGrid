@@ -183,12 +183,12 @@ void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 
 	Current->Distance = 0;
 	TArray<UNavTileComponent *> NeighbouringTiles;
-	Current->GetUnobstructedNeighbours(*Pawn->CapsuleComponent, NeighbouringTiles);
+	Current->GetUnobstructedNeighbours(*Pawn->MovementCollisionCapsule, NeighbouringTiles);
 	TArray<UNavTileComponent *> TentativeSet(NeighbouringTiles);
 
 	while (Current)
 	{
-		Current->GetUnobstructedNeighbours(*Pawn->CapsuleComponent, NeighbouringTiles);
+		Current->GetUnobstructedNeighbours(*Pawn->MovementCollisionCapsule, NeighbouringTiles);
 		for (UNavTileComponent *N : NeighbouringTiles)
 		{
 			if (!N->Traversable(Pawn->MovementComponent->MaxWalkAngle, Pawn->MovementComponent->AvailableMovementModes))

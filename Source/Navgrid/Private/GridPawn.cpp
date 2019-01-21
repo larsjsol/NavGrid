@@ -17,14 +17,13 @@ AGridPawn::AGridPawn()
 
 	TurnComponent = CreateDefaultSubobject<UTurnComponent>("TurnComponent");
 
-	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
-	CapsuleComponent->SetupAttachment(Scene);
-	CapsuleComponent->SetRelativeLocation(FVector(0, 0, 100)); //Above the ground to avoid collisions
-	CapsuleComponent->SetCapsuleHalfHeight(50);
-	CapsuleComponent->SetCapsuleRadius(30);
-	CapsuleComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
-	MovementComponent->SetUpdatedComponent(CapsuleComponent);
+	MovementCollisionCapsule = CreateDefaultSubobject<UCapsuleComponent>("MovementCollisionCapsule");
+	MovementCollisionCapsule->SetupAttachment(Scene);
+	MovementCollisionCapsule->SetRelativeLocation(FVector(0, 0, 100)); //Above the ground to avoid collisions
+	MovementCollisionCapsule->SetCapsuleHalfHeight(50);
+	MovementCollisionCapsule->SetCapsuleRadius(30);
+	MovementCollisionCapsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	MovementComponent->SetUpdatedComponent(MovementCollisionCapsule);
 
 	SelectedHighlight = CreateDefaultSubobject<UStaticMeshComponent>("SelectedHighlight");
 	SelectedHighlight->SetupAttachment(Scene);
@@ -35,8 +34,7 @@ AGridPawn::AGridPawn()
 	SelectedHighlight->SetVisibility(false);
 
 	Arrow = CreateDefaultSubobject<UArrowComponent>("Arrow");
-	Arrow->SetupAttachment(Scene);
-	Arrow->SetRelativeLocation(FVector(0, 0, 50));
+	Arrow->SetupAttachment(MovementCollisionCapsule);
 	Arrow->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	bHumanControlled = true;

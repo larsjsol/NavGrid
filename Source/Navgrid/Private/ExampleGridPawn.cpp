@@ -9,12 +9,15 @@
 AExampleGridPawn::AExampleGridPawn()
 	:Super()
 {
+	MovementCollisionCapsule->SetCapsuleHalfHeight(30);
+	MovementCollisionCapsule->SetRelativeLocation(FVector(0, 0, 50));
+
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
 	UStaticMesh *Mesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Engine/BasicShapes/Cone.Cone'")).Object;
 	StaticMesh->SetStaticMesh(Mesh);
-	StaticMesh->SetRelativeLocation(FVector(0, 0, 50));
-	StaticMesh->SetupAttachment(Scene);
+	StaticMesh->SetRelativeLocation(-MovementCollisionCapsule->RelativeLocation + FVector(0, 0, 50));
+	StaticMesh->SetupAttachment(MovementCollisionCapsule);
 
-	/* Show the arrow in game so we can which way the cone is facing */
+	/* Show the arrow in-game so we can which way the pawn is facing */
 	Arrow->SetHiddenInGame(false);
 }
