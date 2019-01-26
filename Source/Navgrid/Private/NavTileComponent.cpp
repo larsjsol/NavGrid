@@ -145,6 +145,8 @@ bool UNavTileComponent::Obstructed(const FVector & From, const FVector & To, con
 
 void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours)
 {
+	QUICK_SCOPE_CYCLE_COUNTER(STAT_UNavTileComponent_GetUnobstructedNeighbours);
+
 	OutNeighbours.Empty();
 	for (auto N : *GetNeighbours())
 	{

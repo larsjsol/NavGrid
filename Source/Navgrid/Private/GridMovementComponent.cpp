@@ -253,6 +253,8 @@ UNavTileComponent * UGridMovementComponent::GetTile(const FVector &Position)
 
 void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath, TArray<const UNavTileComponent*>& OutPath)
 {
+	QUICK_SCOPE_CYCLE_COUNTER(STAT_UGridMovementComponent_StringPull);
+
 	AGridPawn *GridPawnOwner = Cast<AGridPawn>(GetOwner());
 
 	OutPath.Empty();
@@ -288,6 +290,8 @@ void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath
 
 bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 {
+	QUICK_SCOPE_CYCLE_COUNTER(STAT_UGridMovementComponent_CreatePath);
+
 	Spline->ClearSplinePoints();
 	AGridPawn *Owner = Cast<AGridPawn>(GetOwner());
 
@@ -296,7 +300,6 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 		UE_LOG(NavGrid, Error, TEXT("%s: Not on grid"), *Owner->GetName());
 		return false;
 	}
-
 
 	TArray<UNavTileComponent *> InRange;
 	Grid->GetTilesInRange(Cast<AGridPawn>(GetOwner()), true, InRange);

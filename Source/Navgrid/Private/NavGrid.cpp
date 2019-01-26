@@ -171,6 +171,8 @@ void ANavGrid::EndTileCursorOver(const UNavTileComponent *Tile)
 
 void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 {
+	QUICK_SCOPE_CYCLE_COUNTER(STAT_ANavGrid_CalculateTilesInRange);
+
 	check(Pawn);
 
 	ClearTiles();
@@ -353,6 +355,8 @@ FVector ANavGrid::AdjustToTileLocation(const FVector &Location)
 
 void ANavGrid::GenerateVirtualTiles(const AGridPawn *Pawn)
 {
+	QUICK_SCOPE_CYCLE_COUNTER(STAT_ANavGrid_GenerateVirtualTiles);
+
 	// only keep a reasonable number
 	if (VirtualTiles.Num() > MaxVirtualTiles)
 	{
