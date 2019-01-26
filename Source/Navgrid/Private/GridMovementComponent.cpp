@@ -256,9 +256,9 @@ void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath
 	QUICK_SCOPE_CYCLE_COUNTER(STAT_UGridMovementComponent_StringPull);
 
 	AGridPawn *GridPawnOwner = Cast<AGridPawn>(GetOwner());
-
 	OutPath.Empty();
 	const UCapsuleComponent &Capsule = *GridPawnOwner->MovementCollisionCapsule;
+
 	int32 CurrentIdx = 0;
 	OutPath.Add(InPath[0]);
 	for (int32 Idx = 1; Idx < InPath.Num(); Idx++)
@@ -313,14 +313,13 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 			Path.Add(Current);
 			Current = Current->Backpointer;
 		}
-		Algo::Reverse(Path);
-
 		if (bStringPullPath)
 		{
 			TArray<const UNavTileComponent *> StringPulledPath;
 			StringPull(Path, StringPulledPath);
 			Path = StringPulledPath;
 		}
+		Algo::Reverse(Path);
 
 		if (Path.Num() > 1)
 		{
