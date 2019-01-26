@@ -65,9 +65,6 @@ public:
 	/* Number of tiles that exist in the current level */
 	UPROPERTY(VisibleAnywhere, Category = "NavGrid")
 	int32 NumPersistentTiles = 0;
-	/* Current number of virtual tiles */
-	UPROPERTY(VisibleAnywhere, Category = "NavGrid")
-	int32 NumVirtualTiles = 0;
 	UPROPERTY(EditAnyWhere)
 	int32 MaxVirtualTiles = 10000;
 
@@ -76,7 +73,7 @@ public:
 	static ANavGrid *GetNavGrid(UWorld *World);
 
 	/* Get tile from world location, may return NULL */
-	virtual UNavTileComponent *GetTile(const FVector &WorldLocation, bool FindFloor = true, float UpwardTraceLength = 25, float DownwardTraceLength = 100);
+	virtual UNavTileComponent *GetTile(const FVector &WorldLocation, bool FindFloor = true, float UpwardTraceLength = 100, float DownwardTraceLength = 100);
 protected:
 	UNavTileComponent *LineTraceTile(const FVector &Start, const FVector &End);
 
@@ -132,8 +129,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "NavGrid")
 	TArray<UNavTileComponent *> VirtualTiles;
 public:
+	/* place virtual tiles within the movement range of a pawn */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void GenerateVirtualTiles(const AGridPawn *Pawn);
+	/* place a single virtual tile under a pawn */
+	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
+	void GenerateVirtualTile(const AGridPawn *Pawn);
 	void DestroyVirtualTiles();
 
 	virtual void Destroyed() override;

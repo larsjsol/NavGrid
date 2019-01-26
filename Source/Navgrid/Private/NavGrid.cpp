@@ -104,7 +104,7 @@ ANavGrid * ANavGrid::GetNavGrid(UWorld *World)
 	return NULL;
 }
 
-UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation, bool FindFloor/*= true*/, float UpwardTraceLength/* = 25*/, float DownwardTraceLength/* = 25*/)
+UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation, bool FindFloor/*= true*/, float UpwardTraceLength/* = 100*/, float DownwardTraceLength/* = 100*/)
 {
 	if (FindFloor)
 	{
@@ -265,7 +265,7 @@ void ANavGrid::ClearTiles()
 	}
 
 	ClearTileHighlights();
-	NumPersistentTiles = AllTiles.Num() - NumVirtualTiles;
+	NumPersistentTiles = AllTiles.Num() - VirtualTiles.Num();
 }
 
 bool ANavGrid::TraceTileLocation(const FVector & TraceStart, const FVector & TraceEnd, FVector & OutTilePos)
@@ -378,7 +378,16 @@ void ANavGrid::GenerateVirtualTiles(const AGridPawn *Pawn)
 			}
 		}
 	}
-	NumVirtualTiles = VirtualTiles.Num();
+}
+
+void ANavGrid::GenerateVirtualTile(const AGridPawn * Pawn)
+{
+	FVector Location = AdjustToTileLocation(Pawn->GetActorLocation());
+	UNavTileComponent *TileComp = ConsiderPlaceTile(Location + FVector(0, 0, TileSize), Location - FVector(0, 0, 0.1));
+	if (TileComp)
+	{
+		VirtualTiles.Add(TileComp);
+	}
 }
 
 void ANavGrid::DestroyVirtualTiles()

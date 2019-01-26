@@ -89,6 +89,7 @@ void AGridPawn::OnTurnStart()
 	{
 		GenerateVirtualTiles();
 	}
+	MovementComponent->ConsiderUpdateCurrentTile();
 	if (SnapToGrid)
 	{
 		MovementComponent->SnapToGrid();
@@ -182,10 +183,21 @@ void AGridPawn::MoveTo(const UNavTileComponent & Tile)
 	MovementComponent->HidePath();
 }
 
+UNavTileComponent *AGridPawn::ConsiderGenerateVirtualTile()
+{
+	if (!IsValid(MovementComponent->GetTile()) && Grid->EnableVirtualTiles)
+	{
+		Grid->GenerateVirtualTile(this);
+		MovementComponent->ConsiderUpdateCurrentTile();
+	}
+	return MovementComponent->GetTile();
+}
+
 void AGridPawn::GenerateVirtualTiles()
 {
 	check(Grid);
 	Grid->GenerateVirtualTiles(this);
+	MovementComponent->ConsiderUpdateCurrentTile();
 }
 
 void AGridPawn::Clicked(AActor *ClickedActor, FKey PressedKey)

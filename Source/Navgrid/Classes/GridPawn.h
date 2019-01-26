@@ -102,6 +102,11 @@ public:
 	template <class T>
 	T *GetTile() const { return Cast<T>(GetTile()); }
 
+	/* Return current tile, if this is NULL consider generating a virtual tile at our feet and returing that*/
+	UNavTileComponent *ConsiderGenerateVirtualTile();
+	template <class T>
+	T *ConsiderGenerateVirtualTile() { return Cast<T>(ConsiderGenerateVirtualTile()); }
+
 	void GenerateVirtualTiles();
 
 	/* Called when the user clicks on this actor, default implementation is to change the the current turn taker to this */

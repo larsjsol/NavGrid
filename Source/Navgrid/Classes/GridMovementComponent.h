@@ -48,8 +48,9 @@ protected:
 	FTransform TransformFromPath(float DeltaTime);
 	/* return an tranfrom usable for rotation in place */
 	FTransform TransformFromRotation(float DeltaTime);
-
+public:
 	void ConsiderUpdateCurrentTile();
+protected:
 	/* The tile we're currently on */
 	UPROPERTY()
 	UNavTileComponent *CurrentTile = NULL;

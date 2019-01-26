@@ -291,12 +291,12 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 	Spline->ClearSplinePoints();
 	AGridPawn *Owner = Cast<AGridPawn>(GetOwner());
 
-	ConsiderUpdateCurrentTile();
 	if (!IsValid(CurrentTile))
 	{
 		UE_LOG(NavGrid, Error, TEXT("%s: Not on grid"), *Owner->GetName());
 		return false;
 	}
+
 
 	TArray<UNavTileComponent *> InRange;
 	Grid->GetTilesInRange(Cast<AGridPawn>(GetOwner()), true, InRange);
