@@ -189,7 +189,7 @@ void UNavTileComponent::TouchEnd(ETouchIndex::Type Type, UPrimitiveComponent* To
 
 void UNavTileComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile) const
 {
-	OutSpline.AddSplinePoint(GetComponentLocation() + PawnLocationOffset, ESplineCoordinateSpace::Local);
+	OutSpline.AddSplinePoint(GetComponentLocation() + PawnLocationOffset, ESplineCoordinateSpace::Local, false);
 }
 
 FVector UNavTileComponent::GetSplineMeshUpVector()

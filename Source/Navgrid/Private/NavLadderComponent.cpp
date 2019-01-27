@@ -87,19 +87,19 @@ void UNavLadderComponent::AddSplinePoints(const FVector &FromPos, USplineCompone
 	float BottomDistance = (BottomPathPoint->GetComponentLocation() - FromPos).Size();
 	if (TopDistance > BottomDistance)
 	{
-		OutSpline.AddSplinePoint(BottomPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
-		OutSpline.AddSplinePoint(TopPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		OutSpline.AddSplinePoint(BottomPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local, false);
+		OutSpline.AddSplinePoint(TopPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local, false);
 	}
 	else
 	{
-		OutSpline.AddSplinePoint(TopPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
-		OutSpline.AddSplinePoint(BottomPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		OutSpline.AddSplinePoint(TopPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local, false);
+		OutSpline.AddSplinePoint(BottomPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local, false);
 	}
 
 	if (LastTile)
 	{
 		OutSpline.RemoveSplinePoint(OutSpline.GetNumberOfSplinePoints() - 1);
-		OutSpline.AddSplinePoint(PawnLocationOffset + GetComponentLocation(), ESplineCoordinateSpace::Local);
+		OutSpline.AddSplinePoint(PawnLocationOffset + GetComponentLocation(), ESplineCoordinateSpace::Local, false);
 	}
 }
 

@@ -255,37 +255,44 @@ void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath
 {
 	QUICK_SCOPE_CYCLE_COUNTER(STAT_UGridMovementComponent_StringPull);
 
-	AGridPawn *GridPawnOwner = Cast<AGridPawn>(GetOwner());
-	OutPath.Empty();
-	const UCapsuleComponent &Capsule = *GridPawnOwner->MovementCollisionCapsule;
-
-	int32 CurrentIdx = 0;
-	OutPath.Add(InPath[0]);
-	for (int32 Idx = 1; Idx < InPath.Num(); Idx++)
+	if (InPath.Num() > 2)
 	{
-		// keep points needed to get around chasms and obstacles
-		FVector Delta = InPath[Idx]->GetPawnLocation() - InPath[CurrentIdx]->GetPawnLocation();
-		if (FMath::Abs(Delta.Rotation().Pitch) > MaxWalkAngle ||
-			FMath::Abs(Delta.Z * 2) > Capsule.RelativeLocation.Z - Capsule.GetScaledCapsuleHalfHeight() ||
-			InPath[Idx]->Obstructed(InPath[CurrentIdx]->GetPawnLocation(), Capsule))
+		AGridPawn *GridPawnOwner = Cast<AGridPawn>(GetOwner());
+		OutPath.Empty();
+		const UCapsuleComponent &Capsule = *GridPawnOwner->MovementCollisionCapsule;
+		int32 CurrentIdx = 0;
+		OutPath.Add(InPath[0]);
+		for (int32 Idx = 1; Idx < InPath.Num() - 1; Idx++)
 		{
-			OutPath.AddUnique(InPath[Idx - 1]);
-			CurrentIdx = Idx - 1;
-		}
-		// dont stringpull ladders
-		else if (Cast<const UNavLadderComponent>(InPath[Idx]))
-		{
-			OutPath.AddUnique(InPath[Idx - 1]);
-			OutPath.AddUnique(InPath[Idx]);
-			if (Idx + 1 < InPath.Num())
+			// keep points needed to get around chasms and obstacles
+			FVector Delta = InPath[Idx]->GetPawnLocation() - InPath[CurrentIdx]->GetPawnLocation();
+			if (FMath::Abs(Delta.Rotation().Pitch) > MaxWalkAngle ||
+				FMath::Abs(Delta.Z * 2) > Capsule.RelativeLocation.Z - Capsule.GetScaledCapsuleHalfHeight() ||
+				InPath[Idx]->Obstructed(InPath[CurrentIdx]->GetPawnLocation(), Capsule))
 			{
-				OutPath.AddUnique(InPath[Idx + 1]);
+				OutPath.AddUnique(InPath[Idx - 1]);
+				CurrentIdx = Idx - 1;
 			}
-			CurrentIdx = Idx + 1;
-			Idx = Idx + 1;
+			// dont stringpull ladders
+			else if (Cast<const UNavLadderComponent>(InPath[Idx]))
+			{
+				OutPath.AddUnique(InPath[Idx - 1]);
+				OutPath.AddUnique(InPath[Idx]);
+				if (Idx + 1 < InPath.Num())
+				{
+					OutPath.AddUnique(InPath[Idx + 1]);
+				}
+				CurrentIdx = Idx + 1;
+				Idx = Idx + 1;
+			}
 		}
+		OutPath.AddUnique(InPath[InPath.Num() - 2]);
+		OutPath.AddUnique(InPath[InPath.Num() - 1]);
 	}
-	OutPath.Add(InPath[InPath.Num() - 1]);
+	else
+	{
+		OutPath = InPath;
+	}
 }
 
 bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
@@ -323,16 +330,22 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 
 		if (Path.Num() > 1)
 		{
+			FVector ActorLocation = GetOwner()->GetActorLocation();
+
 			// use the actor location inststead of the tile location for the first spline point
-			Spline->AddSplinePoint(GetOwner()->GetActorLocation(), ESplineCoordinateSpace::Local);
-			Path[1]->AddSplinePoints(GetOwner()->GetActorLocation(), *Spline, false);
+			Spline->AddSplinePoint(ActorLocation, ESplineCoordinateSpace::Local);
+			Spline->SetSplinePointType(0, ESplinePointType::Linear, false);
 
 			// Add the remaining spline points for the tiles in the path
-			for (int32 Idx = 2; Idx < Path.Num(); Idx++)
+			for (int32 Idx = 1; Idx < Path.Num(); Idx++)
 			{
-				Path[Idx]->AddSplinePoints(Path[Idx - 1]->GetComponentLocation(), *Spline, Idx == Path.Num() - 1);
+				if (Grid->GetTile(ActorLocation) != Path[Idx] && Owner->GetTile() != Path[Idx])
+				{
+					FVector EntryPoint = Spline->GetLocationAtSplinePoint(Spline->GetNumberOfSplinePoints() - 1, ESplineCoordinateSpace::Local);
+					Path[Idx]->AddSplinePoints(EntryPoint, *Spline, Idx == Path.Num() - 1);
+				}
 			}
-
+			Spline->UpdateSpline();
 			return true; // success!
 		}
 	}

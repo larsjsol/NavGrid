@@ -101,6 +101,9 @@ public:
 	* FromPos - the previous position of the entering pawn
 	* OutSpline - the spline to add the points to
 	* EndTile - true if this is the last tile in the path
+	*
+	* The caller is responsible for calling UpdateSpline() (i.e. this function should call
+	* AddSplinePoint() with bUpdateSpline = false)
 	*/
 	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile) const;
 	/* Return a suitable upvector for a splinemesh moving across this tile */
