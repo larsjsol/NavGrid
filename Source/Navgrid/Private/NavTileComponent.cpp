@@ -62,7 +62,7 @@ void UNavTileComponent::SetPawnLocationOffset(const FVector &Offset)
 void UNavTileComponent::SetGrid(ANavGrid * InGrid)
 {
 	Grid = InGrid;
-	SetCollisionResponseToChannel(Grid->ECC_NavGridWalkable, ECollisionResponse::ECR_Block); // So we can find the floor with a line trace
+	SetCollisionResponseToChannel(Grid->ECC_NavGridWalkable, ECollisionResponse::ECR_Overlap); // So we can find the floor with a line trace
 }
 
 ANavGrid * UNavTileComponent::GetGrid() const

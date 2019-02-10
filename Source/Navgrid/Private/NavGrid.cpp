@@ -145,13 +145,20 @@ UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation, bool FindFloo
 
 UNavTileComponent *ANavGrid::LineTraceTile(const FVector &Start, const FVector &End)
 {
-	FHitResult HitResult;
+	TArray<FHitResult> HitResults;
 	FCollisionQueryParams CQP;
 	CQP.TraceTag = "NavGridTile";
 
-	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_NavGridWalkable, CQP);
-	UPrimitiveComponent *Comp = HitResult.GetComponent();
-	return Cast<UNavTileComponent>(Comp);
+	GetWorld()->LineTraceMultiByChannel(HitResults, Start, End, ECC_NavGridWalkable, CQP);
+	if (HitResults.Num())
+	{
+		UPrimitiveComponent *Comp = HitResults[0].GetComponent();
+		return Cast<UNavTileComponent>(Comp);
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 void ANavGrid::TileClicked(const UNavTileComponent *Tile)
