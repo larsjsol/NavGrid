@@ -79,11 +79,13 @@ void ANavGridPC::SetTurnManager(ATurnManager * InTurnManager)
 	// unregister any delegates from the previous manager
 	if (TurnManager)
 	{
+		TurnManager->OnRoundStart.RemoveDynamic(this, &ANavGridPC::OnRoundStart);
 		TurnManager->OnTurnStart.RemoveDynamic(this, &ANavGridPC::OnTurnStart);
 		TurnManager->OnTurnEnd.RemoveDynamic(this, &ANavGridPC::OnTurnEnd);
 	}
 
 	TurnManager = InTurnManager;
+	TurnManager->OnRoundStart.AddDynamic(this, &ANavGridPC::OnRoundStart);
 	TurnManager->OnTurnStart.AddDynamic(this, &ANavGridPC::OnTurnStart);
 	TurnManager->OnTurnEnd.AddDynamic(this, &ANavGridPC::OnTurnEnd);
 }

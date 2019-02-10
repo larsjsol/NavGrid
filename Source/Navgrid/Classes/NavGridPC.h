@@ -30,6 +30,9 @@ public:
 	UFUNCTION()
 	virtual void OnEndTileCursorOver(const UNavTileComponent *Tile);
 
+	/* Called when a new round starts*/
+	UFUNCTION()
+	virtual void OnRoundStart() {};
 	/* Called when a new turn starts*/
 	UFUNCTION()
 	virtual void OnTurnStart(UTurnComponent *Component);
