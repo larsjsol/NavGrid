@@ -165,7 +165,8 @@ bool AGridPawn::CanBeSelected()
 
 bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
 {
-	if (Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
+	if (MovementComponent->GetTile() != &Tile &&
+		Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
 	{
 		TArray<UNavTileComponent *> InRange;
 		Grid->GetTilesInRange(this, true, InRange);
