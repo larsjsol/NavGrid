@@ -72,15 +72,25 @@ public:
 	bool SnapToGrid = true;
 
 	/* Callend on round start */
+	UFUNCTION()
 	virtual void OnRoundStart() {}
-	/* Called on turn start */
+	/* Called on turn start for any component */
+	UFUNCTION()
+	virtual void OnAnyTurnStart(UTurnComponent *InTurnComponent);
+	/* Called on turn start for this pawn */
 	virtual void OnTurnStart();
-	/* Called on turn end */
+	/* Called on turn end for any component */
+	UFUNCTION()
+	virtual void OnAnyTurnEnd(UTurnComponent *InTurnComponent);
+	/* Called on turn end for this pawn */
 	virtual void OnTurnEnd();
 	/* Called when done moving */
 	virtual void OnMoveEnd();
-	/* Called when this pawn is ready for player input */
-	virtual void OnPawnReady() {};
+	/* Called when any component owner is ready for player or ai input */
+	UFUNCTION()
+	virtual void OnAnyPawnReadyForInput(UTurnComponent *InTurnComponent);
+	/* Called when this pawn is ready for player or ai input */
+	virtual void OnPawnReadyForInput() {}
 
 	/* override this class and implement your own AI here. The default implementation just ends the turn */
 	virtual void PlayAITurn();

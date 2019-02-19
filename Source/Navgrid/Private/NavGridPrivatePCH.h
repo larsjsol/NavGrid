@@ -10,7 +10,6 @@
 #include "../Classes/GridMovementComponent.h"
 #include "../Classes/TurnComponent.h"
 #include "../Classes/TurnManager.h"
-#include "../Classes/TeamTurnManager.h"
 #include "../Classes/NavTileActor.h"
 #include "../Classes/NavLadderActor.h"
 #include "../Classes/NavGridGameMode.h"

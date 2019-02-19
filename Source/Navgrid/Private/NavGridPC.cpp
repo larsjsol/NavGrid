@@ -17,7 +17,7 @@ void ANavGridPC::BeginPlay()
 {
 	// grab turn manager and grid from the game state
 	auto *State = GetWorld()->GetGameState<ANavGridGameState>();
-	SetTurnManager(State->GetTurnManager(FGenericTeamId()));
+	SetTurnManager(State->GetTurnManager());
 	SetGrid(State->Grid);
 }
 
@@ -63,8 +63,10 @@ void ANavGridPC::OnEndTileCursorOver(const UNavTileComponent *Tile)
 
 void ANavGridPC::OnTurnStart(UTurnComponent *Component)
 {
-	GridPawn = Cast<AGridPawn>(Component->GetOwner());
-	check(GridPawn);
+	if (Component->GetOwner()->IsA<AGridPawn>())
+	{
+		GridPawn = Cast<AGridPawn>(Component->GetOwner());
+	}
 }
 
 void ANavGridPC::OnTurnEnd(UTurnComponent * Component)
@@ -79,15 +81,15 @@ void ANavGridPC::SetTurnManager(ATurnManager * InTurnManager)
 	// unregister any delegates from the previous manager
 	if (TurnManager)
 	{
-		TurnManager->OnRoundStart.RemoveDynamic(this, &ANavGridPC::OnRoundStart);
-		TurnManager->OnTurnStart.RemoveDynamic(this, &ANavGridPC::OnTurnStart);
-		TurnManager->OnTurnEnd.RemoveDynamic(this, &ANavGridPC::OnTurnEnd);
+		TurnManager->OnRoundStart().RemoveDynamic(this, &ANavGridPC::OnRoundStart);
+		TurnManager->OnTurnStart().RemoveDynamic(this, &ANavGridPC::OnTurnStart);
+		TurnManager->OnTurnEnd().RemoveDynamic(this, &ANavGridPC::OnTurnEnd);
 	}
 
 	TurnManager = InTurnManager;
-	TurnManager->OnRoundStart.AddDynamic(this, &ANavGridPC::OnRoundStart);
-	TurnManager->OnTurnStart.AddDynamic(this, &ANavGridPC::OnTurnStart);
-	TurnManager->OnTurnEnd.AddDynamic(this, &ANavGridPC::OnTurnEnd);
+	TurnManager->OnRoundStart().AddDynamic(this, &ANavGridPC::OnRoundStart);
+	TurnManager->OnTurnStart().AddDynamic(this, &ANavGridPC::OnTurnStart);
+	TurnManager->OnTurnEnd().AddDynamic(this, &ANavGridPC::OnTurnEnd);
 }
 
 void ANavGridPC::SetGrid(ANavGrid * InGrid)

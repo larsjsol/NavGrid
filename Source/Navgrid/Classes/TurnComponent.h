@@ -4,9 +4,8 @@
 
 #include "Components/ActorComponent.h"
 #include "TurnManager.h"
-#include "TurnComponent.generated.h"
 
-class APlayerController;
+#include "TurnComponent.generated.h"
 
 /**
 * Actors with a turn component can be managed by a turn manager
@@ -17,67 +16,36 @@ class NAVGRID_API UTurnComponent : public UActorComponent
 	GENERATED_BODY()
 public:
 	UTurnComponent();
+	virtual void BeginPlay() override;
 
-	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
-
-	//Event delegates
-	DECLARE_MULTICAST_DELEGATE(FOnTurnStart);
-	DECLARE_MULTICAST_DELEGATE(FOnTurnEnd);
-	DECLARE_MULTICAST_DELEGATE(FOnRoundStart);
-	DECLARE_MULTICAST_DELEGATE(FOnPawnReady);
-
-	/* The Owners turn have started */
-	FOnTurnStart& OnTurnStart() { return OnTurnStartDelegate; }
-	/* The Owners turn have ended */
-	FOnTurnEnd& OnTurnEnd() { return OnTurnEndDelegate; }
-	/* All actors managed by the turn manager have had their turn and a new round begins */
-	FOnRoundStart& OnRoundStart() { return OnRoundStartDelegate; }
-	/* The pawn is ready for player input */
-	FOnPawnReady& OnPawnReady() { return OnPawnReadyDelegate; }
-
-	void SetTurnManager(ATurnManager *InTurnManager);
+	ATurnManager *GetTurnManager() { return TurnManager; }
 protected:
 	UPROPERTY()
 	ATurnManager *TurnManager;
 public:
 	/* The number of actions this pawn can perform in a single round */
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Turn Component")
-	int32 ActionPoints;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Turn Component")
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite)
+	int32 StartingActionPoints;
+	/* Remaining actions that this pawn can perform this round */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	int32 RemainingActionPoints;
 
 	/* Tell the manager that we are done acting for this round*/
-	void EndTurn();
-	/* Tell the manager that the turn should pass to the next component*/
-	void StartTurnNext();
+	void EndTurn() { TurnManager->EndTurn(this); }
+	void EndTeamTurn() { TurnManager->EndTeamTurn(FGenericTeamId::GetTeamIdentifier(GetOwner())); }
 	/* request the turn manager to start a turn for this component */
 	bool RequestStartTurn() { return TurnManager->RequestStartTurn(this); }
-	/* Callend when a turn starts */
-	void TurnStart();
-	/* Called when a turn ends */
-	void TurnEnd();
-	/* Called when a new round starts (i.e. everyone has acted and its time to start over) */
-	void RoundStart();
-	/* Broadcast that this component is ready for player input */
-	void BroadcastReadyForPlayerInput();
+	/* request that the turn manager starts the turn for the next component on our team */
+	bool RequestStartNextComponent() { return TurnManager->RequestStartNextComponent(this); }
 
-	/* Remove the entry for this component in the turn manager */
-	void UnRegister();
+	/* Used be the owning actor to notify that it is ready to receive input from a player or ai */
+	void OwnerReadyForInput() { TurnManager->OnReadyForInput().Broadcast(this); }
 
 	/* is it this components turn? */
-	UFUNCTION(BLueprintPure, Category = "Turn Component")
-	inline bool MyTurn() { return bMyTurn; }
+	UFUNCTION(BlueprintPure)
+	bool MyTurn() { return IsValid(TurnManager) && TurnManager->GetCurrentComponent() == this; }
 
 	/* which team this component is a part of */
-	UFUNCTION(BLueprintPure, Category = "Turn Component")
+	UFUNCTION(BlueprintPure)
 	FGenericTeamId TeamId() const { return FGenericTeamId::GetTeamIdentifier(GetOwner()); }
-
-protected:
-	bool bMyTurn;
-
-private:
-	FOnTurnStart OnTurnStartDelegate;
-	FOnTurnEnd OnTurnEndDelegate;
-	FOnRoundStart OnRoundStartDelegate;
-	FOnPawnReady OnPawnReadyDelegate;
 };

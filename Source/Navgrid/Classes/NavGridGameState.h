@@ -31,9 +31,9 @@ public:
 	ANavGrid *Grid;
 
 	UFUNCTION(BlueprintCallable, Category = "NavGrid")
-	virtual ATurnManager *GetTurnManager(const FGenericTeamId& TeamID) const { return TurnManager->GetTurnManager(TeamID); }
+	virtual ATurnManager *GetTurnManager() const { return TurnManager; }
 	template <class T>
-	T *GetTurnManager(const FGenericTeamId& TeamID) const { return Cast<T>(GetTurnManager(TeamID)); }
+	T *GetTurnManager() const { return Cast<T>(GetTurnManager()); }
 
 protected:
 	UPROPERTY(BlueprintReadWrite, VisibleAnyWhere, Category = "NavGrid")

@@ -1,63 +1,172 @@
 #include "NavGridPrivatePCH.h"
 
+bool FTeam::HasComponentWaitingForTurn()
+{
+	for (UTurnComponent *Comp : Components)
+	{
+		if (IsValid(Comp) && Comp->RemainingActionPoints > 0)
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
 ATurnManager::ATurnManager()
-	:Super()
+	:Super(),
+	TurnDelay(0.5),
+	Round(0),
+	CurrentTeam(0),
+	CurrentComponent(0)
 {
-	TurnDelay = 0.5;
 }
 
 void ATurnManager::BeginPlay()
 {
-	StartFirstRound();
+	Super::BeginPlay();
+	OnRoundStart().Broadcast();
+	GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurn, FMath::Max(0.01f, TurnDelay));
 }
 
 void ATurnManager::Register(UTurnComponent *TurnComponent)
 {
-	TurnComponents.AddUnique(TurnComponent);
-	TurnComponent->SetTurnManager(this);
-}
-
-void ATurnManager::UnRegister(UTurnComponent *TurnComponent)
-{
-	TurnComponents.Remove(TurnComponent);
-	TurnComponent->SetTurnManager(NULL);
-}
-
-void ATurnManager::EndTurn(UTurnComponent *Ender)
-{
-	check(Ender == TurnComponents[ComponentIndex])
-	if (Ender->RemainingActionPoints > 0)
+	check(IsValid(TurnComponent));
+	if (!Teams.Contains(TurnComponent->TeamId()))
 	{
-		// Ender get to keep going if it still can act this round
-		ChangeCurrent(ComponentIndex);
+		Teams.Add(TurnComponent->TeamId(), FTeam());
+	}
+	Teams[TurnComponent->TeamId()].Components.AddUnique(TurnComponent);
+}
+
+void ATurnManager::StartTurnForNextComponent()
+{
+	check(Teams.Num() > 0);
+
+	TArray<FGenericTeamId> TeamIdArray;
+	Teams.GenerateKeyArray(TeamIdArray);
+
+	bool bStartNewRound = false;
+
+	// first find the correct team
+	if (!Teams.Contains(CurrentTeam) || !Teams[CurrentTeam].HasComponentWaitingForTurn())
+	{
+		bStartNewRound = true; // start a new round if no teams have members that are waiting for their turn
+		for (FGenericTeamId &TeamId : TeamIdArray)
+		{
+			if (Teams[TeamId].HasComponentWaitingForTurn())
+			{
+				CurrentTeam = TeamId;
+				bStartNewRound = false;
+				break;
+			}
+		}
+	}
+
+	if (bStartNewRound)
+	{
+		OnRoundEnd().Broadcast();
+		for (FGenericTeamId &TeamId : TeamIdArray)
+		{
+			for (UTurnComponent *Comp : Teams[TeamId].Components)
+			{
+				Comp->RemainingActionPoints = Comp->StartingActionPoints;
+			}
+		}
+		OnRoundStart().Broadcast();
+		CurrentComponent = 0;
+		CurrentTeam = TeamIdArray[0];
+		Round++;
 	}
 	else
 	{
-		StartTurnNext();
+		// go through the list of components, starting with the one follonwing the current component
+		for (int32 Idx = 1; Idx <= Teams[CurrentTeam].Components.Num(); Idx++)
+		{
+			int32 CandidateComponentIndex = (CurrentComponent + Idx) % Teams[CurrentTeam].Components.Num();
+			UTurnComponent *Comp = Teams[CurrentTeam].Components[CandidateComponentIndex];
+			if (IsValid(Comp) && Comp->RemainingActionPoints > 0)
+			{
+				CurrentComponent = CandidateComponentIndex;
+				break;
+			}
+		}
 	}
+
+	GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurn, FMath::Max(0.01f, TurnDelay));
 }
 
-void ATurnManager::StartTurnNext()
+void ATurnManager::StartTurn()
 {
-	int32 NewIndex = GetNextIndexThatCanAct();
-	if (NewIndex >= 0)
+	if (Teams[CurrentTeam].HasComponentWaitingForTurn() &&
+		IsValid(Teams[CurrentTeam].Components[CurrentComponent]) &&
+		Teams[CurrentTeam].Components[CurrentComponent]->RemainingActionPoints > 0)
 	{
-		ChangeCurrent(NewIndex);
+		OnTurnStart().Broadcast(Teams[CurrentTeam].Components[CurrentComponent]);
 	}
 	else
 	{
-		EndRound();
+		StartTurnForNextComponent();
 	}
 }
 
-bool ATurnManager::RequestStartTurn(UTurnComponent * TurnComponent)
+bool ATurnManager::EndTurn(UTurnComponent *Ender)
 {
-	int32 Index;
-	bool Found = TurnComponents.Find(TurnComponent, Index);
-	if (Found)
+	if (Ender == Teams[CurrentTeam].Components[CurrentComponent])
 	{
-		ChangeCurrent(Index);
+		OnTurnEnd().Broadcast(Ender);
+		GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurn, FMath::Max(0.01f, TurnDelay));
+		return true;
+	}
+	else
+	{
+		UE_LOG(NavGrid, Error, TEXT("EndTurn(%s) was called out of turn"), *Ender->GetName());
+		return false;
+	}
+}
+
+bool ATurnManager::EndTeamTurn(FGenericTeamId InTeamId)
+{
+	if (InTeamId == CurrentTeam)
+	{
+		for (UTurnComponent *Comp : Teams[CurrentTeam].Components)
+		{
+			if (Comp->RemainingActionPoints > 0)
+			{
+				Comp->RemainingActionPoints = 0;
+				OnTurnEnd().Broadcast(Comp);
+			}
+		}
+		GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurn, FMath::Max(0.01f, TurnDelay));
+		return true;
+	}
+	else
+	{
+		UE_LOG(NavGrid, Error, TEXT("EndTurn(%i) was called out of turn"), InTeamId.GetId());
+		return false;
+	}
+}
+
+bool ATurnManager::RequestStartTurn(UTurnComponent * CallingComponent)
+{
+	if (CallingComponent->StartingActionPoints > 0)
+	{
+		OnTurnEnd().Broadcast(Teams[CurrentTeam].Components[CurrentComponent]);
+		CurrentTeam = CallingComponent->TeamId();
+		CurrentComponent = Teams[CurrentTeam].Components.Find(CallingComponent);
+		GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurn, FMath::Max(0.01f, TurnDelay));
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool ATurnManager::RequestStartNextComponent(UTurnComponent *CallingComponent)
+{
+	if (CallingComponent->TeamId() == CurrentTeam && Teams[CurrentTeam].HasComponentWaitingForTurn())
+	{
+		StartTurnForNextComponent();
 		return true;
 	}
 	else
@@ -68,73 +177,12 @@ bool ATurnManager::RequestStartTurn(UTurnComponent * TurnComponent)
 
 UTurnComponent *ATurnManager::GetCurrentComponent()
 {
-	return TurnComponents[ComponentIndex];
-}
-
-void ATurnManager::StartFirstRound()
-{
-	check(Round == 0);
-
-	// order components by their team id. Lowest team goes first
-	TurnComponents.Sort([](const UTurnComponent& LHS, const UTurnComponent& RHS) {
-		return LHS.TeamId() > RHS.TeamId();
-	});
-	StartNewRound();
-}
-
-void ATurnManager::EndRound()
-{
-	if (ComponentIndex >= 0 && ComponentIndex < TurnComponents.Num())
+	if (Teams.Contains(CurrentTeam) && Teams[CurrentTeam].Components.Num() > CurrentComponent)
 	{
-		TurnComponents[ComponentIndex]->TurnEnd();
-		OnTurnEnd.Broadcast(TurnComponents[ComponentIndex]);
+		return Teams[CurrentTeam].Components[CurrentComponent];
 	}
-	OnRoundEnd.Broadcast();
-	StartNewRound();
-}
-
-void ATurnManager::ChangeCurrent(int32 NewIndex)
-{
-	check(NewIndex >= 0 && NewIndex < TurnComponents.Num());
-	TurnComponents[ComponentIndex]->TurnEnd();
-	OnTurnEnd.Broadcast(TurnComponents[ComponentIndex]);
-	ComponentIndex = NewIndex;
-	GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurnCurrent, FMath::Max(0.01f, TurnDelay));
-}
-
-int32 ATurnManager::GetNextIndexThatCanAct()
-{
-	// start searching from the next component in the list
-	for (int32 Count = 1; Count <= TurnComponents.Num(); Count++)
+	else
 	{
-		int32 Candidate = (ComponentIndex + Count) % TurnComponents.Num();
-		if (TurnComponents[Candidate]->RemainingActionPoints > 0)
-		{
-			return Candidate;
-		}
+		return nullptr;
 	}
-	return -1;
-}
-
-void ATurnManager::StartNewRound()
-{
-	Round++;
-	for (UTurnComponent *TC : TurnComponents)
-	{
-		TC->RoundStart();
-	}
-	OnRoundStart.Broadcast();
-	ComponentIndex = 0; // start searching for eligible components from the start of the array
-	int32 First = GetNextIndexThatCanAct();
-	if (First >= 0)
-	{
-		ComponentIndex = First;
-		GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurnCurrent, FMath::Max(0.01f, TurnDelay));
-	}
-}
-
-void ATurnManager::StartTurnCurrent()
-{
-	TurnComponents[ComponentIndex]->TurnStart();
-	OnTurnStart.Broadcast(TurnComponents[ComponentIndex]);
 }

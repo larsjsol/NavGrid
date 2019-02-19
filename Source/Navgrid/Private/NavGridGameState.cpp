@@ -6,11 +6,6 @@ void ANavGridGameState::HandleBeginPlay()
 {
 	//spawn turn manager
 	TurnManager = SpawnTurnManager();
-	// register every pawn in the world
-	for (TActorIterator<AGridPawn> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	{
-		TurnManager->Register(ActorItr->TurnComponent);
-	}
 
 	// if a navgrid exists in the game world, grab it
 	TActorIterator<ANavGrid> GridItr(GetWorld());

@@ -11,9 +11,20 @@ class UTurnComponent;
 //Declare delegates
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnStart, UTurnComponent *, TurnComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnEnd, UTurnComponent *, TurnComponent);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReadyForPlayerInput, UTurnComponent *, TurnComponent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReadyForInput, UTurnComponent *, TurnComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundStart);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundEnd);
+
+USTRUCT()
+struct FTeam
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TArray<UTurnComponent *> Components;
+
+	bool HasComponentWaitingForTurn();
+};
 
 /**
 * Coordinates a set of turn components.
@@ -31,50 +42,52 @@ public:
 	virtual void BeginPlay() override;
 
 	/* Add a turn component to be managed */
-	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
-	virtual void Register(UTurnComponent *TurnComponent);
-	/* remove a component from this manager */
-	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
-	virtual void UnRegister(UTurnComponent *TurnComponent);
+	UFUNCTION(BlueprintCallable)
+	void Register(UTurnComponent *TurnComponent);
+
+protected:
+	void StartTurnForNextComponent();
+	void StartTurn();
+
+public:
 	/* End the turn for the current turn component */
-	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
-	virtual void EndTurn(UTurnComponent *Ender);
-	/* Move on to the next component in line */
-	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
-	virtual void StartTurnNext();
+	UFUNCTION(BlueprintCallable)
+	bool EndTurn(UTurnComponent *Ender);
+	/* End the turn for all components of the current team */
+	UFUNCTION(BlueprintCallable)
+	bool EndTeamTurn(FGenericTeamId InTeamId);
 	/* request to immediatly start the turn for the supplied component. Return false if the request is denied */
-	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
-	virtual bool RequestStartTurn(UTurnComponent *TurnComponent);
+	UFUNCTION(BlueprintCallable)
+	bool RequestStartTurn(UTurnComponent *CallingComponent);
+	UFUNCTION(BlueprintCallable)
+	bool RequestStartNextComponent(UTurnComponent *CallingComponent);
 	/* Return the component whos turn it is */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Turn Manager")
+	UFUNCTION(BlueprintPure)
 	UTurnComponent *GetCurrentComponent();
-	/* Start the first round */
-	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
-	virtual void StartFirstRound();
-	/* End the current round */
-	UFUNCTION(BlueprintCallable, Category = "Turn Manager")
-	virtual void EndRound();
+	UFUNCTION(BlueprintPure)
+	FGenericTeamId GetCurrentTeam() const { return CurrentTeam; }
 
-	/* Get the turn manager for a given team, the default implementation just returns this */
-	UFUNCTION(BlueprintPure, Category = "Turn Manager")
-	virtual ATurnManager *GetTurnManager(const FGenericTeamId& TeamID) { return this; }
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Turn Manager")
+	UFUNCTION(BlueprintPure)
 	int32 GetRound() const { return Round; }
 
-	UFUNCTION(BlueprintPure, Category = "Turn Manager")
-	virtual bool MyTurn() { return true; }
+private:
+	UPROPERTY(BlueprintAssignable)
+	FOnTurnStart OnTurnStartDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnTurnEnd OnTurnEndDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnReadyForInput OnReadyForInputDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnRoundStart OnRoundStartDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnRoundEnd OnRoundEndDelegate;
 
-	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
-	FOnTurnStart OnTurnStart;
-	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
-	FOnTurnEnd OnTurnEnd;
-	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
-	FOnReadyForPlayerInput OnReadyForPlayerInput;
-	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
-	FOnRoundStart OnRoundStart;
-	UPROPERTY(BlueprintAssignable, Category = "Turn Manager")
-	FOnRoundStart OnRoundEnd;
+public:
+	virtual FOnTurnStart& OnTurnStart() { return OnTurnStartDelegate; }
+	virtual FOnTurnEnd& OnTurnEnd() { return OnTurnEndDelegate; }
+	virtual FOnReadyForInput& OnReadyForInput() { return OnReadyForInputDelegate; }
+	virtual FOnRoundStart& OnRoundStart() { return OnRoundStartDelegate; }
+	virtual FOnRoundEnd& OnRoundEnd() { return OnRoundEndDelegate; }
 
 	/* wait for this long between each turn */
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Turn Manager")
@@ -82,17 +95,10 @@ public:
 
 protected:
 	UPROPERTY()
-	TArray<UTurnComponent *> TurnComponents;
-	UPROPERTY(VisibleAnyWhere, Category = "Turn Manager", meta = (AllowPrivateAccess = "true"))
-	int32 ComponentIndex = 0;
-	UPROPERTY(VisibleAnyWhere, Category = "Turn Manager", meta = (AllowPrivateAccess = "true"))
-	int32 Round = 0;
-	void ChangeCurrent(int32 NewIndex);
-	// returns -1 if no components can act this round
-	int32 GetNextIndexThatCanAct();
-	void StartNewRound();
+	TMap<FGenericTeamId, FTeam> Teams;
+	int32 CurrentComponent;
+	FGenericTeamId CurrentTeam;
+	int32 Round;
 
-	// start the turn for the current component
-	void StartTurnCurrent();
 	FTimerHandle TurnDelayHandle;
 };

@@ -47,16 +47,11 @@ void AGridPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TurnComponent->OnRoundStart().AddUObject(this, &AGridPawn::OnRoundStart);
-	TurnComponent->OnTurnStart().AddUObject(this, &AGridPawn::OnTurnStart);
-	// manually fire OnRoundStart() and OnTurnStart() if its our turn as that means we have missed the event
-	if (TurnComponent->MyTurn())
-	{
-		OnRoundStart();
-		OnTurnStart();
-	}
-	TurnComponent->OnTurnEnd().AddUObject(this, &AGridPawn::OnTurnEnd);
-	TurnComponent->OnPawnReady().AddUObject(this, &AGridPawn::OnPawnReady);
+	ATurnManager *TurnManager = GetWorld()->GetGameState<ANavGridGameState>()->GetTurnManager();
+	TurnManager->OnRoundStart().AddDynamic(this, &AGridPawn::OnRoundStart);
+	TurnManager->OnTurnStart().AddDynamic(this, &AGridPawn::OnAnyTurnStart);
+	TurnManager->OnTurnEnd().AddDynamic(this, &AGridPawn::OnAnyTurnEnd);
+	TurnManager->OnReadyForInput().AddDynamic(this, &AGridPawn::OnAnyPawnReadyForInput);
 
 	auto *State = GetWorld()->GetGameState<ANavGridGameState>();
 	check(State && State->Grid);
@@ -69,18 +64,21 @@ void AGridPawn::BeginPlay()
 void AGridPawn::SetGenericTeamId(const FGenericTeamId & InTeamId)
 {
 	ANavGridGameState *State = GetWorld()->GetGameState<ANavGridGameState>();
-	ATurnManager *OldTM = State->GetTurnManager(TeamId);
-	if (IsValid(OldTM))
-	{
-		OldTM->UnRegister(TurnComponent);
-	}
-	ATurnManager *NewTM = State->GetTurnManager(InTeamId);
+	ATurnManager *NewTM = State->GetTurnManager();
 	if (IsValid(NewTM))
 	{
 		NewTM->Register(TurnComponent);
 	}
 
 	TeamId = InTeamId;
+}
+
+void AGridPawn::OnAnyTurnStart(UTurnComponent *InTurnComponent)
+{
+	if (InTurnComponent == TurnComponent)
+	{
+		OnTurnStart();
+	}
 }
 
 void AGridPawn::OnTurnStart()
@@ -97,13 +95,18 @@ void AGridPawn::OnTurnStart()
 
 	SelectedHighlight->SetVisibility(true);
 
-	if (bHumanControlled)
-	{
-		TurnComponent->BroadcastReadyForPlayerInput();
-	}
-	else
+	TurnComponent->OwnerReadyForInput();
+	if (!bHumanControlled)
 	{
 		PlayAITurn();
+	}
+}
+
+void AGridPawn::OnAnyTurnEnd(UTurnComponent *InTurnComponent)
+{
+	if (InTurnComponent == TurnComponent)
+	{
+		OnTurnEnd();
 	}
 }
 
@@ -118,6 +121,14 @@ void AGridPawn::OnMoveEnd()
 	//Moving costs one action point
 	TurnComponent->RemainingActionPoints--;
 	TurnComponent->EndTurn();
+}
+
+void AGridPawn::OnAnyPawnReadyForInput(UTurnComponent * InTurnComponent)
+{
+	if (InTurnComponent == TurnComponent)
+	{
+		OnPawnReadyForInput();
+	}
 }
 
 void AGridPawn::PlayAITurn()
@@ -144,7 +155,7 @@ EGridPawnState AGridPawn::GetState() const
 }
 
 /** Can this pawn start its turn right now?
-  *  1) It's turn manager must be in its turn
+  *  1) It must be the pawns teams turn
   *  2) It must be in the WaitingForTurn state
   *  3) The pawn currently in its turn must be idle
 */
@@ -153,8 +164,8 @@ bool AGridPawn::CanBeSelected()
 	ANavGridGameState *GameState = Cast<ANavGridGameState>(GetWorld()->GetGameState());
 	if (GameState)
 	{
-		ATurnManager *TurnManager = GameState->GetTurnManager(TeamId);
-		if (TurnManager && TurnManager->MyTurn() && GetState() == EGridPawnState::WaitingForTurn)
+		ATurnManager *TurnManager = GameState->GetTurnManager();
+		if (TurnManager && TurnManager->GetCurrentTeam() == TeamId && GetState() == EGridPawnState::WaitingForTurn)
 		{
 			AGridPawn *CurrentPawn = Cast<AGridPawn>(TurnManager->GetCurrentComponent()->GetOwner());
 			return CurrentPawn->GetState() != EGridPawnState::Busy;

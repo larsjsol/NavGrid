@@ -3,63 +3,16 @@
 #include "NavGridPrivatePCH.h"
 
 UTurnComponent::UTurnComponent()
-	:Super()
+	:Super(),
+	StartingActionPoints(1),
+	RemainingActionPoints(1),
+	TurnManager(nullptr)
 {
-	ActionPoints = 1;
-	bMyTurn = false;
 }
 
-void UTurnComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+void UTurnComponent::BeginPlay()
 {
-	Super::OnComponentDestroyed(bDestroyingHierarchy);
-	UnRegister();
-}
-
-void UTurnComponent::SetTurnManager(ATurnManager *InTurnManager)
-{
-	TurnManager = InTurnManager;
-}
-
-void UTurnComponent::EndTurn()
-{
-	check(TurnManager);
-	TurnManager->EndTurn(this);
-}
-
-void UTurnComponent::StartTurnNext()
-{
-	check(TurnManager);
-	TurnManager->StartTurnNext();
-}
-
-void UTurnComponent::TurnStart()
-{
-	bMyTurn = true;
-	OnTurnStart().Broadcast();
-}
-
-void UTurnComponent::TurnEnd()
-{
-	bMyTurn = false;
-	OnTurnEnd().Broadcast();
-}
-
-void UTurnComponent::RoundStart()
-{
-	RemainingActionPoints = ActionPoints;
-	OnRoundStart().Broadcast();
-}
-
-void UTurnComponent::BroadcastReadyForPlayerInput()
-{
-	TurnManager->OnReadyForPlayerInput.Broadcast(this);
-	OnPawnReady().Broadcast();
-}
-
-void UTurnComponent::UnRegister()
-{
-	if (TurnManager)
-	{
-		TurnManager->UnRegister(this);
-	}
+	Super::BeginPlay();
+	TurnManager = GetWorld()->GetGameState<ANavGridGameState>()->GetTurnManager();
+	TurnManager->Register(this);
 }
