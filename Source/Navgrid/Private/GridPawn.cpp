@@ -67,7 +67,7 @@ void AGridPawn::SetGenericTeamId(const FGenericTeamId & InTeamId)
 	ATurnManager *NewTM = State->GetTurnManager();
 	if (IsValid(NewTM))
 	{
-		NewTM->Register(TurnComponent);
+		NewTM->RegisterTurnComponent(TurnComponent);
 	}
 
 	TeamId = InTeamId;

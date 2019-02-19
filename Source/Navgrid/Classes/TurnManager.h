@@ -43,7 +43,9 @@ public:
 
 	/* Add a turn component to be managed */
 	UFUNCTION(BlueprintCallable)
-	void Register(UTurnComponent *TurnComponent);
+	void RegisterTurnComponent(UTurnComponent *TurnComponent);
+	UFUNCTION(BlueprintCallable)
+	void UnregisterTurnComponent(UTurnComponent *TurnComponent);
 
 protected:
 	void StartTurnForNextComponent();

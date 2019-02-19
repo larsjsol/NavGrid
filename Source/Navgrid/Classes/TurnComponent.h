@@ -17,6 +17,7 @@ class NAVGRID_API UTurnComponent : public UActorComponent
 public:
 	UTurnComponent();
 	virtual void BeginPlay() override;
+	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
 	ATurnManager *GetTurnManager() { return TurnManager; }
 protected:

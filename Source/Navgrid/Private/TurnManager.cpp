@@ -28,7 +28,7 @@ void ATurnManager::BeginPlay()
 	GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurn, FMath::Max(0.01f, TurnDelay));
 }
 
-void ATurnManager::Register(UTurnComponent *TurnComponent)
+void ATurnManager::RegisterTurnComponent(UTurnComponent *TurnComponent)
 {
 	check(IsValid(TurnComponent));
 	if (!Teams.Contains(TurnComponent->TeamId()))
@@ -36,6 +36,19 @@ void ATurnManager::Register(UTurnComponent *TurnComponent)
 		Teams.Add(TurnComponent->TeamId(), FTeam());
 	}
 	Teams[TurnComponent->TeamId()].Components.AddUnique(TurnComponent);
+}
+
+void ATurnManager::UnregisterTurnComponent(UTurnComponent * TurnComponent)
+{
+	if (Teams.Contains(TurnComponent->TeamId()))
+	{
+		FTeam &Team = Teams[TurnComponent->TeamId()];
+		Team.Components.Remove(TurnComponent);
+		if (Team.Components.Num() == 0)
+		{
+			Teams.Remove(TurnComponent->TeamId());
+		}
+	}
 }
 
 void ATurnManager::StartTurnForNextComponent()

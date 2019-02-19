@@ -14,5 +14,14 @@ void UTurnComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	TurnManager = GetWorld()->GetGameState<ANavGridGameState>()->GetTurnManager();
-	TurnManager->Register(this);
+	TurnManager->RegisterTurnComponent(this);
+}
+
+void UTurnComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+{
+	Super::OnComponentDestroyed(bDestroyingHierarchy);
+	if (IsValid(TurnManager))
+	{
+		TurnManager->UnregisterTurnComponent(this);
+	}
 }
