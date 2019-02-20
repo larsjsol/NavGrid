@@ -15,7 +15,7 @@ bool FTeam::HasComponentWaitingForTurn()
 ATurnManager::ATurnManager()
 	:Super(),
 	TurnDelay(0.5),
-	Round(0),
+	Round(1),
 	CurrentTeam(0),
 	CurrentComponent(0)
 {
