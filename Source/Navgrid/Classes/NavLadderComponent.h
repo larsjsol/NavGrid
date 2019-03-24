@@ -13,8 +13,6 @@ public:
 	UNavLadderComponent(const FObjectInitializer &ObjectInitializer);
 	virtual void BeginPlay() override;
 
-	TArray<FVector> *GetContactPoints() override;
-
 	virtual FVector GetPawnLocation() const override;
 	virtual void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours) override;
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const override;
@@ -23,9 +21,12 @@ public:
 	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool LastTile) const override;
 
 	/* Helpers for determining walkable paths through this tile */
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") USceneComponent *BottomPathPoint;
-	UPROPERTY(BlueprintReadOnly, EditAnyWhere, Category = "Components") USceneComponent *TopPathPoint;
-	UPROPERTY(BlueprintReadWrite, Category = "Components") UArrowComponent *ArrowComponent;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere)
+	USceneComponent *BottomPathPoint;
+	UPROPERTY(BlueprintReadOnly, EditAnyWhere)
+	USceneComponent *TopPathPoint;
+	UPROPERTY(BlueprintReadWrite)
+	UArrowComponent *ArrowComponent;
 
 	virtual FVector GetSplineMeshUpVector() override;
 };

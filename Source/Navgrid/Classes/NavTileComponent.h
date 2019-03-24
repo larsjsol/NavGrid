@@ -27,9 +27,9 @@ public:
 	void SetGrid(ANavGrid *InGrid);
 	ANavGrid* GetGrid() const;
 
-	// USceneComponent interface
+	// UPrimitiveComponent interface
 	virtual void DestroyComponent(bool bPromoteChildren = false) override;
-	// USceneComponent interface
+	// UPrimitiveComponent interface end
 
 // Pathing
 	/* Cost of moving into this tile*/
@@ -45,14 +45,7 @@ public:
 	/* Reset variables used in pathfinding */
 	virtual void ResetPath();
 
-	/*
-		Nodes are considered neighbours if at least one
-		of their contact points are close to each other
-	*/
-	virtual TArray<FVector> *GetContactPoints();
 protected:
-	TArray<FVector> ContactPoints;
-
 	UPROPERTY()
 	TArray<UNavTileComponent *> Neighbours;
 	void FindNeighbours();
@@ -63,6 +56,9 @@ public:
 	void AddNeighbour(UNavTileComponent *Neighbour) { Neighbours.AddUnique(Neighbour); }
 	/* Remove a til from the list of neighbouring tiles */
 	void RemoveNeighbour(UNavTileComponent *Neighbour) { Neighbours.Remove(Neighbour); }
+
+	/* Shape for checking if this tile is a neighbour */
+	virtual FCollisionShape GetNeighbourHoodShape();
 
 	/* is there anything blocking an actor from moving from FromPos to this tile? Uses the capsule for collision testing */
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const;

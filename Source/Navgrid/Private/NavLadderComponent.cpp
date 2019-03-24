@@ -25,19 +25,6 @@ void UNavLadderComponent::BeginPlay()
 	TopPathPoint->SetRelativeLocation(FVector(60, 0, BoxExtent.Z - 25));
 }
 
-TArray<FVector>* UNavLadderComponent::GetContactPoints()
-{
-	if (!ContactPoints.Num())
-	{
-		float ZExtent = GetScaledBoxExtent().Z;
-		FVector RelativeTop = GetComponentRotation().RotateVector(FVector(0, 0, ZExtent));
-		ContactPoints.Add(GetComponentLocation() + RelativeTop);
-		FVector RelativeBottom = GetComponentRotation().RotateVector(FVector(0, 0, -ZExtent));
-		ContactPoints.Add(GetComponentLocation() + RelativeBottom);
-	}
-	return &ContactPoints;
-}
-
 FVector UNavLadderComponent::GetPawnLocation() const
 {
 	return (BottomPathPoint->GetComponentLocation() + TopPathPoint->GetComponentLocation()) / 2;
@@ -79,7 +66,6 @@ bool UNavLadderComponent::LegalPositionAtEndOfTurn(float MaxWalkAngle, const TAr
 {
 	return false;
 }
-
 
 void UNavLadderComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool LastTile) const
 {

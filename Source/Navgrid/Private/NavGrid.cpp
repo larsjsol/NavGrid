@@ -33,9 +33,9 @@ ANavGrid::ANavGrid()
 		UE_LOG(NavGrid, Error, TEXT("Error loading %s"), HCRef);
 	}
 
-	AddHighlightType("Movable", TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Movable.NavGrid_Movable'"));
-	AddHighlightType("Dangerous", TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Dangerous.NavGrid_Dangerous'"));
-	AddHighlightType("Special", TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Special.NavGrid_Special'"));
+	AddHighlightType("Movable", TEXT("Material'/NavGrid/Materials/Movable_Mat.Movable_Mat'"));
+	AddHighlightType("Dangerous", TEXT("Material'/NavGrid/Materials/Dangerous_Mat.Dangerous_Mat'"));
+	AddHighlightType("Special", TEXT("Material'/NavGrid/Materials/Special_Mat.Special_Mat'"));
 
 	CurrentPawn = NULL;
 	CurrentTile = NULL;
@@ -66,11 +66,14 @@ UInstancedStaticMeshComponent * ANavGrid::GetHighlightComponent(FName Type)
 	if (!TileHighlights.Contains(Type) && TileHighLightPaths.Contains(Type))
 	{
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-		UStaticMesh *Mesh = LoadObject<UStaticMesh>(this, TileHighLightPaths[Type]);
+		UStaticMesh *Mesh = LoadObject<UStaticMesh>(this, TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_TileHighlight.NavGrid_TileHighlight'"));
 		check(Mesh);
+		UMaterial *Material = LoadObject<UMaterial>(this, TileHighLightPaths[Type]);
+		check(Material);
 		auto *Comp = NewObject<UInstancedStaticMeshComponent>(this);
 		Comp->SetupAttachment(GetRootComponent());
 		Comp->SetStaticMesh(Mesh);
+		Comp->SetMaterial(0, Material);
 		Comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		Comp->RegisterComponent();
 		TileHighlights.Add(Type, Comp);
@@ -181,7 +184,6 @@ void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 	QUICK_SCOPE_CYCLE_COUNTER(STAT_ANavGrid_CalculateTilesInRange);
 
 	check(Pawn);
-
 	ClearTiles();
 	UNavTileComponent *Current = Pawn->GetTile();
 	/* if we're not on the grid, the number of tiles in range is zero */
@@ -207,34 +209,17 @@ void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 
 			if (!N->Visited)
 			{
-				float TentativeDistance = N->Cost + Current->Distance;
-				if (TentativeDistance <= N->Distance)
+				float NewDistance = N->Cost + Current->Distance;
+				if (NewDistance < N->Distance)
 				{
-
-					//	Prioritize straight paths by using the world distance as a tiebreaker
-					//	when TentativeDistance is equal N->Dinstance
-					float OldDistance = std::numeric_limits<float>::infinity();
-					float NewDistance = 0;
-					if (TentativeDistance == N->Distance)
-					{
-						NewDistance = (Current->GetComponentLocation() - N->GetComponentLocation()).Size();
-						if (N->Backpointer)
-						{
-							OldDistance = (N->Backpointer->GetComponentLocation() - N->GetComponentLocation()).Size();
-						}
-					}
-
-					if (NewDistance < OldDistance) // Always true if TentativeDistance < N->Distance
-					{
-						N->Distance = TentativeDistance;
+						N->Distance = NewDistance;
 						N->Backpointer = Current;
 
-						if (TentativeDistance <= Pawn->MovementComponent->MovementRange)
+						if (NewDistance <= Pawn->MovementComponent->MovementRange)
 						{
 							TentativeSet.AddUnique(N);
 						}
 					}
-				}
 			}
 		}
 		Current->Visited = true;
@@ -317,9 +302,9 @@ UNavTileComponent * ANavGrid::PlaceTile(const FVector & Location, AActor * TileO
 	TileComp->SetupAttachment(TileOwner->GetRootComponent());
 	TileComp->SetWorldTransform(FTransform::Identity);
 	TileComp->SetWorldLocation(Location);
-	TileComp->SetGrid(this);
 	TileComp->SetBoxExtent(FVector(TileSize / 2, TileSize / 2, 5));
 	TileComp->RegisterComponentWithWorld(TileOwner->GetWorld());
+	TileComp->SetGrid(this);
 
 	return TileComp;
 }
@@ -363,6 +348,9 @@ FVector ANavGrid::AdjustToTileLocation(const FVector &Location)
 void ANavGrid::GenerateVirtualTiles(const AGridPawn *Pawn)
 {
 	QUICK_SCOPE_CYCLE_COUNTER(STAT_ANavGrid_GenerateVirtualTiles);
+
+	// invalidate all existing paths
+	CurrentPawn = nullptr;
 
 	// only keep a reasonable number
 	if (VirtualTiles.Num() > MaxVirtualTiles)

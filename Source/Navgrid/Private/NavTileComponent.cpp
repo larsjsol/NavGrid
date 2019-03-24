@@ -71,7 +71,6 @@ ANavGrid * UNavTileComponent::GetGrid() const
 	return Grid;
 }
 
-
 void UNavTileComponent::DestroyComponent(bool bPromoteChildren)
 {
 	for (UNavTileComponent *Neighbour : Neighbours)
@@ -81,7 +80,6 @@ void UNavTileComponent::DestroyComponent(bool bPromoteChildren)
 	Super::DestroyComponent(bPromoteChildren);
 }
 
-
 void UNavTileComponent::ResetPath()
 {
 	Distance = std::numeric_limits<float>::infinity();
@@ -89,57 +87,37 @@ void UNavTileComponent::ResetPath()
 	Visited = false;
 }
 
-TArray<FVector>* UNavTileComponent::GetContactPoints()
-{
-	if (!ContactPoints.Num())
-	{
-		int32 XExtent = GetScaledBoxExtent().X;
-		int32 YExtent = GetScaledBoxExtent().Y;
-		for (int32 X = -XExtent; X <= XExtent; X += XExtent)
-		{
-			for (int32 Y = -YExtent; Y <= YExtent; Y += YExtent)
-			{
-				FVector PointLocation = GetComponentRotation().RotateVector(FVector(X, Y, 0));
-				FVector WorldLocation = GetComponentLocation() + PointLocation;
-				ContactPoints.Add(WorldLocation);
-			}
-		}
-	}
-	return &ContactPoints;
-}
-
 void UNavTileComponent::FindNeighbours()
 {
 	QUICK_SCOPE_CYCLE_COUNTER(STAT_UNavTileComponent_FindNeighbours);
-	float MaxDistance = Grid->TileSize * 0.75;
-
+	check(IsRegistered());
 	Neighbours.Empty();
 	for (TObjectIterator<UNavTileComponent> Itr; Itr; ++Itr)
 	{
 		if (Itr->GetWorld() == GetWorld() && *Itr != this)
 		{
-			bool Added = false; // stop comparing CPs when we know a tile is a neighbour
-			for (const FVector &OtherCP : *Itr->GetContactPoints())
+			FCollisionShape OtherCollisionShape = Itr->GetNeighbourHoodShape();
+			if (OverlapComponent(Itr->GetComponentLocation(), Itr->GetComponentRotation().Quaternion(), OtherCollisionShape))
 			{
-				for (const FVector &MyCP : *GetContactPoints())
-				{
-					if ((OtherCP - MyCP).Size() < MaxDistance)
-					{
-						AddNeighbour(*Itr);
-						Itr->AddNeighbour(this);
-						Added = true;
-						break;
-					}
-				}
-				if (Added)
-				{
-					break;
-				}
+				AddNeighbour(*Itr);
+				Itr->AddNeighbour(this);
 			}
 		}
 	}
 }
 
+FCollisionShape UNavTileComponent::GetNeighbourHoodShape()
+{
+	FVector NewExtent = BoxExtent;
+	/* make the tile taller so it will be included in neighbourhoods that spread over slopes */
+	if (IsValid(Grid))
+	{
+		NewExtent.Z = FMath::Max<float>(NewExtent.Z, Grid->TileSize / 2);
+	}
+	/* Grow slightly larger than the actual tile so it will intersect its neighbours */
+	NewExtent += FVector(15);
+	return FCollisionShape::MakeBox(NewExtent);
+}
 
 bool UNavTileComponent::Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const
 {
@@ -219,10 +197,9 @@ void UNavTileComponent::SetHighlight(FName NewHighlightType)
 	auto *HighlightComponent = Grid->GetHighlightComponent(NewHighlightType);
 	if (HighlightComponent)
 	{
-		FTransform HighlightTransform = GetComponentTransform();
-		FVector HighlightLocation = HighlightTransform.GetLocation();
-		HighlightLocation.Z += Grid->UIOffset;
-		HighlightTransform.SetLocation(HighlightLocation);
-		HighlightComponent->AddInstanceWorldSpace(HighlightTransform);
+		FVector MeshSize = HighlightComponent->GetStaticMesh()->GetBoundingBox().GetSize();
+		FTransform Transform = GetComponentTransform();
+		Transform.SetScale3D(FVector(Grid->TileSize / MeshSize.X, Grid->TileSize / MeshSize.Y, 1));
+		HighlightComponent->AddInstanceWorldSpace(Transform);
 	}
 }
