@@ -27,6 +27,10 @@ public:
 	void SetGrid(ANavGrid *InGrid);
 	ANavGrid* GetGrid() const;
 
+	// USceneComponent interface
+	virtual void DestroyComponent(bool bPromoteChildren = false) override;
+	// USceneComponent interface
+
 // Pathing
 	/* Cost of moving into this tile*/
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Pathfinding")
@@ -49,12 +53,17 @@ public:
 protected:
 	TArray<FVector> ContactPoints;
 
-public:
-	/* List of neighbouring tiles */
-	virtual TArray<UNavTileComponent *> *GetNeighbours();
-protected:
+	UPROPERTY()
 	TArray<UNavTileComponent *> Neighbours;
+	void FindNeighbours();
 public:
+	/* Tiles that are reachable from this tile */
+	virtual TArray<UNavTileComponent *> *GetNeighbours() { return &Neighbours; }
+	/* Add a tile to the list of neighbouring tiles */
+	void AddNeighbour(UNavTileComponent *Neighbour) { Neighbours.AddUnique(Neighbour); }
+	/* Remove a til from the list of neighbouring tiles */
+	void RemoveNeighbour(UNavTileComponent *Neighbour) { Neighbours.Remove(Neighbour); }
+
 	/* is there anything blocking an actor from moving from FromPos to this tile? Uses the capsule for collision testing */
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const;
 	/* is there anything blocking an actor from moving between From and To? Uses the capsule for collision testing */

@@ -63,12 +63,24 @@ void UNavTileComponent::SetGrid(ANavGrid * InGrid)
 {
 	Grid = InGrid;
 	SetCollisionResponseToChannel(Grid->ECC_NavGridWalkable, ECollisionResponse::ECR_Overlap); // So we can find the floor with a line trace
+	FindNeighbours();
 }
 
 ANavGrid * UNavTileComponent::GetGrid() const
 {
 	return Grid;
 }
+
+
+void UNavTileComponent::DestroyComponent(bool bPromoteChildren)
+{
+	for (UNavTileComponent *Neighbour : Neighbours)
+	{
+		Neighbour->RemoveNeighbour(this);
+	}
+	Super::DestroyComponent(bPromoteChildren);
+}
+
 
 void UNavTileComponent::ResetPath()
 {
@@ -96,8 +108,9 @@ TArray<FVector>* UNavTileComponent::GetContactPoints()
 	return &ContactPoints;
 }
 
-TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
+void UNavTileComponent::FindNeighbours()
 {
+	QUICK_SCOPE_CYCLE_COUNTER(STAT_UNavTileComponent_FindNeighbours);
 	float MaxDistance = Grid->TileSize * 0.75;
 
 	Neighbours.Empty();
@@ -112,17 +125,21 @@ TArray<UNavTileComponent*>* UNavTileComponent::GetNeighbours()
 				{
 					if ((OtherCP - MyCP).Size() < MaxDistance)
 					{
-						Neighbours.Add(*Itr);
+						AddNeighbour(*Itr);
+						Itr->AddNeighbour(this);
 						Added = true;
 						break;
 					}
 				}
-				if (Added) { break; }
+				if (Added)
+				{
+					break;
+				}
 			}
 		}
 	}
-	return &Neighbours;
 }
+
 
 bool UNavTileComponent::Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const
 {
