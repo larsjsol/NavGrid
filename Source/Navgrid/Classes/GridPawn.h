@@ -51,13 +51,23 @@ protected:
 	FGenericTeamId TeamId;
 
 public:
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-	USceneComponent *Scene;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	USceneComponent *SceneRoot;
+	/** Bounding capsule.
+	Used to check for collisions when spawning and for mouse over events.
+	It should be adjusted so it envelops the entire mesh of the pawn.
+	*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UCapsuleComponent *BoundsCapsule;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UGridMovementComponent *MovementComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTurnComponent *TurnComponent;
-	/* Used to test if thre's room for pawn on a tile*/
+	/** Collision capsule.
+	Used to check if a pawn will collide with the environment if it moves into a tile.
+	It should be slightly thinner than the pawn and its location along the z-axis determines the height
+	of the obstacles the pawn can step over.
+	*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UCapsuleComponent *MovementCollisionCapsule;
 	/* Shown when the pawn is selected/has its turn */

@@ -9,24 +9,31 @@ AGridPawn::AGridPawn()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Scene = CreateDefaultSubobject<USceneComponent>("SceneComponent");
-	SetRootComponent(Scene);
+	SceneRoot = CreateDefaultSubobject<USceneComponent>("Root");
+	SetRootComponent(SceneRoot);
+
+	BoundsCapsule = CreateDefaultSubobject<UCapsuleComponent>("Capsule");
+	BoundsCapsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	BoundsCapsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block); // So we get mouse over events
+	BoundsCapsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Block); // So we get mouse over events
+	BoundsCapsule->ShapeColor = FColor::Magenta;
+	BoundsCapsule->SetupAttachment(SceneRoot);
 
 	MovementComponent = CreateDefaultSubobject<UGridMovementComponent>("MovementComponent");
 	MovementComponent->OnMovementEnd().AddUObject(this, &AGridPawn::OnMoveEnd);
+	MovementComponent->SetUpdatedComponent(BoundsCapsule);
 
 	TurnComponent = CreateDefaultSubobject<UTurnComponent>("TurnComponent");
 
 	MovementCollisionCapsule = CreateDefaultSubobject<UCapsuleComponent>("MovementCollisionCapsule");
-	MovementCollisionCapsule->SetupAttachment(Scene);
-	MovementCollisionCapsule->SetRelativeLocation(FVector(0, 0, 100)); //Above the ground to avoid collisions
+	MovementCollisionCapsule->SetupAttachment(SceneRoot);
+	MovementCollisionCapsule->SetRelativeLocation(FVector(0, 0, 100));
 	MovementCollisionCapsule->SetCapsuleHalfHeight(50);
 	MovementCollisionCapsule->SetCapsuleRadius(30);
 	MovementCollisionCapsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	MovementComponent->SetUpdatedComponent(MovementCollisionCapsule);
 
 	SelectedHighlight = CreateDefaultSubobject<UStaticMeshComponent>("SelectedHighlight");
-	SelectedHighlight->SetupAttachment(Scene);
+	SelectedHighlight->SetupAttachment(SceneRoot);
 	UStaticMesh *Selected = ConstructorHelpers::FObjectFinder<UStaticMesh>(
 		TEXT("StaticMesh'/NavGrid/SMesh/NavGrid_Cursor.NavGrid_Cursor'")).Object;
 	SelectedHighlight->SetStaticMesh(Selected);
