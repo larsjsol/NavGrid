@@ -209,17 +209,34 @@ void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests)
 
 			if (!N->Visited)
 			{
-				float NewDistance = N->Cost + Current->Distance;
-				if (NewDistance < N->Distance)
+				float TentativeDistance = N->Cost + Current->Distance;
+				if (TentativeDistance <= N->Distance)
 				{
-						N->Distance = NewDistance;
+
+					//	Prioritize straight paths by using the world distance as a tiebreaker
+					//	when TentativeDistance is equal N->Dinstance
+					float OldDistance = std::numeric_limits<float>::infinity();
+					float NewDistance = 0;
+					if (TentativeDistance == N->Distance)
+					{
+						NewDistance = (Current->GetComponentLocation() - N->GetComponentLocation()).Size();
+						if (N->Backpointer)
+						{
+							OldDistance = (N->Backpointer->GetComponentLocation() - N->GetComponentLocation()).Size();
+						}
+					}
+
+					if (NewDistance < OldDistance) // Always true if TentativeDistance < N->Distance
+					{
+						N->Distance = TentativeDistance;
 						N->Backpointer = Current;
 
-						if (NewDistance <= Pawn->MovementComponent->MovementRange)
+						if (TentativeDistance <= Pawn->MovementComponent->MovementRange)
 						{
 							TentativeSet.AddUnique(N);
 						}
 					}
+				}
 			}
 		}
 		Current->Visited = true;
