@@ -283,7 +283,6 @@ bool ANavGrid::TraceTileLocation(const FVector & TraceStart, const FVector & Tra
 {
 	FCollisionQueryParams CQP;
 	CQP.bFindInitialOverlaps = true;
-	CQP.bTraceComplex = true;
 	CQP.TraceTag = "NavGridTilePlacement";
 	FHitResult HitResult;
 
