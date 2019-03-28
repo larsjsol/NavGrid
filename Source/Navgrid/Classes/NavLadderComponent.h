@@ -11,7 +11,6 @@ class NAVGRID_API UNavLadderComponent : public UNavTileComponent
 	GENERATED_BODY()
 public:
 	UNavLadderComponent(const FObjectInitializer &ObjectInitializer);
-	virtual void BeginPlay() override;
 
 	virtual void UpdateBodySetup() override;
 

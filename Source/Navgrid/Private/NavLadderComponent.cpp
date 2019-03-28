@@ -15,30 +15,29 @@ UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitial
 	ArrowComponent->SetupAttachment(this);
 }
 
-void UNavLadderComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// it seems like 'BoxExtent' still has the default values in PostInitProperties()
-	PawnLocationOffset = GetComponentRotation().RotateVector(FVector(90, 0, 0));
-	BottomPathPoint->SetRelativeLocation(FVector(60, 0, -BoxExtent.Z + 50));
-	TopPathPoint->SetRelativeLocation(FVector(60, 0, BoxExtent.Z - 25));
-}
-
 void UNavLadderComponent::UpdateBodySetup()
 {
 	Super::UpdateBodySetup();
 
+	// Update NeighbourhoodExtent
 	FVector NeighbourhoodExtent = BoxExtent;
 	/* make the tile wider to increase the chance of it overlapping with regular tiles */
 	if (IsValid(Grid))
 	{
-		NeighbourhoodExtent.X = FMath::Max<float>(NeighbourhoodExtent.X, Grid->TileSize / 2);
+		NeighbourhoodExtent.X = FMath::Max<float>(NeighbourhoodExtent.X, Grid->TileSize);
 		NeighbourhoodExtent.Y = FMath::Max<float>(NeighbourhoodExtent.Y, Grid->TileSize / 2);
 	}
 	/* Make the shape slightly larger than the actual tile so it will intersect its neighbours */
 	NeighbourhoodExtent += FVector(15);
 	NeighbourhoodShape = FCollisionShape::MakeBox(NeighbourhoodExtent);
+
+	// Update path points and PawnLocationOffset
+	PawnLocationOffset = GetComponentRotation().RotateVector(FVector(90, 0, 0));
+	if (IsValid(Grid))
+	{
+		BottomPathPoint->SetRelativeLocation(FVector(Grid->TileSize / 2, 0, 50 - BoxExtent.Z));
+		TopPathPoint->SetRelativeLocation(FVector(Grid->TileSize / 2, 0, BoxExtent.Z - 25));
+	}
 }
 
 FVector UNavLadderComponent::GetPawnLocation() const
