@@ -286,6 +286,25 @@ bool ANavGrid::TraceTileLocation(const FVector & TraceStart, const FVector & Tra
 	CQP.TraceTag = "NavGridTilePlacement";
 	FHitResult HitResult;
 
+	int32 BlockingHits = 0;
+	FVector Offsets[] = {
+		FVector(-TileSize / 4, TileSize / 4, 0), FVector(TileSize / 4, TileSize / 4, 0),
+		FVector(-TileSize / 4, -TileSize / 4, 0), FVector(TileSize / 4, -TileSize / 4, 0)
+		};
+	for (FVector &Offset : Offsets)
+	{
+		bool BlockingHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart + Offset, TraceEnd + Offset, ECollisionChannel::ECC_Pawn, CQP);
+		if (BlockingHit)
+		{
+			BlockingHits++;
+		}
+	}
+	if (BlockingHits <= 2)
+	{
+		return false;
+	}
+
+
 	bool BlockingHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Pawn, CQP);
 	if (BlockingHit)
 	{
