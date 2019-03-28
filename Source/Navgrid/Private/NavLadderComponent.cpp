@@ -55,7 +55,7 @@ void UNavLadderComponent::GetUnobstructedNeighbours(const UCapsuleComponent & Co
 		float BottomDistance = (BottomPathPoint->GetComponentLocation() - N->GetPawnLocation()).Size();
 		FVector TracePoint = TopDistance < BottomDistance ? TopPathPoint->GetComponentLocation() : BottomPathPoint->GetComponentLocation();
 
-		if (!UNavTileComponent::Obstructed(TracePoint, N->GetPawnLocation(), CollisionCapsule))
+		if (!N->Obstructed(TracePoint, CollisionCapsule))
 		{
 			OutNeighbours.Add(N);
 		}
@@ -69,7 +69,7 @@ bool UNavLadderComponent::Obstructed(const FVector & FromPos, const UCapsuleComp
 	float BottomDistance = (BottomPathPoint->GetComponentLocation() - FromPos).Size();
 	FVector TracePoint = TopDistance < BottomDistance ? TopPathPoint->GetComponentLocation() : BottomPathPoint->GetComponentLocation();
 
-	return UNavTileComponent::Obstructed(FromPos, TracePoint, CollisionCapsule);
+	return UNavTileComponent::Obstructed(FromPos + CollisionCapsule.RelativeLocation, TracePoint + CollisionCapsule.RelativeLocation, CollisionCapsule);
 }
 
 bool UNavLadderComponent::Traversable(float MaxWalkAngle, const TArray<EGridMovementMode>& AvailableMovementModes) const

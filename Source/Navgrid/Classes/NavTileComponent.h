@@ -63,7 +63,7 @@ public:
 	/* is there anything blocking an actor from moving from FromPos to this tile? Uses the capsule for collision testing */
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const;
 	/* is there anything blocking an actor from moving between From and To? Uses the capsule for collision testing */
-	bool static Obstructed(const FVector &From, const FVector &To, const UCapsuleComponent &CollisionCapsule);
+	virtual bool Obstructed(const FVector &From, const FVector &To, const UCapsuleComponent &CollisionCapsule) const;
 	/* Return the neighbours that are not Obstructed() */
 	virtual void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours);
 	/* Can a pawn traverse this tile?

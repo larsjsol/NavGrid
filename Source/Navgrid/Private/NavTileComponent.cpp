@@ -124,21 +124,19 @@ void UNavTileComponent::FindNeighbours()
 
 bool UNavTileComponent::Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const
 {
-	return Obstructed(FromPos, PawnLocationOffset + GetComponentLocation(), CollisionCapsule);
+	return Obstructed(FromPos + CollisionCapsule.RelativeLocation, GetComponentLocation() + PawnLocationOffset + CollisionCapsule.RelativeLocation, CollisionCapsule);
 }
 
-bool UNavTileComponent::Obstructed(const FVector & From, const FVector & To, const UCapsuleComponent & CollisionCapsule)
+bool UNavTileComponent::Obstructed(const FVector &From, const FVector &To, const UCapsuleComponent &CollisionCapsule) const
 {
 	FHitResult OutHit;
-	FVector Start = From + CollisionCapsule.RelativeLocation;
-	FVector End = To + CollisionCapsule.RelativeLocation;
 	FQuat Rot = FQuat::Identity;
 	FCollisionShape CollisionShape = CollisionCapsule.GetCollisionShape();
 	FCollisionQueryParams CQP;
 	CQP.AddIgnoredActor(CollisionCapsule.GetOwner());
 	CQP.TraceTag = "NavGridMovement";
 
-	return CollisionCapsule.GetWorld()->SweepSingleByChannel(OutHit, Start, End, Rot, ECollisionChannel::ECC_Pawn, CollisionShape, CQP);
+	return CollisionCapsule.GetWorld()->SweepSingleByChannel(OutHit, From, To, Rot, ECollisionChannel::ECC_Pawn, CollisionShape, CQP);
 }
 
 void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours)

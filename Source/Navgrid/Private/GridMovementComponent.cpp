@@ -267,7 +267,7 @@ void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath
 			// keep points needed to get around chasms and obstacles
 			FVector Delta = InPath[Idx]->GetPawnLocation() - InPath[CurrentIdx]->GetPawnLocation();
 			if (FMath::Abs(Delta.Rotation().Pitch) > MaxWalkAngle ||
-				FMath::Abs(Delta.Z * 2) > Capsule.RelativeLocation.Z - Capsule.GetScaledCapsuleHalfHeight() ||
+				FMath::Abs(Delta.Z * 1.5) > Capsule.RelativeLocation.Z - Capsule.GetScaledCapsuleHalfHeight() ||
 				InPath[Idx]->Obstructed(InPath[CurrentIdx]->GetPawnLocation(), Capsule))
 			{
 				OutPath.AddUnique(InPath[Idx - 1]);
