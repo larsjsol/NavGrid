@@ -25,6 +25,22 @@ void UNavLadderComponent::BeginPlay()
 	TopPathPoint->SetRelativeLocation(FVector(60, 0, BoxExtent.Z - 25));
 }
 
+void UNavLadderComponent::UpdateBodySetup()
+{
+	Super::UpdateBodySetup();
+
+	FVector NeighbourhoodExtent = BoxExtent;
+	/* make the tile wider to increase the chance of it overlapping with regular tiles */
+	if (IsValid(Grid))
+	{
+		NeighbourhoodExtent.X = FMath::Max<float>(NeighbourhoodExtent.X, Grid->TileSize / 2);
+		NeighbourhoodExtent.Y = FMath::Max<float>(NeighbourhoodExtent.Y, Grid->TileSize / 2);
+	}
+	/* Make the shape slightly larger than the actual tile so it will intersect its neighbours */
+	NeighbourhoodExtent += FVector(15);
+	NeighbourhoodShape = FCollisionShape::MakeBox(NeighbourhoodExtent);
+}
+
 FVector UNavLadderComponent::GetPawnLocation() const
 {
 	return (BottomPathPoint->GetComponentLocation() + TopPathPoint->GetComponentLocation()) / 2;

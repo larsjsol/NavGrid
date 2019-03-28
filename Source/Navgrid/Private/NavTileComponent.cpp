@@ -80,6 +80,21 @@ void UNavTileComponent::DestroyComponent(bool bPromoteChildren)
 	Super::DestroyComponent(bPromoteChildren);
 }
 
+void UNavTileComponent::UpdateBodySetup()
+{
+	Super::UpdateBodySetup();
+
+	FVector NeighbourhoodExtent = BoxExtent;
+	/* make the tile taller so it will be included in neighbourhoods that spread over slopes */
+	if (IsValid(Grid))
+	{
+		NeighbourhoodExtent.Z = FMath::Max<float>(NeighbourhoodExtent.Z, Grid->TileSize / 2);
+	}
+	/* Make the shape slightly larger than the actual tile so it will intersect its neighbours */
+	NeighbourhoodExtent += FVector(15);
+	NeighbourhoodShape = FCollisionShape::MakeBox(NeighbourhoodExtent);
+}
+
 void UNavTileComponent::ResetPath()
 {
 	Distance = std::numeric_limits<float>::infinity();
@@ -91,32 +106,20 @@ void UNavTileComponent::FindNeighbours()
 {
 	QUICK_SCOPE_CYCLE_COUNTER(STAT_UNavTileComponent_FindNeighbours);
 	check(IsRegistered());
+	UpdateBodySetup(); //make sure that Extent and NeighbourhoodShape is updated
 	Neighbours.Empty();
 	for (TObjectIterator<UNavTileComponent> Itr; Itr; ++Itr)
 	{
 		if (Itr->GetWorld() == GetWorld() && *Itr != this)
 		{
-			FCollisionShape OtherCollisionShape = Itr->GetNeighbourHoodShape();
-			if (OverlapComponent(Itr->GetComponentLocation(), Itr->GetComponentRotation().Quaternion(), OtherCollisionShape))
+			if (OverlapComponent(Itr->GetComponentLocation(), Itr->GetComponentRotation().Quaternion(), Itr->NeighbourhoodShape) ||
+				Itr->OverlapComponent(GetComponentLocation(), GetComponentRotation().Quaternion(), NeighbourhoodShape))
 			{
 				AddNeighbour(*Itr);
 				Itr->AddNeighbour(this);
 			}
 		}
 	}
-}
-
-FCollisionShape UNavTileComponent::GetNeighbourHoodShape()
-{
-	FVector NewExtent = BoxExtent;
-	/* make the tile taller so it will be included in neighbourhoods that spread over slopes */
-	if (IsValid(Grid))
-	{
-		NewExtent.Z = FMath::Max<float>(NewExtent.Z, Grid->TileSize / 2);
-	}
-	/* Grow slightly larger than the actual tile so it will intersect its neighbours */
-	NewExtent += FVector(15);
-	return FCollisionShape::MakeBox(NewExtent);
 }
 
 bool UNavTileComponent::Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const

@@ -29,6 +29,7 @@ public:
 
 	// UPrimitiveComponent interface
 	virtual void DestroyComponent(bool bPromoteChildren = false) override;
+	virtual void UpdateBodySetup() override;
 	// UPrimitiveComponent interface end
 
 // Pathing
@@ -57,8 +58,7 @@ public:
 	/* Remove a til from the list of neighbouring tiles */
 	void RemoveNeighbour(UNavTileComponent *Neighbour) { Neighbours.Remove(Neighbour); }
 
-	/* Shape for checking if this tile is a neighbour */
-	virtual FCollisionShape GetNeighbourHoodShape();
+	FCollisionShape NeighbourhoodShape;
 
 	/* is there anything blocking an actor from moving from FromPos to this tile? Uses the capsule for collision testing */
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const;
