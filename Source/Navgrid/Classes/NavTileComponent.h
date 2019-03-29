@@ -59,6 +59,9 @@ public:
 	void RemoveNeighbour(UNavTileComponent *Neighbour) { Neighbours.Remove(Neighbour); }
 
 	FCollisionShape NeighbourhoodShape;
+	/* movement modes that are legal (or make sense) for this tile */
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite)
+	TSet<EGridMovementMode> MovementModes;
 
 	/* is there anything blocking an actor from moving from FromPos to this tile? Uses the capsule for collision testing */
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const;
@@ -69,11 +72,11 @@ public:
 	/* Can a pawn traverse this tile?
 	*
 	* MaxWalkAngle: the pawns MaxWalkAngle
-	* AvailableMovementModes: movement modes availbe for the pawn
+	* PawnMovementModes: movement modes availabe for the pawn
 	*/
-	virtual bool Traversable(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const;
+	virtual bool Traversable(float MaxWalkAngle, const TSet<EGridMovementMode> &PawnMovementModes) const;
 	/* Can a pawn end its turn on this tile?*/
-	virtual bool LegalPositionAtEndOfTurn(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const;
+	virtual bool LegalPositionAtEndOfTurn(float MaxWalkAngle, const TSet<EGridMovementMode> &PawnMovementModes) const;
 
 	/* Placement for pawn occupying this tile in world space */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Default")
@@ -103,14 +106,11 @@ public:
 	/*
 	* Add points for moving into this tile from FromPos
 	*
-	* FromPos - the previous position of the entering pawn
 	* OutSpline - the spline to add the points to
+	* OutPathSegments - the array we should add our path segment to
 	* EndTile - true if this is the last tile in the path
-	*
-	* The caller is responsible for calling UpdateSpline() (i.e. this function should call
-	* AddSplinePoint() with bUpdateSpline = false)
 	*/
-	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile) const;
+	virtual void AddPathSegments(USplineComponent &OutSpline, TArray<FPathSegment> &OutPathSegments, bool EndTile) const;
 	/* Return a suitable upvector for a splinemesh moving across this tile */
 	virtual FVector GetSplineMeshUpVector();
 

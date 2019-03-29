@@ -6,6 +6,13 @@
 #include "Components/SplineMeshComponent.h"
 #include "Animation/AnimInstance.h"
 
+FPathSegment::FPathSegment(TSet<EGridMovementMode> InMovementModes, float InStart, float InEnd)
+{
+	MovementModes = InMovementModes;
+	Start = InStart;
+	End = InEnd;
+}
+
 UGridMovementComponent::UGridMovementComponent(const FObjectInitializer &ObjectInitializer)
 	:Super(ObjectInitializer)
 {
@@ -64,6 +71,22 @@ void UGridMovementComponent::BeginPlay()
 void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// if we are moving, find the current path segment
+	if (MovementMode == EGridMovementMode::Walking ||
+		MovementMode == EGridMovementMode::ClimbingDown ||
+		MovementMode == EGridMovementMode::ClimbingUp)
+	{
+		CurrentPathSegment = FPathSegment({ EGridMovementMode::Walking }, 0, Spline->GetSplineLength());
+		for (FPathSegment &Segment : PathSegments)
+		{
+			if (Distance >= Segment.Start && Distance <= Segment.End)
+			{
+				CurrentPathSegment = Segment;
+				break;
+			}
+		}
+	}
 
 	AActor *Owner = GetOwner();
 	FTransform NewTransform = Owner->GetActorTransform();
@@ -163,17 +186,7 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 	/* Use the rotation from the ladder if we're climbing */
 	else if (MovementMode == EGridMovementMode::ClimbingUp || MovementMode == EGridMovementMode::ClimbingDown)
 	{
-		if (IsValid(CurrentTile) && CurrentTile->IsA<UNavLadderComponent>())
-		{
-			DesiredRotation = CurrentTile->GetComponentRotation();
-			DesiredRotation.Yaw -= 180;
-		}
-		else
-			// Dont update the rotation if we have no idea of what it should be
-			// This to prevent the occational stuttering at the start of a descent
-		{
-			DesiredRotation = GetOwner()->GetActorRotation();
-		}
+		DesiredRotation = CurrentPathSegment.PawnRotationHint;
 	}
 
 	/* Find the new rotation by limiting DesiredRotation by MaxRotationSpeed */
@@ -298,8 +311,6 @@ void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath
 bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 {
 	QUICK_SCOPE_CYCLE_COUNTER(STAT_UGridMovementComponent_CreatePath);
-
-	Spline->ClearSplinePoints();
 	AGridPawn *Owner = Cast<AGridPawn>(GetOwner());
 
 	if (!IsValid(CurrentTile))
@@ -328,24 +339,23 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 		}
 		Algo::Reverse(Path);
 
+		// Build the path spline and path segments
+		Spline->ClearSplinePoints();
+		PathSegments.Empty();
 		if (Path.Num() > 1)
 		{
 			FVector ActorLocation = GetOwner()->GetActorLocation();
-
 			// use the actor location inststead of the tile location for the first spline point
 			Spline->AddSplinePoint(ActorLocation, ESplineCoordinateSpace::Local);
 			Spline->SetSplinePointType(0, ESplinePointType::Linear, false);
 
-			// Add the remaining spline points for the tiles in the path
 			for (int32 Idx = 1; Idx < Path.Num(); Idx++)
 			{
 				if (Grid->GetTile(ActorLocation) != Path[Idx] && Owner->GetTile() != Path[Idx])
 				{
-					FVector EntryPoint = Spline->GetLocationAtSplinePoint(Spline->GetNumberOfSplinePoints() - 1, ESplineCoordinateSpace::Local);
-					Path[Idx]->AddSplinePoints(EntryPoint, *Spline, Idx == Path.Num() - 1);
+					Path[Idx]->AddPathSegments(*Spline, PathSegments, Idx == Path.Num() - 1);
 				}
 			}
-			Spline->UpdateSpline();
 			return true; // success!
 		}
 	}
@@ -442,31 +452,30 @@ FTransform UGridMovementComponent::ConsumeRootMotion()
 
 void UGridMovementComponent::ConsiderUpdateMovementMode()
 {
+	// only consider changing mode when we are moving
 	if (MovementMode == EGridMovementMode::Walking ||
 		MovementMode == EGridMovementMode::ClimbingDown ||
 		MovementMode == EGridMovementMode::ClimbingUp)
 	{
-		// try to get the tile the pawn will occupy when it moves a bit further
-		FVector ForwardPoint = GetForwardLocation(50);
-		UNavTileComponent *CurrentTile = GetTile(ForwardPoint);
-		if (CurrentTile)
+		// if the maching segment is not walkable, transtion to the a climbing mode
+		if (!CurrentPathSegment.MovementModes.Contains(EGridMovementMode::Walking))
 		{
-			if (CurrentTile->IsA<UNavLadderComponent>())
+			// try to get the tile the pawn will occupy when it moves a bit further
+			FVector ForwardPoint = GetForwardLocation(50);
+			FVector ActorLocation = GetOwner()->GetActorLocation();
+			if (ForwardPoint.Z > ActorLocation.Z)
 			{
-				FVector ActorLocation = GetOwner()->GetActorLocation();
-				if (ForwardPoint.Z > ActorLocation.Z)
-				{
-					ChangeMovementMode(EGridMovementMode::ClimbingUp);
-				}
-				else
-				{
-					ChangeMovementMode(EGridMovementMode::ClimbingDown);
-				}
+				ChangeMovementMode(EGridMovementMode::ClimbingUp);
 			}
 			else
 			{
-				ChangeMovementMode(EGridMovementMode::Walking);
+				ChangeMovementMode(EGridMovementMode::ClimbingDown);
 			}
+		}
+		// default movement mode is walking
+		else
+		{
+			ChangeMovementMode(EGridMovementMode::Walking);
 		}
 	}
 }

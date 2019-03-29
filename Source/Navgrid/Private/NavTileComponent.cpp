@@ -23,20 +23,23 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block); // So we get mouse over events
 	SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Block); // So we get mouse over events
 
+	MovementModes.Add(EGridMovementMode::Stationary);
+	MovementModes.Add(EGridMovementMode::Walking);
+	MovementModes.Add(EGridMovementMode::InPlaceTurn);
+
 	ShapeColor = FColor::Magenta;
 
 	ResetPath();
 }
 
-bool UNavTileComponent::Traversable(float MaxWalkAngle, const TArray<EGridMovementMode>& AvailableMovementModes) const
+bool UNavTileComponent::Traversable(float MaxWalkAngle, const TSet<EGridMovementMode>& PawnMovementModes) const
 {
 	FRotator TileRot = GetComponentRotation();
 	float MaxAngle = FMath::Max3<float>(TileRot.Pitch, TileRot.Yaw, TileRot.Roll);
 	float MinAngle = FMath::Min3<float>(TileRot.Pitch, TileRot.Yaw, TileRot.Roll);
-	if (AvailableMovementModes.Contains(EGridMovementMode::Walking) &&
-		(MaxAngle < MaxWalkAngle && MinAngle > -MaxWalkAngle))
+	if (MaxAngle < MaxWalkAngle && MinAngle > -MaxWalkAngle)
 	{
-		return true;
+		return MovementModes.Intersect(PawnMovementModes).Num() > 0;
 	}
 	else
 	{
@@ -44,9 +47,9 @@ bool UNavTileComponent::Traversable(float MaxWalkAngle, const TArray<EGridMoveme
 	}
 }
 
-bool UNavTileComponent::LegalPositionAtEndOfTurn(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const
+bool UNavTileComponent::LegalPositionAtEndOfTurn(float MaxWalkAngle, const TSet<EGridMovementMode> &PawnMovementModes) const
 {
-	return Traversable(MaxWalkAngle, AvailableMovementModes);
+	return Traversable(MaxWalkAngle, PawnMovementModes) && MovementModes.Contains(EGridMovementMode::Stationary);
 }
 
 FVector UNavTileComponent::GetPawnLocation() const
@@ -183,9 +186,12 @@ void UNavTileComponent::TouchEnd(ETouchIndex::Type Type, UPrimitiveComponent* To
 	Grid->TileClicked(this);
 }
 
-void UNavTileComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool EndTile) const
+void UNavTileComponent::AddPathSegments(USplineComponent &OutSpline, TArray<FPathSegment> &OutPathSegments, bool EndTile) const
 {
-	OutSpline.AddSplinePoint(GetComponentLocation() + PawnLocationOffset, ESplineCoordinateSpace::Local, false);
+	FVector EntryPoint = OutSpline.GetLocationAtSplinePoint(OutSpline.GetNumberOfSplinePoints() - 1, ESplineCoordinateSpace::Local);
+	float SegmentStart = OutSpline.GetSplineLength();
+	OutSpline.AddSplinePoint(GetComponentLocation() + PawnLocationOffset, ESplineCoordinateSpace::Local);
+	OutPathSegments.Add(FPathSegment(MovementModes, SegmentStart, OutSpline.GetSplineLength()));
 }
 
 FVector UNavTileComponent::GetSplineMeshUpVector()

@@ -30,6 +30,19 @@ enum class EGridMovementPhase : uint8
 	Done			UMETA(DisplayName = "Done")
 };
 
+USTRUCT()
+struct FPathSegment
+{
+	GENERATED_BODY()
+	FPathSegment() {}
+	FPathSegment(TSet<EGridMovementMode> InMovementModes, float InStart, float InEnd);
+	/* Legal movement modes for this segment */
+	TSet<EGridMovementMode> MovementModes;
+	/* start and end distance along the path spline this segment covers */
+	float Start, End;
+	FRotator PawnRotationHint;
+};
+
 
 /**
  * A movement component that operates on a NavGrid
@@ -54,6 +67,7 @@ protected:
 	/* The tile we're currently on */
 	UPROPERTY()
 	UNavTileComponent *CurrentTile = NULL;
+	FPathSegment CurrentPathSegment;
 public:
 
 	/* Return the tiles that are in range */
@@ -80,7 +94,7 @@ public:
 	float MaxWalkAngle = 45;
 	/* MovementModes usable for this Pawn */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement")
-	TArray<EGridMovementMode> AvailableMovementModes;
+	TSet<EGridMovementMode> AvailableMovementModes;
 	/* Should we ignore rotation over the X axis */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement")
 	bool LockRoll = true;
@@ -192,4 +206,7 @@ protected:
 	FRotator LimitRotation(const FRotator &OldRotation, const FRotator &NewRotation, float DeltaTime);
 	/* The rotation of the skeletal mesh (if any). Used to handle root motion rotation */
 	FRotator MeshRotation;
+
+	UPROPERTY()
+	TArray<FPathSegment> PathSegments;
 };

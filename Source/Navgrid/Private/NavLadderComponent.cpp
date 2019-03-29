@@ -13,6 +13,10 @@ UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitial
 
 	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
 	ArrowComponent->SetupAttachment(this);
+
+	MovementModes.Empty();
+	MovementModes.Add(EGridMovementMode::ClimbingUp);
+	MovementModes.Add(EGridMovementMode::ClimbingDown);
 }
 
 void UNavLadderComponent::UpdateBodySetup()
@@ -72,35 +76,53 @@ bool UNavLadderComponent::Obstructed(const FVector & FromPos, const UCapsuleComp
 	return UNavTileComponent::Obstructed(FromPos + CollisionCapsule.RelativeLocation, TracePoint + CollisionCapsule.RelativeLocation, CollisionCapsule);
 }
 
-bool UNavLadderComponent::Traversable(float MaxWalkAngle, const TArray<EGridMovementMode>& AvailableMovementModes) const
+bool UNavLadderComponent::Traversable(float MaxWalkAngle, const TSet<EGridMovementMode>& PawnMovementModes) const
 {
-	return AvailableMovementModes.Contains(EGridMovementMode::ClimbingDown) || AvailableMovementModes.Contains(EGridMovementMode::ClimbingUp);
+	return MovementModes.Intersect(PawnMovementModes).Num() > 0;
 }
 
-bool UNavLadderComponent::LegalPositionAtEndOfTurn(float MaxWalkAngle, const TArray<EGridMovementMode>& AvailableMovementModes) const
-{
-	return false;
-}
 
-void UNavLadderComponent::AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool LastTile) const
+void UNavLadderComponent::AddPathSegments(USplineComponent &OutSpline, TArray<FPathSegment> &OutPathSegments, bool EndTile) const
 {
-	float TopDistance = (TopPathPoint->GetComponentLocation() - FromPos).Size();
-	float BottomDistance = (BottomPathPoint->GetComponentLocation() - FromPos).Size();
+	FVector EntryPoint = OutSpline.GetLocationAtSplinePoint(OutSpline.GetNumberOfSplinePoints() - 1, ESplineCoordinateSpace::Local);
+	float TopDistance = (TopPathPoint->GetComponentLocation() - EntryPoint).Size();
+	float BottomDistance = (BottomPathPoint->GetComponentLocation() - EntryPoint).Size();
+
+	FPathSegment NewSegment;
+	NewSegment.MovementModes = MovementModes;
+	NewSegment.PawnRotationHint = GetComponentRotation();
+	NewSegment.PawnRotationHint.Yaw -= 180;
+
+	// add spline points and segments
 	if (TopDistance > BottomDistance)
 	{
-		OutSpline.AddSplinePoint(BottomPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local, false);
-		OutSpline.AddSplinePoint(TopPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local, false);
+		OutSpline.AddSplinePoint(BottomPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		NewSegment.Start = OutSpline.GetSplineLength();
+		OutSpline.AddSplinePoint(TopPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		NewSegment.End = OutSpline.GetSplineLength();
 	}
 	else
 	{
-		OutSpline.AddSplinePoint(TopPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local, false);
-		OutSpline.AddSplinePoint(BottomPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local, false);
+		OutSpline.AddSplinePoint(TopPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		NewSegment.Start = OutSpline.GetSplineLength();
+		OutSpline.AddSplinePoint(BottomPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		NewSegment.End = OutSpline.GetSplineLength();
 	}
 
-	if (LastTile)
+	// unlike regular tiles, we do not want the pawn to change movement mode untill it reaches the first path point
+	// we therefore extend the previous segment to that point
+	if (OutPathSegments.Num())
+	{
+		OutPathSegments.Last().End = NewSegment.Start;
+	}
+
+	// add the new segment
+	OutPathSegments.Add(NewSegment);
+
+	if (EndTile)
 	{
 		OutSpline.RemoveSplinePoint(OutSpline.GetNumberOfSplinePoints() - 1);
-		OutSpline.AddSplinePoint(PawnLocationOffset + GetComponentLocation(), ESplineCoordinateSpace::Local, false);
+		OutSpline.AddSplinePoint(PawnLocationOffset + GetComponentLocation(), ESplineCoordinateSpace::Local);
 	}
 }
 

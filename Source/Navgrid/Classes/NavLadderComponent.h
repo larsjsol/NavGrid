@@ -17,9 +17,8 @@ public:
 	virtual FVector GetPawnLocation() const override;
 	virtual void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours) override;
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const override;
-	virtual bool Traversable(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const override;
-	virtual bool LegalPositionAtEndOfTurn(float MaxWalkAngle, const TArray<EGridMovementMode> &AvailableMovementModes) const override;
-	virtual void AddSplinePoints(const FVector &FromPos, USplineComponent &OutSpline, bool LastTile) const override;
+	virtual bool Traversable(float MaxWalkAngle, const TSet<EGridMovementMode> &PawnMovementModes) const override;
+	virtual void AddPathSegments(USplineComponent &OutSpline, TArray<FPathSegment> &OutPathSegments, bool EndTile) const override;
 
 	/* Helpers for determining walkable paths through this tile */
 	UPROPERTY(BlueprintReadOnly, EditAnyWhere)
