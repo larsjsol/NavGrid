@@ -42,7 +42,7 @@ ATurnManager * ANavGridGameState::SpawnTurnManager()
 
 ANavGrid * ANavGridGameState::SpawnNavGrid()
 {
-	ANavGrid *Grid = GetWorld()->SpawnActor<ANavGrid>();
-	Grid->SetOwner(this);
-	return Grid;
+	ANavGrid *NewGrid = GetWorld()->SpawnActor<ANavGrid>();
+	NewGrid->SetOwner(this);
+	return NewGrid;
 }

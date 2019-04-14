@@ -4,9 +4,9 @@
 
 UTurnComponent::UTurnComponent()
 	:Super(),
+	TurnManager(nullptr),
 	StartingActionPoints(1),
-	RemainingActionPoints(1),
-	TurnManager(nullptr)
+	RemainingActionPoints(1)
 {
 }
 
