@@ -27,20 +27,16 @@ enum class EGridPawnState : uint8
 	Dead			UMETA(DisplayName = "Dead")
 };
 
-/**
- * A pawn that can move around on a NavGrid.
- *
- * Currently simply a pawn with a GridMovementComponent.
- */
+/** A pawn that can move around on a NavGrid. */
 UCLASS()
 class NAVGRID_API AGridPawn : public APawn, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this pawn's properties
 	AGridPawn();
 	virtual void BeginPlay() override;
+	virtual void OnConstruction(const FTransform &Transform) override;
 
 	// IGenericTeamAgentInterface start
 	virtual void SetGenericTeamId(const FGenericTeamId& InTeamId) override;
@@ -78,7 +74,7 @@ public:
 	UArrowComponent *Arrow;
 
 	/* Should this pawn snap to grid at the start of each turn */
-	UPROPERTY(EditAnyWhere, Category = "NavGrid")
+	UPROPERTY(EditAnyWhere)
 	bool SnapToGrid = true;
 
 	/* Callend on round start */
@@ -105,10 +101,10 @@ public:
 	/* override this class and implement your own AI here. The default implementation just ends the turn */
 	virtual void PlayAITurn();
 	/* Get the current state for this pawn */
-	UFUNCTION(BlueprintCallable, Category = "NavGrid")
+	UFUNCTION(BlueprintCallable)
 	virtual EGridPawnState GetState() const;
 	/* is this pawn controlled by a human player? */
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite)
 	bool bHumanControlled;
 	/* can the we request to start our turn now? The turn manager may still deny our request even if this returns true */
 	virtual bool CanBeSelected();
@@ -117,7 +113,7 @@ public:
 	virtual void MoveTo(const UNavTileComponent & Tile);
 
 	/* get the tile occupied at the start of this pawns turn */
-	UFUNCTION(BlueprintCallable, Category = "NavGrid")
+	UFUNCTION(BlueprintCallable)
 	UNavTileComponent *GetTile() const { return MovementComponent->GetTile(); }
 	template <class T>
 	T *GetTile() const { return Cast<T>(GetTile()); }
@@ -133,7 +129,17 @@ public:
 	UFUNCTION()
 	virtual void Clicked(AActor *ClickedActor, FKey PressedKey);
 
+#if WITH_EDITORONLY_DATA
+	void OnObjectSelectedInEditor(UObject *SelectedObject);
+
 protected:
-	UPROPERTY()
-	ANavGrid *Grid;
+	UPROPERTY(EditAnyWhere)
+	bool bPreviewTiles = false;
+	UPROPERTY(EditAnyWhere)
+	float PreviewTileSize = 200;
+	FTimerHandle PreviewTimerHandle;
+	void UpdatePreviewTiles();
+	UPROPERTY(Transient)
+	ANavGrid *PreviewGrid;
+#endif // WITH_EDITORONLY_DATA
 };

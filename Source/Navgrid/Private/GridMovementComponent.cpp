@@ -243,7 +243,7 @@ void UGridMovementComponent::ConsiderUpdateCurrentTile()
 
 void UGridMovementComponent::GetTilesInRange(TArray<UNavTileComponent *> &OutTiles)
 {
-	check(Grid);
+
 	Grid->GetTilesInRange(Cast<AGridPawn>(GetOwner()), true, OutTiles);
 }
 
@@ -262,6 +262,16 @@ UNavTileComponent * UGridMovementComponent::GetTile(const FVector &Position)
 		Tile = Grid->GetTile(Position, false);
 	}
 	return Tile;
+}
+
+ANavGrid * UGridMovementComponent::GetNavGrid()
+{
+	if (!IsValid(Grid))
+	{
+		Grid = ANavGrid::GetNavGrid(GetOwner());
+	}
+	check(Grid);
+	return Grid;
 }
 
 void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath, TArray<const UNavTileComponent*>& OutPath)

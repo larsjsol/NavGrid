@@ -1,6 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NavGridPrivatePCH.h"
+#if WITH_EDITORONLY_DATA
+#include "Editor.h"
+#endif
 
 // Sets default values
 AGridPawn::AGridPawn()
@@ -48,6 +51,9 @@ AGridPawn::AGridPawn()
 
 	/* bind mouse events*/
 	OnClicked.AddDynamic(this, &AGridPawn::Clicked);
+#if WITH_EDITORONLY_DATA
+	USelection::SelectObjectEvent.AddUObject(this, &AGridPawn::OnObjectSelectedInEditor);
+#endif
 }
 
 void AGridPawn::BeginPlay()
@@ -60,11 +66,27 @@ void AGridPawn::BeginPlay()
 	TurnManager->OnTurnEnd().AddDynamic(this, &AGridPawn::OnAnyTurnEnd);
 	TurnManager->OnReadyForInput().AddDynamic(this, &AGridPawn::OnAnyPawnReadyForInput);
 
-	auto *State = GetWorld()->GetGameState<ANavGridGameState>();
-	check(State && State->Grid);
-	Grid = State->Grid;
-
 	SetGenericTeamId(TeamId);
+
+#if WITH_EDITORONLY_DATA
+	GEditor->GetTimerManager()->ClearTimer(PreviewTimerHandle);
+#endif //WITH_EDITORONLY_DATA
+}
+
+void AGridPawn::OnConstruction(const FTransform & Transform)
+{
+	Super::OnConstruction(Transform);
+
+#if WITH_EDITORONLY_DATA
+	if (bPreviewTiles && IsSelectedInEditor())
+	{
+		GEditor->GetTimerManager()->SetTimer(PreviewTimerHandle, this, &AGridPawn::UpdatePreviewTiles, 1, true);
+	}
+	else
+	{
+		GEditor->GetTimerManager()->ClearTimer(PreviewTimerHandle);
+	}
+#endif //WITH_EDITORONLY_DATA
 }
 
 void AGridPawn::SetGenericTeamId(const FGenericTeamId & InTeamId)
@@ -89,6 +111,7 @@ void AGridPawn::OnAnyTurnStart(UTurnComponent *InTurnComponent)
 
 void AGridPawn::OnTurnStart()
 {
+	ANavGrid *Grid = MovementComponent->GetNavGrid();
 	if (IsValid(Grid) && Grid->EnableVirtualTiles)
 	{
 		GenerateVirtualTiles();
@@ -186,7 +209,7 @@ bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
 		Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
 	{
 		TArray<UNavTileComponent *> InRange;
-		Grid->GetTilesInRange(this, true, InRange);
+		MovementComponent->GetNavGrid()->GetTilesInRange(this, true, InRange);
 		if (Tile.Distance <= MovementComponent->MovementRange)
 		{
 			return true;
@@ -203,18 +226,16 @@ void AGridPawn::MoveTo(const UNavTileComponent & Tile)
 
 UNavTileComponent *AGridPawn::ConsiderGenerateVirtualTile()
 {
-	if (!IsValid(MovementComponent->GetTile()) && Grid->EnableVirtualTiles)
+	if (!IsValid(MovementComponent->GetTile()) && MovementComponent->GetNavGrid()->EnableVirtualTiles)
 	{
-		Grid->GenerateVirtualTile(this);
-		MovementComponent->ConsiderUpdateCurrentTile();
+		GenerateVirtualTiles();
 	}
 	return MovementComponent->GetTile();
 }
 
 void AGridPawn::GenerateVirtualTiles()
 {
-	check(Grid);
-	Grid->GenerateVirtualTiles(this);
+	MovementComponent->GetNavGrid()->GenerateVirtualTiles(this);
 	MovementComponent->ConsiderUpdateCurrentTile();
 }
 
@@ -225,3 +246,64 @@ void AGridPawn::Clicked(AActor *ClickedActor, FKey PressedKey)
 		TurnComponent->RequestStartTurn();
 	}
 }
+
+#if WITH_EDITORONLY_DATA
+void AGridPawn::OnObjectSelectedInEditor(UObject * SelectedObject)
+{
+	AGridPawn *SelectedPawn = Cast<AGridPawn>(SelectedObject);
+	if (SelectedPawn && SelectedPawn->bPreviewTiles)
+	{
+		if (SelectedPawn == this)
+		{
+			GEditor->GetTimerManager()->SetTimer(PreviewTimerHandle, this, &AGridPawn::UpdatePreviewTiles, 1, true);
+		}
+		else
+		{
+			GEditor->GetTimerManager()->ClearTimer(PreviewTimerHandle);
+		}
+	}
+}
+
+void AGridPawn::UpdatePreviewTiles()
+{
+	// check if a previewgrid already exist
+	if (!IsValid(PreviewGrid))
+	{
+		for (TActorIterator<ANavGrid> Itr(GetWorld()); Itr; ++Itr)
+		{
+			if (Itr->Tags.Contains(FName("PreviewGrid")))
+			{
+				PreviewGrid = *Itr;
+				break;
+			}
+		}
+	}
+
+	// create a preview grid if no grid already exists in the level
+	if (!IsValid(PreviewGrid))
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.bAllowDuringConstructionScript = true;
+		SpawnParams.bTemporaryEditorActor = true;
+		SpawnParams.Name = FName(*FString::Printf(TEXT("PreviewNavGrid_%s"), *GetName()));
+		PreviewGrid = GetWorld()->SpawnActor<ANavGrid>(SpawnParams);
+		PreviewGrid->TileSize = PreviewTileSize;
+		PreviewGrid->Tags.Add(FName("PreviewGrid"));
+
+		TArray<UNavTileComponent *> Tiles;
+		ANavGrid::GetEveryTile(Tiles, GetWorld());
+		for (UNavTileComponent *Tile : Tiles)
+		{
+			Tile->SetGrid(PreviewGrid);
+		}
+	}
+
+	GenerateVirtualTiles();
+	TArray<UNavTileComponent *> Tiles;
+	PreviewGrid->GetTilesInRange(this, true, Tiles);
+	for (UNavTileComponent *Tile : Tiles)
+	{
+		Tile->SetHighlight("Movable");
+	}
+}
+#endif //WITH_EDITORONLY_DATA

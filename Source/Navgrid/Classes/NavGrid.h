@@ -136,10 +136,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void GenerateVirtualTile(const AGridPawn *Pawn);
 	void DestroyVirtualTiles();
-
 	virtual void Destroyed() override;
-private:
-
 
 public:
 	/** return every tile in the supplied world */

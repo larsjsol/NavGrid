@@ -66,7 +66,7 @@ void UNavTileComponent::SetGrid(ANavGrid * InGrid)
 {
 	Grid = InGrid;
 	SetCollisionResponseToChannel(Grid->ECC_NavGridWalkable, ECollisionResponse::ECR_Overlap); // So we can find the floor with a line trace
-	FindNeighbours();
+	UpdateBodySetup();
 }
 
 ANavGrid * UNavTileComponent::GetGrid() const
@@ -96,6 +96,15 @@ void UNavTileComponent::UpdateBodySetup()
 	/* Make the shape slightly larger than the actual tile so it will intersect its neighbours */
 	NeighbourhoodExtent += FVector(15);
 	NeighbourhoodShape = FCollisionShape::MakeBox(NeighbourhoodExtent);
+
+	FindNeighbours();
+}
+
+void UNavTileComponent::InvalidateLightingCacheDetailed(bool bInvalidateBuildEnqueuedLighting, bool bTranslationOnly)
+{
+	Super::InvalidateLightingCacheDetailed(bInvalidateBuildEnqueuedLighting, bTranslationOnly);
+
+	FindNeighbours();
 }
 
 void UNavTileComponent::ResetPath()
@@ -108,9 +117,14 @@ void UNavTileComponent::ResetPath()
 void UNavTileComponent::FindNeighbours()
 {
 	QUICK_SCOPE_CYCLE_COUNTER(STAT_UNavTileComponent_FindNeighbours);
-	check(IsRegistered());
-	UpdateBodySetup(); //make sure that Extent and NeighbourhoodShape is updated
+
+	// clear any neighbour relations involving this tile
+	for (UNavTileComponent *Neighbour : Neighbours)
+	{
+		Neighbour->RemoveNeighbour(this);
+	}
 	Neighbours.Empty();
+
 	for (TObjectIterator<UNavTileComponent> Itr; Itr; ++Itr)
 	{
 		if (Itr->GetWorld() == GetWorld() && *Itr != this)
@@ -123,6 +137,7 @@ void UNavTileComponent::FindNeighbours()
 			}
 		}
 	}
+
 }
 
 bool UNavTileComponent::Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const

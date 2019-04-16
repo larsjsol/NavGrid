@@ -21,7 +21,7 @@ public:
 	UNavTileComponent(const FObjectInitializer &ObjectInitializer);
 
 protected:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	ANavGrid *Grid;
 public:
 	void SetGrid(ANavGrid *InGrid);
@@ -30,6 +30,7 @@ public:
 	// UPrimitiveComponent interface
 	virtual void DestroyComponent(bool bPromoteChildren = false) override;
 	virtual void UpdateBodySetup() override;
+	virtual void InvalidateLightingCacheDetailed(bool bInvalidateBuildEnqueuedLighting, bool bTranslationOnly) override;
 	// UPrimitiveComponent interface end
 
 // Pathing

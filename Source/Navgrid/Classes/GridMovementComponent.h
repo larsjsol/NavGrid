@@ -77,6 +77,7 @@ public:
 	/* Get the tile the pawn would occupy of it was located at a different position.
 	May return NULL if no tile is found.*/
 	UNavTileComponent *GetTile(const FVector &Position);
+	ANavGrid *GetNavGrid();
 	/* How far (in tile cost) the actor can move in one go */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement")
 	float MovementRange = 4;

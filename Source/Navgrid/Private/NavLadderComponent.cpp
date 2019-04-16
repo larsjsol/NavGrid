@@ -21,7 +21,7 @@ UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitial
 
 void UNavLadderComponent::UpdateBodySetup()
 {
-	Super::UpdateBodySetup();
+	UBoxComponent::UpdateBodySetup();
 
 	// Update NeighbourhoodExtent
 	FVector NeighbourhoodExtent = BoxExtent;
@@ -42,6 +42,8 @@ void UNavLadderComponent::UpdateBodySetup()
 		BottomPathPoint->SetRelativeLocation(FVector(Grid->TileSize / 2, 0, 50 - BoxExtent.Z));
 		TopPathPoint->SetRelativeLocation(FVector(Grid->TileSize / 2, 0, BoxExtent.Z - 25));
 	}
+
+	FindNeighbours();
 }
 
 FVector UNavLadderComponent::GetPawnLocation() const
