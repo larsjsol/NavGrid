@@ -405,6 +405,16 @@ void ANavGrid::GenerateVirtualTile(const AGridPawn * Pawn)
 	}
 }
 
+UNavTileComponent * ANavGrid::ConsiderGenerateVirtualTile(const FVector & TileLocation)
+{
+	UNavTileComponent *TileComp = ConsiderPlaceTile(TileLocation + FVector(0, 0, TileSize), TileLocation - FVector(0, 0, TileSize));
+	if (TileComp)
+	{
+		VirtualTiles.Add(TileComp);
+	}
+	return TileComp;
+}
+
 void ANavGrid::DestroyVirtualTiles()
 {
 	for (UNavTileComponent *T : VirtualTiles)

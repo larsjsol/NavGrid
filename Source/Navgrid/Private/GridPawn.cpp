@@ -228,7 +228,7 @@ UNavTileComponent *AGridPawn::ConsiderGenerateVirtualTile()
 {
 	if (!IsValid(MovementComponent->GetTile()) && MovementComponent->GetNavGrid()->EnableVirtualTiles)
 	{
-		GenerateVirtualTiles();
+		return MovementComponent->GetNavGrid()->ConsiderGenerateVirtualTile(GetActorLocation());
 	}
 	return MovementComponent->GetTile();
 }

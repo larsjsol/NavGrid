@@ -135,9 +135,9 @@ public:
 	/* place a single virtual tile under a pawn */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void GenerateVirtualTile(const AGridPawn *Pawn);
+	UNavTileComponent *ConsiderGenerateVirtualTile(const FVector &TileLocation);
 	void DestroyVirtualTiles();
 	virtual void Destroyed() override;
-
 public:
 	/** return every tile in the supplied world */
 	static void GetEveryTile(TArray<UNavTileComponent* > &OutTiles, UWorld *World);
