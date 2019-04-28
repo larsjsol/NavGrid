@@ -237,13 +237,16 @@ void UGridMovementComponent::ConsiderUpdateCurrentTile()
 		if (IsValid(NewTile))
 		{
 			CurrentTile = NewTile;
+
+			ANavGridGameState *GameState = Cast<ANavGridGameState>(UGameplayStatics::GetGameState(GetOwner()));
+			AGridPawn *GridPawn = Cast<AGridPawn>(GetOwner());
+			GameState->OnPawnEnterTile().Broadcast(GridPawn, CurrentTile);
 		}
 	}
 }
 
 void UGridMovementComponent::GetTilesInRange(TArray<UNavTileComponent *> &OutTiles)
 {
-
 	Grid->GetTilesInRange(Cast<AGridPawn>(GetOwner()), true, OutTiles);
 }
 

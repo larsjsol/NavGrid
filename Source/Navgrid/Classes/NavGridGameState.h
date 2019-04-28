@@ -35,6 +35,11 @@ public:
 	template <class T>
 	T *GetTurnManager() const { return Cast<T>(GetTurnManager()); }
 
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPawnEnterTile, class AGridPawn *, class UNavTileComponent *);
+	FOnPawnEnterTile &OnPawnEnterTile() { return PawnEnterTileDelegate; }
+private:
+	FOnPawnEnterTile PawnEnterTileDelegate;
+
 protected:
 	UPROPERTY(BlueprintReadWrite, VisibleAnyWhere, Category = "NavGrid")
 	ATurnManager *TurnManager;
