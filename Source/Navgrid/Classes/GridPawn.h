@@ -90,6 +90,16 @@ public:
 	virtual void OnAnyTurnEnd(UTurnComponent *InTurnComponent);
 	/* Called on turn end for this pawn */
 	virtual void OnTurnEnd();
+	/* Called at turn start for any team */
+	UFUNCTION()
+	virtual void OnAnyTeamTurnStart(const FGenericTeamId &InTeamId);
+	/* Called at turn start for this pawn's team */
+	virtual void OnTeamTurnStart() {}
+	/* Called at turn end for any team */
+	UFUNCTION()
+	virtual void OnAnyTeamTurnEnd(const FGenericTeamId &InTeamId);
+	/* Called at turn end for this pawn's team */
+	virtual void OnTeamTurnEnd() {}
 	/* Called when done moving */
 	virtual void OnMoveEnd();
 	/* Called when any component owner is ready for player or ai input */

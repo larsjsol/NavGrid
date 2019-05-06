@@ -61,7 +61,7 @@ void ATurnManager::StartTurnForNextComponent()
 
 	bool bStartNewRound = false;
 
-	// first find the correct team
+	// first, find the correct team
 	if (!Teams.Contains(CurrentTeam) || !Teams[CurrentTeam].HasComponentWaitingForTurn())
 	{
 		bStartNewRound = true; // start a new round if no teams have members that are waiting for their turn
@@ -69,7 +69,9 @@ void ATurnManager::StartTurnForNextComponent()
 		{
 			if (Teams[TeamId].HasComponentWaitingForTurn())
 			{
+				OnTeamTurnEnd().Broadcast(CurrentTeam);
 				CurrentTeam = TeamId;
+				OnTeamTurnStart().Broadcast(CurrentTeam);
 				bStartNewRound = false;
 				break;
 			}
@@ -79,6 +81,7 @@ void ATurnManager::StartTurnForNextComponent()
 	if (bStartNewRound)
 	{
 		OnRoundEnd().Broadcast();
+		OnTeamTurnEnd().Broadcast(CurrentTeam);
 		for (FGenericTeamId &TeamId : TeamIdArray)
 		{
 			for (UTurnComponent *Comp : Teams[TeamId].Components)
@@ -86,9 +89,10 @@ void ATurnManager::StartTurnForNextComponent()
 				Comp->RemainingActionPoints = Comp->StartingActionPoints;
 			}
 		}
-		OnRoundStart().Broadcast();
 		CurrentComponent = 0;
 		CurrentTeam = TeamIdArray[0];
+		OnRoundStart().Broadcast();
+		OnTeamTurnStart().Broadcast(CurrentTeam);
 		Round++;
 	}
 	else

@@ -64,6 +64,8 @@ void AGridPawn::BeginPlay()
 	TurnManager->OnRoundStart().AddDynamic(this, &AGridPawn::OnRoundStart);
 	TurnManager->OnTurnStart().AddDynamic(this, &AGridPawn::OnAnyTurnStart);
 	TurnManager->OnTurnEnd().AddDynamic(this, &AGridPawn::OnAnyTurnEnd);
+	TurnManager->OnTeamTurnStart().AddDynamic(this, &AGridPawn::OnAnyTeamTurnStart);
+	TurnManager->OnTeamTurnEnd().AddDynamic(this, &AGridPawn::OnAnyTeamTurnEnd);
 	TurnManager->OnReadyForInput().AddDynamic(this, &AGridPawn::OnAnyPawnReadyForInput);
 
 	SetGenericTeamId(TeamId);
@@ -143,6 +145,22 @@ void AGridPawn::OnTurnEnd()
 {
 	SelectedHighlight->SetVisibility(false);
 	MovementComponent->HidePath();
+}
+
+void AGridPawn::OnAnyTeamTurnStart(const FGenericTeamId & InTeamId)
+{
+	if (InTeamId == GetGenericTeamId())
+	{
+		OnTeamTurnStart();
+	}
+}
+
+void AGridPawn::OnAnyTeamTurnEnd(const FGenericTeamId & InTeamId)
+{
+	if (InTeamId == GetGenericTeamId())
+	{
+		OnTeamTurnEnd();
+	}
 }
 
 void AGridPawn::OnMoveEnd()

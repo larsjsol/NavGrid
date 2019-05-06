@@ -11,6 +11,8 @@ class UTurnComponent;
 //Declare delegates
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnStart, UTurnComponent *, TurnComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTurnEnd, UTurnComponent *, TurnComponent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTeamTurnStart, const FGenericTeamId &, TeamId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTeamTurnEnd, const FGenericTeamId &, TeamId);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReadyForInput, UTurnComponent *, TurnComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundStart);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundEnd);
@@ -78,6 +80,10 @@ private:
 	UPROPERTY(BlueprintAssignable)
 	FOnTurnEnd OnTurnEndDelegate;
 	UPROPERTY(BlueprintAssignable)
+	FOnTeamTurnStart OnTeamTurnStartDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnTeamTurnEnd OnTeamTurnEndDelegate;
+	UPROPERTY(BlueprintAssignable)
 	FOnReadyForInput OnReadyForInputDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnRoundStart OnRoundStartDelegate;
@@ -87,6 +93,8 @@ private:
 public:
 	virtual FOnTurnStart& OnTurnStart() { return OnTurnStartDelegate; }
 	virtual FOnTurnEnd& OnTurnEnd() { return OnTurnEndDelegate; }
+	virtual FOnTeamTurnStart& OnTeamTurnStart() { return OnTeamTurnStartDelegate; }
+	virtual FOnTeamTurnEnd& OnTeamTurnEnd() { return OnTeamTurnEndDelegate; }
 	virtual FOnReadyForInput& OnReadyForInput() { return OnReadyForInputDelegate; }
 	virtual FOnRoundStart& OnRoundStart() { return OnRoundStartDelegate; }
 	virtual FOnRoundEnd& OnRoundEnd() { return OnRoundEndDelegate; }
