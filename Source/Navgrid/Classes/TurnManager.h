@@ -60,7 +60,7 @@ public:
 	bool EndTeamTurn(FGenericTeamId InTeamId);
 	/* request to immediatly start the turn for the supplied component. Return false if the request is denied */
 	UFUNCTION(BlueprintCallable)
-	bool RequestStartTurn(UTurnComponent *CallingComponent);
+	bool RequestStartTurn(UTurnComponent *CallingComponent, bool bIgnoreRemainingActionPoints = false);
 	UFUNCTION(BlueprintCallable)
 	bool RequestStartNextComponent(UTurnComponent *CallingComponent);
 	/* Return the component whos turn it is */
@@ -103,4 +103,5 @@ protected:
 	int32 Round;
 
 	FTimerHandle TurnDelayHandle;
+	bool bIgnoreActionPointsForNextComponent;
 };

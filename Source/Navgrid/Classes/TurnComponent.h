@@ -35,7 +35,7 @@ public:
 	void EndTurn() { TurnManager->EndTurn(this); }
 	void EndTeamTurn() { TurnManager->EndTeamTurn(FGenericTeamId::GetTeamIdentifier(GetOwner())); }
 	/* request the turn manager to start a turn for this component */
-	bool RequestStartTurn() { return TurnManager->RequestStartTurn(this); }
+	bool RequestStartTurn(bool bIgnoreRemainingActionPoints = false) { return TurnManager->RequestStartTurn(this, bIgnoreRemainingActionPoints); }
 	/* request that the turn manager starts the turn for the next component on our team */
 	bool RequestStartNextComponent() { return TurnManager->RequestStartNextComponent(this); }
 
@@ -49,4 +49,9 @@ public:
 	/* which team this component is a part of */
 	UFUNCTION(BlueprintPure)
 	FGenericTeamId TeamId() const { return FGenericTeamId::GetTeamIdentifier(GetOwner()); }
+
+	// register with the turn manager in order to get to take turns
+	void RegisterWithTurnManager();
+	// unregister, this compnent will no longer get to take turns
+	void UnregisterWithTurnManager();
 };

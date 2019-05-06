@@ -17,7 +17,8 @@ ATurnManager::ATurnManager()
 	TurnDelay(0.5),
 	CurrentComponent(0),
 	CurrentTeam(0),
-	Round(1)
+	Round(1),
+	bIgnoreActionPointsForNextComponent(false)
 {
 }
 
@@ -110,11 +111,12 @@ void ATurnManager::StartTurnForNextComponent()
 
 void ATurnManager::StartTurn()
 {
-	if (Teams[CurrentTeam].HasComponentWaitingForTurn() &&
-		IsValid(Teams[CurrentTeam].Components[CurrentComponent]) &&
-		Teams[CurrentTeam].Components[CurrentComponent]->RemainingActionPoints > 0)
+	if (IsValid(Teams[CurrentTeam].Components[CurrentComponent]) &&
+		(Teams[CurrentTeam].Components[CurrentComponent]->RemainingActionPoints > 0 ||
+		bIgnoreActionPointsForNextComponent))
 	{
 		OnTurnStart().Broadcast(Teams[CurrentTeam].Components[CurrentComponent]);
+		bIgnoreActionPointsForNextComponent = false;
 	}
 	else
 	{
@@ -159,13 +161,14 @@ bool ATurnManager::EndTeamTurn(FGenericTeamId InTeamId)
 	}
 }
 
-bool ATurnManager::RequestStartTurn(UTurnComponent * CallingComponent)
+bool ATurnManager::RequestStartTurn(UTurnComponent * CallingComponent, bool bIgnoreRemainingActionPoints)
 {
-	if (CallingComponent->StartingActionPoints > 0)
+	if (CallingComponent->RemainingActionPoints > 0 || bIgnoreRemainingActionPoints)
 	{
 		OnTurnEnd().Broadcast(Teams[CurrentTeam].Components[CurrentComponent]);
 		CurrentTeam = CallingComponent->TeamId();
 		CurrentComponent = Teams[CurrentTeam].Components.Find(CallingComponent);
+		bIgnoreActionPointsForNextComponent = bIgnoreRemainingActionPoints;
 		GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurn, FMath::Max(0.01f, TurnDelay));
 		return true;
 	}

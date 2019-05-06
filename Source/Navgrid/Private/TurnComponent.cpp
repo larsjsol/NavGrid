@@ -13,13 +13,24 @@ UTurnComponent::UTurnComponent()
 void UTurnComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	TurnManager = GetWorld()->GetGameState<ANavGridGameState>()->GetTurnManager();
-	TurnManager->RegisterTurnComponent(this);
+	RegisterWithTurnManager();
 }
 
 void UTurnComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
+	UnregisterWithTurnManager();
+}
+
+void UTurnComponent::RegisterWithTurnManager()
+{
+	UnregisterWithTurnManager();
+	TurnManager = GetWorld()->GetGameState<ANavGridGameState>()->GetTurnManager();
+	TurnManager->RegisterTurnComponent(this);
+}
+
+void UTurnComponent::UnregisterWithTurnManager()
+{
 	if (IsValid(TurnManager))
 	{
 		TurnManager->UnregisterTurnComponent(this);
