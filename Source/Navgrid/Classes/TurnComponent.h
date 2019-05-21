@@ -35,9 +35,9 @@ public:
 	void EndTurn() { TurnManager->EndTurn(this); }
 	void EndTeamTurn() { TurnManager->EndTeamTurn(FGenericTeamId::GetTeamIdentifier(GetOwner())); }
 	/* request the turn manager to start a turn for this component */
-	bool RequestStartTurn(bool bIgnoreRemainingActionPoints = false) { return TurnManager->RequestStartTurn(this, bIgnoreRemainingActionPoints); }
+	void RequestStartTurn() { TurnManager->RequestStartTurn(this); }
 	/* request that the turn manager starts the turn for the next component on our team */
-	bool RequestStartNextComponent() { return TurnManager->RequestStartNextComponent(this); }
+	void RequestStartNextComponent() { TurnManager->RequestStartNextComponent(this); }
 
 	/* Used be the owning actor to notify that it is ready to receive input from a player or ai */
 	void OwnerReadyForInput() { TurnManager->OnReadyForInput().Broadcast(this); }
@@ -49,6 +49,11 @@ public:
 	/* which team this component is a part of */
 	UFUNCTION(BlueprintPure)
 	FGenericTeamId TeamId() const { return FGenericTeamId::GetTeamIdentifier(GetOwner()); }
+
+	UFUNCTION(BlueprintPure)
+	AActor *GetCurrentActor() const;
+	template <class T>
+	T *GetCurrentActor() const { return Cast<T>(GetCurrentActor()); }
 
 	// register with the turn manager in order to get to take turns
 	void RegisterWithTurnManager();

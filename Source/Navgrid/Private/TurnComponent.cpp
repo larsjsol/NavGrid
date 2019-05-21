@@ -22,6 +22,15 @@ void UTurnComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	UnregisterWithTurnManager();
 }
 
+AActor *UTurnComponent::GetCurrentActor() const
+{
+	if (IsValid(TurnManager))
+	{
+		return TurnManager->GetCurrentActor();
+	}
+	return nullptr;
+}
+
 void UTurnComponent::RegisterWithTurnManager()
 {
 	UnregisterWithTurnManager();
@@ -35,4 +44,5 @@ void UTurnComponent::UnregisterWithTurnManager()
 	{
 		TurnManager->UnregisterTurnComponent(this);
 	}
+	TurnManager = nullptr;
 }

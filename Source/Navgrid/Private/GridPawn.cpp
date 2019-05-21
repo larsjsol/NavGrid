@@ -261,7 +261,7 @@ void AGridPawn::Clicked(AActor *ClickedActor, FKey PressedKey)
 {
 	if (CanBeSelected())
 	{
-		TurnComponent->RequestStartTurn(true);
+		TurnComponent->RequestStartTurn();
 	}
 }
 

@@ -17,17 +17,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReadyForInput, UTurnComponent *, 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundStart);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoundEnd);
 
-USTRUCT()
-struct FTeam
-{
-	GENERATED_BODY()
-
-	UPROPERTY()
-	TArray<UTurnComponent *> Components;
-
-	bool HasComponentWaitingForTurn();
-};
-
 /**
 * Coordinates a set of turn components.
 *
@@ -41,7 +30,7 @@ class NAVGRID_API ATurnManager : public AActor
 	GENERATED_BODY()
 public:
 	ATurnManager();
-	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 	/* Add a turn component to be managed */
 	UFUNCTION(BlueprintCallable)
@@ -49,30 +38,34 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UnregisterTurnComponent(UTurnComponent *TurnComponent);
 
-protected:
-	void StartTurnForNextComponent();
-	void StartTurn();
-
-public:
 	/* End the turn for the current turn component */
 	UFUNCTION(BlueprintCallable)
-	bool EndTurn(UTurnComponent *Ender);
+	void EndTurn(UTurnComponent *Ender);
 	/* End the turn for all components of the current team */
 	UFUNCTION(BlueprintCallable)
-	bool EndTeamTurn(FGenericTeamId InTeamId);
+	void EndTeamTurn(FGenericTeamId InTeamId);
 	/* request to immediatly start the turn for the supplied component. Return false if the request is denied */
 	UFUNCTION(BlueprintCallable)
-	bool RequestStartTurn(UTurnComponent *CallingComponent, bool bIgnoreRemainingActionPoints = false);
+	void RequestStartTurn(UTurnComponent *CallingComponent);
 	UFUNCTION(BlueprintCallable)
-	bool RequestStartNextComponent(UTurnComponent *CallingComponent);
-	/* Return the component whos turn it is */
+	void RequestStartNextComponent(UTurnComponent *CallingComponent);
 	UFUNCTION(BlueprintPure)
-	UTurnComponent *GetCurrentComponent();
+	UTurnComponent *GetCurrentComponent() const { return CurrentComponent; }
 	UFUNCTION(BlueprintPure)
-	FGenericTeamId GetCurrentTeam() const { return CurrentTeam; }
+	FGenericTeamId GetCurrentTeam() const;
+
+	AActor *GetCurrentActor() const;
+	template <class T>
+	T* GetCurrentActor() const { return Cast<T>(GetCurrentActor()); }
 
 	UFUNCTION(BlueprintPure)
 	int32 GetRound() const { return Round; }
+
+protected:
+	// find the next team member that can act this turn
+	UTurnComponent *FindNextTeamMember(const FGenericTeamId &TeamId);
+	UTurnComponent *FindNextComponent();
+	bool HasComponentsThatCanAct();
 
 private:
 	UPROPERTY(BlueprintAssignable)
@@ -99,17 +92,12 @@ public:
 	virtual FOnRoundStart& OnRoundStart() { return OnRoundStartDelegate; }
 	virtual FOnRoundEnd& OnRoundEnd() { return OnRoundEndDelegate; }
 
-	/* wait for this long between each turn */
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Turn Manager")
-	float TurnDelay;
-
 protected:
 	UPROPERTY()
-	TMap<FGenericTeamId, FTeam> Teams;
-	int32 CurrentComponent;
-	FGenericTeamId CurrentTeam;
+	UTurnComponent *CurrentComponent;
+	UPROPERTY()
+	UTurnComponent *NextComponent;
+	TMultiMap<FGenericTeamId, UTurnComponent *> Teams;
 	int32 Round;
-
-	FTimerHandle TurnDelayHandle;
-	bool bIgnoreActionPointsForNextComponent;
+	bool bStartNewTurn;
 };

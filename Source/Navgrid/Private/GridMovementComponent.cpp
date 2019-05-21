@@ -140,6 +140,14 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	}
 }
 
+void UGridMovementComponent::StopMovementImmediately()
+{
+	ChangeMovementMode(EGridMovementMode::Stationary);
+	MovementPhase = EGridMovementPhase::Done;
+	Distance = 0;
+	Spline->ClearSplinePoints();
+}
+
 FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 {
 	/* Check if we can get the speed from root motion */
@@ -234,7 +242,7 @@ void UGridMovementComponent::ConsiderUpdateCurrentTile()
 	{
 		UNavTileComponent *NewTile = Grid->GetTile(GetActorLocation(), MovementMode != EGridMovementMode::ClimbingDown &&
 			MovementMode != EGridMovementMode::ClimbingUp);
-		if (IsValid(NewTile))
+		if (IsValid(NewTile) && NewTile != CurrentTile)
 		{
 			CurrentTile = NewTile;
 

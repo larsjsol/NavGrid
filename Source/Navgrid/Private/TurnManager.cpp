@@ -1,208 +1,194 @@
 #include "NavGridPrivatePCH.h"
 
-bool FTeam::HasComponentWaitingForTurn()
+ATurnManager::ATurnManager() :
+	CurrentComponent(nullptr),
+	NextComponent(nullptr),
+	Round(0),
+	bStartNewTurn(true)
 {
-	for (UTurnComponent *Comp : Components)
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+void ATurnManager::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bStartNewTurn && Teams.Num())
 	{
-		if (IsValid(Comp) && Comp->RemainingActionPoints > 0)
+		// broadcast TurnEnd and TeamTurnEnd
+		if (IsValid(CurrentComponent))
 		{
-			return true;
+			OnTurnEnd().Broadcast(CurrentComponent);
+			if (!IsValid(FindNextTeamMember(CurrentComponent->TeamId())))
+			{
+				OnTeamTurnEnd().Broadcast(CurrentComponent->TeamId());
+			}
 		}
+
+		// start a new round if no more components can act this turn
+		if (Round == 0 || !HasComponentsThatCanAct())
+		{
+			if (Round > 0)
+			{
+				OnRoundEnd().Broadcast();
+			}
+
+			for (TPair<FGenericTeamId, UTurnComponent *> &Pair : Teams)
+			{
+				Pair.Value->RemainingActionPoints = Pair.Value->StartingActionPoints;
+			}
+
+			CurrentComponent = nullptr;
+			NextComponent = nullptr;
+
+			Round++;
+			OnRoundStart().Broadcast();
+		}
+
+		// figure out which component that has the next turn
+		if (!IsValid(NextComponent))
+		{
+			if (IsValid(CurrentComponent) && CurrentComponent->RemainingActionPoints > 0)
+			{
+				NextComponent = CurrentComponent;
+			}
+			else
+			{
+				NextComponent = FindNextComponent();
+			}
+		}
+
+		// broadcast TurnStart and TeamTurnStart
+		if (IsValid(NextComponent))
+		{
+			UTurnComponent *PreviousComponent = CurrentComponent;
+			CurrentComponent = NextComponent;
+			if (!IsValid(PreviousComponent) || CurrentComponent->TeamId() != PreviousComponent->TeamId())
+			{
+				OnTeamTurnStart().Broadcast(CurrentComponent->TeamId());
+			}
+			OnTurnStart().Broadcast(CurrentComponent);
+		}
+
+		NextComponent = nullptr;
+		bStartNewTurn = false;
 	}
-	return false;
-}
-
-ATurnManager::ATurnManager()
-	:Super(),
-	TurnDelay(0.5),
-	CurrentComponent(0),
-	CurrentTeam(0),
-	Round(1),
-	bIgnoreActionPointsForNextComponent(false)
-{
-}
-
-void ATurnManager::BeginPlay()
-{
-	Super::BeginPlay();
-	OnRoundStart().Broadcast();
-	GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurn, FMath::Max(0.01f, TurnDelay));
 }
 
 void ATurnManager::RegisterTurnComponent(UTurnComponent *TurnComponent)
 {
-	check(IsValid(TurnComponent));
-	if (!Teams.Contains(TurnComponent->TeamId()))
-	{
-		Teams.Add(TurnComponent->TeamId(), FTeam());
-	}
-	Teams[TurnComponent->TeamId()].Components.AddUnique(TurnComponent);
+	Teams.AddUnique(TurnComponent->TeamId(), TurnComponent);
 }
 
 void ATurnManager::UnregisterTurnComponent(UTurnComponent * TurnComponent)
 {
-	if (Teams.Contains(TurnComponent->TeamId()))
+	Teams.RemoveSingle(TurnComponent->TeamId(), TurnComponent);
+	if (CurrentComponent == TurnComponent)
 	{
-		FTeam &Team = Teams[TurnComponent->TeamId()];
-		Team.Components.Remove(TurnComponent);
-		if (Team.Components.Num() == 0)
+		CurrentComponent = nullptr;
+		bStartNewTurn = true;
+	}
+}
+
+void ATurnManager::EndTurn(UTurnComponent *Ender)
+{
+	if (Ender == CurrentComponent)
+	{
+		bStartNewTurn = true;
+	}
+}
+
+void ATurnManager::EndTeamTurn(FGenericTeamId InTeamId)
+{
+	if (CurrentComponent->TeamId() == InTeamId)
+	{
+		TArray<UTurnComponent *> TeamMemebers;
+		Teams.MultiFind(InTeamId, TeamMemebers);
+		for (UTurnComponent *Member : TeamMemebers)
 		{
-			Teams.Remove(TurnComponent->TeamId());
+			Member->RemainingActionPoints = 0;
+		}
+
+		bStartNewTurn = true;
+	}
+}
+
+void ATurnManager::RequestStartTurn(UTurnComponent * CallingComponent)
+{
+	if (!IsValid(CurrentComponent) || CurrentComponent->TeamId() == CallingComponent->TeamId())
+	{
+		NextComponent = CallingComponent;
+		bStartNewTurn = true;
+	}
+}
+
+void ATurnManager::RequestStartNextComponent(UTurnComponent *CallingComponent)
+{
+	if (IsValid(CurrentComponent) && CurrentComponent->TeamId() == CallingComponent->TeamId())
+	{
+		UTurnComponent *Candidate = FindNextTeamMember(CallingComponent->TeamId());
+		if (IsValid(Candidate))
+		{
+			NextComponent = Candidate;
+			bStartNewTurn = true;
 		}
 	}
 }
 
-void ATurnManager::StartTurnForNextComponent()
+FGenericTeamId ATurnManager::GetCurrentTeam() const
 {
-	check(Teams.Num() > 0);
+	return CurrentComponent ? CurrentComponent->TeamId() : FGenericTeamId::NoTeam;
+}
 
-	TArray<FGenericTeamId> TeamIdArray;
-	Teams.GenerateKeyArray(TeamIdArray);
+AActor *ATurnManager::GetCurrentActor() const
+{
+	return IsValid(CurrentComponent) ? CurrentComponent->GetOwner() : nullptr;
+}
 
-	bool bStartNewRound = false;
-
-	// first, find the correct team
-	if (!Teams.Contains(CurrentTeam) || !Teams[CurrentTeam].HasComponentWaitingForTurn())
+UTurnComponent * ATurnManager::FindNextTeamMember(const FGenericTeamId & TeamId)
+{
+	TArray<UTurnComponent *> TeamMembers;
+	Teams.MultiFind(TeamId, TeamMembers, true);
+	int32 StartIndex;
+	TeamMembers.Find(CurrentComponent, StartIndex);
+	for (int32 Idx = 1; Idx < TeamMembers.Num(); Idx++)
 	{
-		bStartNewRound = true; // start a new round if no teams have members that are waiting for their turn
-		for (FGenericTeamId &TeamId : TeamIdArray)
+		UTurnComponent *Candidate = TeamMembers[(StartIndex + Idx) % TeamMembers.Num()];
+		if (Candidate->RemainingActionPoints > 0)
 		{
-			if (Teams[TeamId].HasComponentWaitingForTurn())
-			{
-				OnTeamTurnEnd().Broadcast(CurrentTeam);
-				CurrentTeam = TeamId;
-				OnTeamTurnStart().Broadcast(CurrentTeam);
-				bStartNewRound = false;
-				break;
-			}
+			return Candidate;
+		}
+	}
+	return nullptr;
+}
+
+UTurnComponent * ATurnManager::FindNextComponent()
+{
+	TArray<FGenericTeamId> TeamIds;
+	Teams.GenerateKeyArray(TeamIds);
+	TeamIds.Sort();
+	for (FGenericTeamId &TeamId : TeamIds)
+	{
+		UTurnComponent *Candidate = FindNextTeamMember(TeamId);
+		if (IsValid(Candidate))
+		{
+			return Candidate;
 		}
 	}
 
-	if (bStartNewRound)
+	return nullptr;
+}
+
+bool ATurnManager::HasComponentsThatCanAct()
+{
+	for (TPair<FGenericTeamId, UTurnComponent *> &Pair : Teams)
 	{
-		OnRoundEnd().Broadcast();
-		OnTeamTurnEnd().Broadcast(CurrentTeam);
-		for (FGenericTeamId &TeamId : TeamIdArray)
+		if (Pair.Value->RemainingActionPoints > 0)
 		{
-			for (UTurnComponent *Comp : Teams[TeamId].Components)
-			{
-				Comp->RemainingActionPoints = Comp->StartingActionPoints;
-			}
-		}
-		CurrentComponent = 0;
-		CurrentTeam = TeamIdArray[0];
-		OnRoundStart().Broadcast();
-		OnTeamTurnStart().Broadcast(CurrentTeam);
-		Round++;
-	}
-	else
-	{
-		// go through the list of components, starting with the one follonwing the current component
-		for (int32 Idx = 1; Idx <= Teams[CurrentTeam].Components.Num(); Idx++)
-		{
-			int32 CandidateComponentIndex = (CurrentComponent + Idx) % Teams[CurrentTeam].Components.Num();
-			UTurnComponent *Comp = Teams[CurrentTeam].Components[CandidateComponentIndex];
-			if (IsValid(Comp) && Comp->RemainingActionPoints > 0)
-			{
-				CurrentComponent = CandidateComponentIndex;
-				break;
-			}
+			return true;
 		}
 	}
 
-	GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurn, FMath::Max(0.01f, TurnDelay));
+	return false;
 }
 
-void ATurnManager::StartTurn()
-{
-	if (IsValid(Teams[CurrentTeam].Components[CurrentComponent]) &&
-		(Teams[CurrentTeam].Components[CurrentComponent]->RemainingActionPoints > 0 ||
-		bIgnoreActionPointsForNextComponent))
-	{
-		OnTurnStart().Broadcast(Teams[CurrentTeam].Components[CurrentComponent]);
-		bIgnoreActionPointsForNextComponent = false;
-	}
-	else
-	{
-		StartTurnForNextComponent();
-	}
-}
-
-bool ATurnManager::EndTurn(UTurnComponent *Ender)
-{
-	if (Ender == Teams[CurrentTeam].Components[CurrentComponent])
-	{
-		OnTurnEnd().Broadcast(Ender);
-		GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurn, FMath::Max(0.01f, TurnDelay));
-		return true;
-	}
-	else
-	{
-		UE_LOG(NavGrid, Error, TEXT("EndTurn(%s) was called out of turn"), *Ender->GetName());
-		return false;
-	}
-}
-
-bool ATurnManager::EndTeamTurn(FGenericTeamId InTeamId)
-{
-	if (InTeamId == CurrentTeam)
-	{
-		for (UTurnComponent *Comp : Teams[CurrentTeam].Components)
-		{
-			if (Comp->RemainingActionPoints > 0)
-			{
-				Comp->RemainingActionPoints = 0;
-				OnTurnEnd().Broadcast(Comp);
-			}
-		}
-		GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurn, FMath::Max(0.01f, TurnDelay));
-		return true;
-	}
-	else
-	{
-		UE_LOG(NavGrid, Error, TEXT("EndTurn(%i) was called out of turn"), InTeamId.GetId());
-		return false;
-	}
-}
-
-bool ATurnManager::RequestStartTurn(UTurnComponent * CallingComponent, bool bIgnoreRemainingActionPoints)
-{
-	if (CallingComponent->RemainingActionPoints > 0 || bIgnoreRemainingActionPoints)
-	{
-		OnTurnEnd().Broadcast(Teams[CurrentTeam].Components[CurrentComponent]);
-		CurrentTeam = CallingComponent->TeamId();
-		CurrentComponent = Teams[CurrentTeam].Components.Find(CallingComponent);
-		bIgnoreActionPointsForNextComponent = bIgnoreRemainingActionPoints;
-		GetWorldTimerManager().SetTimer(TurnDelayHandle, this, &ATurnManager::StartTurn, FMath::Max(0.01f, TurnDelay));
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-bool ATurnManager::RequestStartNextComponent(UTurnComponent *CallingComponent)
-{
-	if (CallingComponent->TeamId() == CurrentTeam && Teams[CurrentTeam].HasComponentWaitingForTurn())
-	{
-		StartTurnForNextComponent();
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-UTurnComponent *ATurnManager::GetCurrentComponent()
-{
-	if (Teams.Contains(CurrentTeam) && Teams[CurrentTeam].Components.Num() > CurrentComponent)
-	{
-		return Teams[CurrentTeam].Components[CurrentComponent];
-	}
-	else
-	{
-		return nullptr;
-	}
-}

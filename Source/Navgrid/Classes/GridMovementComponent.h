@@ -55,6 +55,7 @@ public:
 	UGridMovementComponent(const FObjectInitializer &ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
+	virtual void StopMovementImmediately() override;
 
 protected:
 	/* return an transform usable for following the spline path */
