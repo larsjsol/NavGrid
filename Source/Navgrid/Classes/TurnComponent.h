@@ -23,6 +23,9 @@ public:
 protected:
 	UPROPERTY()
 	ATurnManager *TurnManager;
+	UFUNCTION()
+	void OnTurnTimeout();
+	FTimerHandle TurnTimeoutHandle;
 public:
 	/* The number of actions this pawn can perform in a single round */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite)
@@ -30,6 +33,10 @@ public:
 	/* Remaining actions that this pawn can perform this round */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	int32 RemainingActionPoints;
+
+	/* end this turn after the given amount of time has passed. Set to 0 to disable */
+	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite)
+	float TurnTimeout;
 
 	/* Tell the manager that we are done acting for this round*/
 	void EndTurn() { TurnManager->EndTurn(this); }
@@ -59,4 +66,8 @@ public:
 	void RegisterWithTurnManager();
 	// unregister, this compnent will no longer get to take turns
 	void UnregisterWithTurnManager();
+
+	// called by the turn manager
+	void OnTurnStart();
+	void OnTurnEnd();
 };

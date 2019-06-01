@@ -6,7 +6,8 @@ UTurnComponent::UTurnComponent()
 	:Super(),
 	TurnManager(nullptr),
 	StartingActionPoints(1),
-	RemainingActionPoints(1)
+	RemainingActionPoints(1),
+	TurnTimeout(30)
 {
 }
 
@@ -20,6 +21,16 @@ void UTurnComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 	UnregisterWithTurnManager();
+}
+
+void UTurnComponent::OnTurnTimeout()
+{
+	if (MyTurn())
+	{
+		UE_LOG(NavGrid, Warning, TEXT("Turn timeout (%f sec) reached for %s"), TurnTimeout, *GetName());
+		RemainingActionPoints = 0;
+		EndTurn();
+	}
 }
 
 AActor *UTurnComponent::GetCurrentActor() const
@@ -45,4 +56,14 @@ void UTurnComponent::UnregisterWithTurnManager()
 		TurnManager->UnregisterTurnComponent(this);
 	}
 	TurnManager = nullptr;
+}
+
+void UTurnComponent::OnTurnStart()
+{
+	GetWorld()->GetTimerManager().SetTimer(TurnTimeoutHandle, this, &UTurnComponent::OnTurnTimeout, TurnTimeout);
+}
+
+void UTurnComponent::OnTurnEnd()
+{
+	GetWorld()->GetTimerManager().ClearTimer(TurnTimeoutHandle);
 }
