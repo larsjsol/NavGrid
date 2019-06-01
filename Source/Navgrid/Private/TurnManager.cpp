@@ -18,6 +18,7 @@ void ATurnManager::Tick(float DeltaTime)
 		// broadcast TurnEnd and TeamTurnEnd
 		if (IsValid(CurrentComponent))
 		{
+			CurrentComponent->OnTurnEnd();
 			OnTurnEnd().Broadcast(CurrentComponent);
 			if (!IsValid(FindNextTeamMember(CurrentComponent->TeamId())))
 			{
@@ -46,7 +47,7 @@ void ATurnManager::Tick(float DeltaTime)
 		}
 
 		// figure out which component that has the next turn
-		if (!IsValid(NextComponent))
+		if (!IsValid(NextComponent) || NextComponent->RemainingActionPoints <= 0)
 		{
 			if (IsValid(CurrentComponent) && CurrentComponent->RemainingActionPoints > 0)
 			{
@@ -59,16 +60,15 @@ void ATurnManager::Tick(float DeltaTime)
 		}
 
 		// broadcast TurnStart and TeamTurnStart
-		if (IsValid(NextComponent))
+		check(IsValid(NextComponent))
+		UTurnComponent *PreviousComponent = CurrentComponent;
+		CurrentComponent = NextComponent;
+		if (!IsValid(PreviousComponent) || CurrentComponent->TeamId() != PreviousComponent->TeamId())
 		{
-			UTurnComponent *PreviousComponent = CurrentComponent;
-			CurrentComponent = NextComponent;
-			if (!IsValid(PreviousComponent) || CurrentComponent->TeamId() != PreviousComponent->TeamId())
-			{
-				OnTeamTurnStart().Broadcast(CurrentComponent->TeamId());
-			}
-			OnTurnStart().Broadcast(CurrentComponent);
+			OnTeamTurnStart().Broadcast(CurrentComponent->TeamId());
 		}
+		CurrentComponent->OnTurnStart();
+		OnTurnStart().Broadcast(CurrentComponent);
 
 		NextComponent = nullptr;
 		bStartNewTurn = false;
@@ -88,6 +88,10 @@ void ATurnManager::UnregisterTurnComponent(UTurnComponent * TurnComponent)
 		CurrentComponent = nullptr;
 		bStartNewTurn = true;
 	}
+	if (NextComponent == TurnComponent)
+	{
+		NextComponent = nullptr;
+	}
 }
 
 void ATurnManager::EndTurn(UTurnComponent *Ender)
@@ -95,6 +99,17 @@ void ATurnManager::EndTurn(UTurnComponent *Ender)
 	if (Ender == CurrentComponent)
 	{
 		bStartNewTurn = true;
+	}
+	else
+	{
+		if (IsValid(CurrentComponent))
+		{
+			UE_LOG(NavGrid, Warning, TEXT("ATurnManager::EndTurn(%s): CurrentComopnent: %s"), *Ender->GetOwner()->GetName(), *CurrentComponent->GetOwner()->GetName());
+		}
+		else
+		{
+			UE_LOG(NavGrid, Warning, TEXT("ATurnManager::EndTurn(%s): CurrentComonent: null"), *Ender->GetOwner()->GetName());
+		}
 	}
 }
 
@@ -151,7 +166,7 @@ UTurnComponent * ATurnManager::FindNextTeamMember(const FGenericTeamId & TeamId)
 	Teams.MultiFind(TeamId, TeamMembers, true);
 	int32 StartIndex;
 	TeamMembers.Find(CurrentComponent, StartIndex);
-	for (int32 Idx = 1; Idx < TeamMembers.Num(); Idx++)
+	for (int32 Idx = 1; Idx <= TeamMembers.Num(); Idx++)
 	{
 		UTurnComponent *Candidate = TeamMembers[(StartIndex + Idx) % TeamMembers.Num()];
 		if (Candidate->RemainingActionPoints > 0)
