@@ -27,7 +27,7 @@ void UTurnComponent::OnTurnTimeout()
 {
 	if (MyTurn())
 	{
-		UE_LOG(NavGrid, Warning, TEXT("Turn timeout (%f sec) reached for %s"), TurnTimeout, *GetName());
+		UE_LOG(NavGrid, Warning, TEXT("Turn timeout (%f sec) reached for %s"), TurnTimeout, *GetOwner()->GetName());
 		RemainingActionPoints = 0;
 		EndTurn();
 	}

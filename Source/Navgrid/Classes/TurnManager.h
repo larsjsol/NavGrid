@@ -38,6 +38,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UnregisterTurnComponent(UTurnComponent *TurnComponent);
 
+	/* minumuim number of teams needed to start a new turn */
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite)
+	int32 MinNumberOfTeams;
+
 	/* End the turn for the current turn component */
 	UFUNCTION(BlueprintCallable)
 	void EndTurn(UTurnComponent *Ender);
@@ -93,11 +97,12 @@ public:
 	virtual FOnRoundEnd& OnRoundEnd() { return OnRoundEndDelegate; }
 
 protected:
-	UPROPERTY()
+	UPROPERTY(VisibleAnyWhere)
 	UTurnComponent *CurrentComponent;
 	UPROPERTY()
 	UTurnComponent *NextComponent;
 	TMultiMap<FGenericTeamId, UTurnComponent *> Teams;
+	UPROPERTY(VisibleAnyWhere)
 	int32 Round;
 	bool bStartNewTurn;
 };

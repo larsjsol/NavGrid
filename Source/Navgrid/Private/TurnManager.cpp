@@ -1,6 +1,7 @@
 #include "NavGridPrivatePCH.h"
 
 ATurnManager::ATurnManager() :
+	MinNumberOfTeams(1),
 	CurrentComponent(nullptr),
 	NextComponent(nullptr),
 	Round(0),
@@ -13,7 +14,9 @@ void ATurnManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bStartNewTurn && Teams.Num())
+	TArray<FGenericTeamId> Keys;
+	Teams.GetKeys(Keys);
+	if (bStartNewTurn && Keys.Num() >= MinNumberOfTeams)
 	{
 		// broadcast TurnEnd and TeamTurnEnd
 		if (IsValid(CurrentComponent))
