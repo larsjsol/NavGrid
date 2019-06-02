@@ -38,16 +38,16 @@ public:
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite)
 	float TurnTimeout;
 
-	/* Tell the manager that we are done acting for this round*/
-	void EndTurn() { TurnManager->EndTurn(this); }
-	void EndTeamTurn() { TurnManager->EndTeamTurn(FGenericTeamId::GetTeamIdentifier(GetOwner())); }
+	/* Tell the manager to end the turn for this component */
+	void EndTurn();
+	void EndTeamTurn();
 	/* request the turn manager to start a turn for this component */
-	void RequestStartTurn() { TurnManager->RequestStartTurn(this); }
+	void RequestStartTurn();
 	/* request that the turn manager starts the turn for the next component on our team */
-	void RequestStartNextComponent() { TurnManager->RequestStartNextComponent(this); }
+	void RequestStartNextComponent();
 
 	/* Used be the owning actor to notify that it is ready to receive input from a player or ai */
-	void OwnerReadyForInput() { TurnManager->OnReadyForInput().Broadcast(this); }
+	void OwnerReadyForInput();
 
 	/* is it this components turn? */
 	UFUNCTION(BlueprintPure)

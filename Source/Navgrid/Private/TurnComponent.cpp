@@ -23,6 +23,39 @@ void UTurnComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	UnregisterWithTurnManager();
 }
 
+void UTurnComponent::EndTurn()
+{
+	if (IsValid(TurnManager))
+	{
+		TurnManager->EndTurn(this);
+	}
+}
+
+void UTurnComponent::EndTeamTurn()
+{
+	if (IsValid(TurnManager))
+	{
+		TurnManager->EndTeamTurn(FGenericTeamId::GetTeamIdentifier(GetOwner()));
+	}
+}
+
+void UTurnComponent::RequestStartTurn()
+{
+	if (IsValid(TurnManager))
+	{
+		TurnManager->RequestStartTurn(this);
+
+	}
+}
+
+void UTurnComponent::RequestStartNextComponent()
+{
+	if (IsValid(TurnManager))
+	{
+		TurnManager->RequestStartNextComponent(this);
+	}
+}
+
 void UTurnComponent::OnTurnTimeout()
 {
 	if (MyTurn())
@@ -30,6 +63,14 @@ void UTurnComponent::OnTurnTimeout()
 		UE_LOG(NavGrid, Warning, TEXT("Turn timeout (%f sec) reached for %s"), TurnTimeout, *GetOwner()->GetName());
 		RemainingActionPoints = 0;
 		EndTurn();
+	}
+}
+
+void UTurnComponent::OwnerReadyForInput()
+{
+	if (IsValid(TurnManager) && TurnManager->GetCurrentComponent() == this)
+	{
+		TurnManager->OnReadyForInput().Broadcast(this);
 	}
 }
 
