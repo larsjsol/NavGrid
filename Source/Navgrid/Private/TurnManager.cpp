@@ -46,6 +46,7 @@ void ATurnManager::Tick(float DeltaTime)
 			NextComponent = nullptr;
 
 			Round++;
+			UE_LOG(NavGrid, Log, TEXT("Starting round %i"), Round);
 			OnRoundStart().Broadcast();
 		}
 
@@ -68,6 +69,7 @@ void ATurnManager::Tick(float DeltaTime)
 		CurrentComponent = NextComponent;
 		if (!IsValid(PreviousComponent) || CurrentComponent->TeamId() != PreviousComponent->TeamId())
 		{
+			UE_LOG(NavGrid, Log, TEXT("Starting team turn for team %i"), CurrentComponent->TeamId().GetId());
 			OnTeamTurnStart().Broadcast(CurrentComponent->TeamId());
 		}
 		CurrentComponent->OnTurnStart();
