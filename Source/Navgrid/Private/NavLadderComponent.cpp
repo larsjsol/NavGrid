@@ -5,12 +5,6 @@
 UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	BottomPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("BottomPathPoint"));
-	BottomPathPoint->SetupAttachment(this);
-
-	TopPathPoint = CreateDefaultSubobject<USceneComponent>(TEXT("TopPathPoint"));
-	TopPathPoint->SetupAttachment(this);
-
 	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
 	ArrowComponent->SetupAttachment(this);
 
@@ -22,15 +16,7 @@ UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitial
 void UNavLadderComponent::SetGrid(ANavGrid *InGrid)
 {
 	Super::SetGrid(InGrid);
-
-	PawnLocationOffset = GetComponentRotation().RotateVector(FVector(90, 0, 0));
-	BottomPathPoint->SetRelativeLocation(FVector(Grid->TileSize * 0.75, 0, 50 - BoxExtent.Z));
-	TopPathPoint->SetRelativeLocation(FVector(Grid->TileSize / 2, 0, BoxExtent.Z - 25));
-}
-
-FVector UNavLadderComponent::GetPawnLocation() const
-{
-	return (BottomPathPoint->GetComponentLocation() + TopPathPoint->GetComponentLocation()) / 2;
+	TileSize = InGrid->TileSize;
 }
 
 void UNavLadderComponent::GetNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutUnObstructed, TArray<UNavTileComponent *> &OutObstructed)
@@ -56,9 +42,9 @@ void UNavLadderComponent::GetNeighbours(const UCapsuleComponent &CollisionCapsul
 		for (UNavTileComponent *N : AllNeighbours)
 		{
 			//Determine if we should trace from the top or bottom point
-			float TopDistance = (TopPathPoint->GetComponentLocation() - N->GetPawnLocation()).Size();
-			float BottomDistance = (BottomPathPoint->GetComponentLocation() - N->GetPawnLocation()).Size();
-			FVector TracePoint = TopDistance < BottomDistance ? TopPathPoint->GetComponentLocation() : BottomPathPoint->GetComponentLocation();
+			float TopDistance = (GetTopPathPoint() - N->GetPawnLocation()).Size();
+			float BottomDistance = (GetBottomPathPoint() - N->GetPawnLocation()).Size();
+			FVector TracePoint = TopDistance < BottomDistance ? GetTopPathPoint() : GetBottomPathPoint();
 			if (N->Obstructed(TracePoint, CollisionCapsule))
 			{
 				OutObstructed.Add(N);
@@ -74,9 +60,9 @@ void UNavLadderComponent::GetNeighbours(const UCapsuleComponent &CollisionCapsul
 bool UNavLadderComponent::Obstructed(const FVector & FromPos, const UCapsuleComponent & CollisionCapsule) const
 {
 	//Determine if we should trace to the top or bottom point
-	float TopDistance = (TopPathPoint->GetComponentLocation() - FromPos).Size();
-	float BottomDistance = (BottomPathPoint->GetComponentLocation() - FromPos).Size();
-	FVector TracePoint = TopDistance < BottomDistance ? TopPathPoint->GetComponentLocation() : BottomPathPoint->GetComponentLocation();
+	float TopDistance = (GetTopPathPoint() - FromPos).Size();
+	float BottomDistance = (GetBottomPathPoint() - FromPos).Size();
+	FVector TracePoint = TopDistance < BottomDistance ? GetTopPathPoint() : GetBottomPathPoint();
 
 	FHitResult OutHit;
 	FCollisionShape CollisionShape = CollisionCapsule.GetCollisionShape();
@@ -95,8 +81,8 @@ bool UNavLadderComponent::Traversable(float MaxWalkAngle, const TSet<EGridMoveme
 void UNavLadderComponent::AddPathSegments(USplineComponent &OutSpline, TArray<FPathSegment> &OutPathSegments, bool EndTile) const
 {
 	FVector EntryPoint = OutSpline.GetLocationAtSplinePoint(OutSpline.GetNumberOfSplinePoints() - 1, ESplineCoordinateSpace::Local);
-	float TopDistance = (TopPathPoint->GetComponentLocation() - EntryPoint).Size();
-	float BottomDistance = (BottomPathPoint->GetComponentLocation() - EntryPoint).Size();
+	float TopDistance = (GetTopPathPoint() - EntryPoint).Size();
+	float BottomDistance = (GetBottomPathPoint() - EntryPoint).Size();
 
 	FPathSegment NewSegment;
 	NewSegment.MovementModes = MovementModes;
@@ -106,16 +92,16 @@ void UNavLadderComponent::AddPathSegments(USplineComponent &OutSpline, TArray<FP
 	// add spline points and segments
 	if (TopDistance > BottomDistance)
 	{
-		OutSpline.AddSplinePoint(BottomPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		OutSpline.AddSplinePoint(GetBottomPathPoint(), ESplineCoordinateSpace::Local);
 		NewSegment.Start = OutSpline.GetSplineLength();
-		OutSpline.AddSplinePoint(TopPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		OutSpline.AddSplinePoint(GetTopPathPoint(), ESplineCoordinateSpace::Local);
 		NewSegment.End = OutSpline.GetSplineLength();
 	}
 	else
 	{
-		OutSpline.AddSplinePoint(TopPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		OutSpline.AddSplinePoint(GetTopPathPoint(), ESplineCoordinateSpace::Local);
 		NewSegment.Start = OutSpline.GetSplineLength();
-		OutSpline.AddSplinePoint(BottomPathPoint->GetComponentLocation(), ESplineCoordinateSpace::Local);
+		OutSpline.AddSplinePoint(GetBottomPathPoint(), ESplineCoordinateSpace::Local);
 		NewSegment.End = OutSpline.GetSplineLength();
 	}
 
