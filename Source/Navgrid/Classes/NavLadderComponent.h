@@ -14,7 +14,7 @@ public:
 
 	virtual void SetGrid(ANavGrid *InGrid) override;
 	virtual FVector GetPawnLocation() const override;
-	virtual void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours) override;
+	virtual void GetNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutUnObstructed, TArray<UNavTileComponent *> &OutObstructed) override;
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const override;
 	virtual bool Traversable(float MaxWalkAngle, const TSet<EGridMovementMode> &PawnMovementModes) const override;
 	virtual void AddPathSegments(USplineComponent &OutSpline, TArray<FPathSegment> &OutPathSegments, bool EndTile) const override;

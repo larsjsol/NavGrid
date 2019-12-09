@@ -49,8 +49,9 @@ public:
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const;
 	/* is there anything blocking an actor from moving between From and To? Uses the capsule for collision testing */
 	virtual bool Obstructed(const FVector &From, const FVector &To, const UCapsuleComponent &CollisionCapsule) const;
+	virtual void GetNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutUnObstructed, TArray<UNavTileComponent *> &OutObstructed);
 	/* Return the neighbours that are not Obstructed() */
-	virtual void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours);
+	void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours);
 	/* Can a pawn traverse this tile?
 	*
 	* MaxWalkAngle: the pawns MaxWalkAngle
@@ -98,4 +99,6 @@ public:
 
 	/* Set a highlight for this tile */
 	virtual void SetHighlight(FName NewHighlightType);
+	/* draw debug information on the screen*/
+	virtual void DrawDebug(UCapsuleComponent *CollisionCapsule, bool bPersistentLines, float LifeTime, float Thickness);
 };

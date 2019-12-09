@@ -98,11 +98,13 @@ bool UNavTileComponent::Obstructed(const FVector &From, const FVector &To, const
 	return CollisionCapsule.GetWorld()->SweepSingleByChannel(OutHit, From, To, Rot, ECollisionChannel::ECC_Pawn, CollisionShape, CQP);
 }
 
-void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours)
+void UNavTileComponent::GetNeighbours(const UCapsuleComponent & CollisionCapsule, TArray<UNavTileComponent*>& OutUnObstructed, TArray<UNavTileComponent*>& OutObstructed)
 {
-	QUICK_SCOPE_CYCLE_COUNTER(STAT_UNavTileComponent_GetUnobstructedNeighbours);
+	QUICK_SCOPE_CYCLE_COUNTER(STAT_UNavTileComponent_GetNeighbours);
 
-	OutNeighbours.Empty();
+	OutUnObstructed.Empty();
+	OutObstructed.Empty();
+
 	if (IsValid(Grid))
 	{
 		FVector MyExtent = BoxExtent + FVector(Grid->TileSize * 0.75);
@@ -113,10 +115,20 @@ void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &Colli
 			UNavTileComponent *HitTile = Cast<UNavTileComponent>(Hit.GetComponent());
 			if (IsValid(HitTile) && HitTile != this && !HitTile->Obstructed(GetPawnLocation(), CollisionCapsule))
 			{
-				OutNeighbours.AddUnique(HitTile);
+				OutUnObstructed.AddUnique(HitTile);
+			}
+			else
+			{
+				OutObstructed.AddUnique(HitTile);
 			}
 		}
 	}
+}
+
+void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours)
+{
+	TArray<UNavTileComponent *> Dummy;
+	GetNeighbours(CollisionCapsule, OutNeighbours, Dummy);
 }
 
 void UNavTileComponent::Clicked(UPrimitiveComponent* TouchedComponent, FKey Key)
@@ -171,5 +183,26 @@ void UNavTileComponent::SetHighlight(FName NewHighlightType)
 		FTransform Transform = GetComponentTransform();
 		Transform.SetScale3D(FVector(Grid->TileSize / MeshSize.X, Grid->TileSize / MeshSize.Y, 1));
 		HighlightComponent->AddInstanceWorldSpace(Transform);
+	}
+}
+
+void UNavTileComponent::DrawDebug(UCapsuleComponent *CollisionCapsule, bool bPersistentLines, float LifeTime, float Thickness)
+{
+	DrawDebugCapsule(GetWorld(), GetPawnLocation() + CollisionCapsule->RelativeLocation, CollisionCapsule->GetScaledCapsuleHalfHeight(), CollisionCapsule->GetScaledCapsuleRadius(),
+		CollisionCapsule->GetComponentQuat(), FColor::Cyan, bPersistentLines, LifeTime, 0, Thickness);
+	DrawDebugBox(GetWorld(), GetComponentLocation(), BoxExtent, GetComponentQuat(), FColor::Cyan, bPersistentLines, LifeTime, 0, Thickness);
+	if (IsValid(Grid))
+	{
+		DrawDebugBox(GetWorld(), GetComponentLocation(), BoxExtent + FVector(Grid->TileSize * 0.75), GetComponentQuat(), FColor::Blue, bPersistentLines, LifeTime, 0, Thickness);
+	}
+	TArray<UNavTileComponent *> UnObstructed, Obstructed;
+	GetNeighbours(*CollisionCapsule, UnObstructed, Obstructed);
+	for (UNavTileComponent *Tile : UnObstructed)
+	{
+		DrawDebugLine(GetWorld(), GetPawnLocation() + CollisionCapsule->RelativeLocation, CollisionCapsule->RelativeLocation + ((GetPawnLocation() + Tile->GetPawnLocation()) / 2), FColor::Green, bPersistentLines, LifeTime, 0, Thickness);
+	}
+	for (UNavTileComponent *Tile : Obstructed)
+	{
+		DrawDebugLine(GetWorld(), GetPawnLocation() + CollisionCapsule->RelativeLocation, CollisionCapsule->RelativeLocation + ((GetPawnLocation() + Tile->GetPawnLocation()) / 2), FColor::Red, bPersistentLines, LifeTime, 0, Thickness);
 	}
 }

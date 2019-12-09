@@ -25,7 +25,7 @@ void UNavLadderComponent::SetGrid(ANavGrid *InGrid)
 
 	PawnLocationOffset = GetComponentRotation().RotateVector(FVector(90, 0, 0));
 	BottomPathPoint->SetRelativeLocation(FVector(Grid->TileSize * 0.75, 0, 50 - BoxExtent.Z));
-	TopPathPoint->SetRelativeLocation(FVector(Grid->TileSize * 0.75, 0, BoxExtent.Z - 25));
+	TopPathPoint->SetRelativeLocation(FVector(Grid->TileSize / 2, 0, BoxExtent.Z - 25));
 }
 
 FVector UNavLadderComponent::GetPawnLocation() const
@@ -33,35 +33,40 @@ FVector UNavLadderComponent::GetPawnLocation() const
 	return (BottomPathPoint->GetComponentLocation() + TopPathPoint->GetComponentLocation()) / 2;
 }
 
-void UNavLadderComponent::GetUnobstructedNeighbours(const UCapsuleComponent & CollisionCapsule, TArray<UNavTileComponent*>& OutNeighbours)
+void UNavLadderComponent::GetNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutUnObstructed, TArray<UNavTileComponent *> &OutObstructed)
 {
-	OutNeighbours.Empty();
+	OutUnObstructed.Empty();
+	OutObstructed.Empty();
 	if (IsValid(Grid))
 	{
 		FCollisionShape Shape = FCollisionShape::MakeBox(BoxExtent + FVector(Grid->TileSize / 2));
 
 		TArray<FHitResult> HitResults;
+		TArray<UNavTileComponent *> AllNeighbours;
 		Grid->GetWorld()->SweepMultiByChannel(HitResults, GetComponentLocation(), GetComponentLocation() + FVector(0, 0, 1), FQuat(), Grid->ECC_NavGridWalkable, Shape);
 		for (FHitResult &Hit : HitResults)
 		{
 			UNavTileComponent *HitTile = Cast<UNavTileComponent>(Hit.GetComponent());
 			if (IsValid(HitTile) && HitTile != this)
 			{
-				OutNeighbours.AddUnique(HitTile);
+				AllNeighbours.AddUnique(HitTile);
 			}
 		}
-	}
 
-	for (int32 Idx = OutNeighbours.Num() - 1; Idx >= 0; Idx--)
-	{
-		//Determine if we should trace from the top or bottom point
-		float TopDistance = (TopPathPoint->GetComponentLocation() - OutNeighbours[Idx]->GetPawnLocation()).Size();
-		float BottomDistance = (BottomPathPoint->GetComponentLocation() - OutNeighbours[Idx]->GetPawnLocation()).Size();
-		FVector TracePoint = TopDistance < BottomDistance ? TopPathPoint->GetComponentLocation() : BottomPathPoint->GetComponentLocation();
-
-		if (OutNeighbours[Idx]->Obstructed(TracePoint, CollisionCapsule))
+		for (UNavTileComponent *N : AllNeighbours)
 		{
-			OutNeighbours.RemoveAt(Idx);
+			//Determine if we should trace from the top or bottom point
+			float TopDistance = (TopPathPoint->GetComponentLocation() - N->GetPawnLocation()).Size();
+			float BottomDistance = (BottomPathPoint->GetComponentLocation() - N->GetPawnLocation()).Size();
+			FVector TracePoint = TopDistance < BottomDistance ? TopPathPoint->GetComponentLocation() : BottomPathPoint->GetComponentLocation();
+			if (N->Obstructed(TracePoint, CollisionCapsule))
+			{
+				OutObstructed.Add(N);
+			}
+			else
+			{
+				OutUnObstructed.Add(N);
+			}
 		}
 	}
 }
