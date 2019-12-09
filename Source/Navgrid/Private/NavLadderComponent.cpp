@@ -43,7 +43,7 @@ void UNavLadderComponent::GetNeighbours(const UCapsuleComponent &CollisionCapsul
 
 		TArray<FHitResult> HitResults;
 		TArray<UNavTileComponent *> AllNeighbours;
-		Grid->GetWorld()->SweepMultiByChannel(HitResults, GetComponentLocation(), GetComponentLocation() + FVector(0, 0, 1), FQuat(), Grid->ECC_NavGridWalkable, Shape);
+		Grid->GetWorld()->SweepMultiByChannel(HitResults, GetComponentLocation(), GetComponentLocation() + FVector(0, 0, 1), GetComponentQuat(), Grid->ECC_NavGridWalkable, Shape);
 		for (FHitResult &Hit : HitResults)
 		{
 			UNavTileComponent *HitTile = Cast<UNavTileComponent>(Hit.GetComponent());
