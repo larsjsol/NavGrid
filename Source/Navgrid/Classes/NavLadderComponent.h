@@ -12,8 +12,7 @@ class NAVGRID_API UNavLadderComponent : public UNavTileComponent
 public:
 	UNavLadderComponent(const FObjectInitializer &ObjectInitializer);
 
-	virtual void UpdateBodySetup() override;
-
+	virtual void SetGrid(ANavGrid *InGrid) override;
 	virtual FVector GetPawnLocation() const override;
 	virtual void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours) override;
 	virtual bool Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const override;

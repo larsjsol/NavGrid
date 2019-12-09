@@ -240,11 +240,18 @@ void UGridMovementComponent::ConsiderUpdateCurrentTile()
 	// actual tile with NULL as that would mean we have moved off the grid
 	if (IsValid(Grid))
 	{
-		UNavTileComponent *NewTile = Grid->GetTile(GetActorLocation(), MovementMode != EGridMovementMode::ClimbingDown &&
-			MovementMode != EGridMovementMode::ClimbingUp);
-		if (IsValid(NewTile) && NewTile != CurrentTile)
+
+		UNavTileComponent *Tile = Grid->GetTile(GetOwner()->GetActorLocation(), true);
+		if (!Tile &&
+			(AvailableMovementModes.Contains(EGridMovementMode::ClimbingDown) ||
+				AvailableMovementModes.Contains(EGridMovementMode::ClimbingUp)))
 		{
-			CurrentTile = NewTile;
+			Tile = Grid->GetTile(GetOwner()->GetActorLocation(), false);
+		}
+
+		if (IsValid(Tile) && Tile != CurrentTile)
+		{
+			CurrentTile = Tile;
 
 			ANavGridGameState *GameState = Cast<ANavGridGameState>(UGameplayStatics::GetGameState(GetOwner()));
 			AGridPawn *GridPawn = Cast<AGridPawn>(GetOwner());
@@ -255,24 +262,12 @@ void UGridMovementComponent::ConsiderUpdateCurrentTile()
 
 void UGridMovementComponent::GetTilesInRange(TArray<UNavTileComponent *> &OutTiles)
 {
-	Grid->GetTilesInRange(Cast<AGridPawn>(GetOwner()), true, OutTiles);
+	Grid->GetTilesInRange(Cast<AGridPawn>(GetOwner()), OutTiles);
 }
 
 UNavTileComponent *UGridMovementComponent::GetTile()
 {
 	return CurrentTile;
-}
-
-UNavTileComponent * UGridMovementComponent::GetTile(const FVector &Position)
-{
-	UNavTileComponent *Tile = Grid->GetTile(Position, true);
-	if (!Tile &&
-		(AvailableMovementModes.Contains(EGridMovementMode::ClimbingDown) ||
-		AvailableMovementModes.Contains(EGridMovementMode::ClimbingUp)))
-	{
-		Tile = Grid->GetTile(Position, false);
-	}
-	return Tile;
 }
 
 ANavGrid * UGridMovementComponent::GetNavGrid()
@@ -341,7 +336,7 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 	}
 
 	TArray<UNavTileComponent *> InRange;
-	Grid->GetTilesInRange(Cast<AGridPawn>(GetOwner()), true, InRange);
+	Grid->GetTilesInRange(Cast<AGridPawn>(GetOwner()), InRange);
 	if (InRange.Contains(&Target))
 	{
 		// create a list of tiles from the destination to the starting point and reverse it

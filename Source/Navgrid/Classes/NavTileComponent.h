@@ -24,14 +24,8 @@ protected:
 	UPROPERTY(Transient)
 	ANavGrid *Grid;
 public:
-	void SetGrid(ANavGrid *InGrid);
+	virtual void SetGrid(ANavGrid *InGrid);
 	ANavGrid* GetGrid() const;
-
-	// UPrimitiveComponent interface
-	virtual void DestroyComponent(bool bPromoteChildren = false) override;
-	virtual void UpdateBodySetup() override;
-	virtual void InvalidateLightingCacheDetailed(bool bInvalidateBuildEnqueuedLighting, bool bTranslationOnly) override;
-	// UPrimitiveComponent interface end
 
 // Pathing
 	/* Cost of moving into this tile*/
@@ -47,19 +41,6 @@ public:
 	/* Reset variables used in pathfinding */
 	virtual void ResetPath();
 
-protected:
-	UPROPERTY()
-	TArray<UNavTileComponent *> Neighbours;
-	void FindNeighbours();
-public:
-	/* Tiles that are reachable from this tile */
-	virtual TArray<UNavTileComponent *> *GetNeighbours() { return &Neighbours; }
-	/* Add a tile to the list of neighbouring tiles */
-	void AddNeighbour(UNavTileComponent *Neighbour) { Neighbours.AddUnique(Neighbour); }
-	/* Remove a til from the list of neighbouring tiles */
-	void RemoveNeighbour(UNavTileComponent *Neighbour) { Neighbours.Remove(Neighbour); }
-
-	FCollisionShape NeighbourhoodShape;
 	/* movement modes that are legal (or make sense) for this tile */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite)
 	TSet<EGridMovementMode> MovementModes;

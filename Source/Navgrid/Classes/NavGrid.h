@@ -75,6 +75,7 @@ public:
 	/* Get tile from world location, may return NULL */
 	virtual UNavTileComponent *GetTile(const FVector &WorldLocation, bool FindFloor = true, float UpwardTraceLength = 100, float DownwardTraceLength = 100);
 protected:
+	UNavTileComponent *LineTraceTile(const FVector &WorldLocation, bool FindFloor, float UpwardTraceLength, float DownwardTraceLength);
 	UNavTileComponent *LineTraceTile(const FVector &Start, const FVector &End);
 
 public:
@@ -84,11 +85,11 @@ public:
 
 protected:
 	/* Do pathfinding and and store all tiles that Pawn can reach in TilesInRange */
-	virtual void CalculateTilesInRange(AGridPawn *Pawn, bool DoCollisionTests);
+	virtual void CalculateTilesInRange(AGridPawn *Pawn);
 public:
 	/* Find all tiles in range. Call CalculateTilesInRange if neccecary */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
-	void GetTilesInRange(AGridPawn *Pawn, bool DoCollisionTests, TArray<UNavTileComponent *> &OutTiles);
+	void GetTilesInRange(AGridPawn *Pawn, TArray<UNavTileComponent *> &OutTiles);
 	/* Reset all pathfinding information in tiles */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void ClearTiles();
@@ -102,8 +103,6 @@ protected:
 	/* Starting Tile for the latest call to CalculcateTilesInRange() */
 	UPROPERTY()
 	UNavTileComponent *CurrentTile;
-	/* whether or not we did collision tests in the latest call to CalculateTilesInRange() */
-	bool bCurrentDoCollisionTests;
 
 public:
 	/* Triggered by mouse clicks on tiles*/
@@ -128,14 +127,12 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "NavGrid")
 	TArray<UNavTileComponent *> VirtualTiles;
-public:
 	/* place virtual tiles within the movement range of a pawn */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void GenerateVirtualTiles(const AGridPawn *Pawn);
 	/* place a single virtual tile under a pawn */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void GenerateVirtualTile(const AGridPawn *Pawn);
-	UNavTileComponent *ConsiderGenerateVirtualTile(const FVector &TileLocation);
 	void DestroyVirtualTiles();
 	virtual void Destroyed() override;
 public:

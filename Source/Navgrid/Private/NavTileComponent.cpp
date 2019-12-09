@@ -2,6 +2,8 @@
 
 #include "NavGridPrivatePCH.h"
 #include <limits>
+#include "Components/CapsuleComponent.h"
+#include "DrawDebugHelpers.h"
 
 UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -66,45 +68,11 @@ void UNavTileComponent::SetGrid(ANavGrid * InGrid)
 {
 	Grid = InGrid;
 	SetCollisionResponseToChannel(Grid->ECC_NavGridWalkable, ECollisionResponse::ECR_Overlap); // So we can find the floor with a line trace
-	UpdateBodySetup();
 }
 
 ANavGrid * UNavTileComponent::GetGrid() const
 {
 	return Grid;
-}
-
-void UNavTileComponent::DestroyComponent(bool bPromoteChildren)
-{
-	for (UNavTileComponent *Neighbour : Neighbours)
-	{
-		Neighbour->RemoveNeighbour(this);
-	}
-	Super::DestroyComponent(bPromoteChildren);
-}
-
-void UNavTileComponent::UpdateBodySetup()
-{
-	Super::UpdateBodySetup();
-
-	FVector NeighbourhoodExtent = BoxExtent;
-	/* make the tile taller so it will be included in neighbourhoods that spread over slopes */
-	if (IsValid(Grid))
-	{
-		NeighbourhoodExtent.Z = FMath::Max<float>(NeighbourhoodExtent.Z, Grid->TileSize / 2);
-	}
-	/* Make the shape slightly larger than the actual tile so it will intersect its neighbours */
-	NeighbourhoodExtent += FVector(15);
-	NeighbourhoodShape = FCollisionShape::MakeBox(NeighbourhoodExtent);
-
-	FindNeighbours();
-}
-
-void UNavTileComponent::InvalidateLightingCacheDetailed(bool bInvalidateBuildEnqueuedLighting, bool bTranslationOnly)
-{
-	Super::InvalidateLightingCacheDetailed(bInvalidateBuildEnqueuedLighting, bTranslationOnly);
-
-	FindNeighbours();
 }
 
 void UNavTileComponent::ResetPath()
@@ -114,35 +82,9 @@ void UNavTileComponent::ResetPath()
 	Visited = false;
 }
 
-void UNavTileComponent::FindNeighbours()
-{
-	QUICK_SCOPE_CYCLE_COUNTER(STAT_UNavTileComponent_FindNeighbours);
-
-	// clear any neighbour relations involving this tile
-	for (UNavTileComponent *Neighbour : Neighbours)
-	{
-		Neighbour->RemoveNeighbour(this);
-	}
-	Neighbours.Empty();
-
-	for (TObjectIterator<UNavTileComponent> Itr; Itr; ++Itr)
-	{
-		if (Itr->GetWorld() == GetWorld() && *Itr != this)
-		{
-			if (OverlapComponent(Itr->GetComponentLocation(), Itr->GetComponentRotation().Quaternion(), Itr->NeighbourhoodShape) ||
-				Itr->OverlapComponent(GetComponentLocation(), GetComponentRotation().Quaternion(), NeighbourhoodShape))
-			{
-				AddNeighbour(*Itr);
-				Itr->AddNeighbour(this);
-			}
-		}
-	}
-
-}
-
 bool UNavTileComponent::Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const
 {
-	return Obstructed(FromPos + CollisionCapsule.RelativeLocation, GetComponentLocation() + PawnLocationOffset + CollisionCapsule.RelativeLocation, CollisionCapsule);
+	return Obstructed(FromPos + CollisionCapsule.RelativeLocation, GetPawnLocation() + CollisionCapsule.RelativeLocation, CollisionCapsule);
 }
 
 bool UNavTileComponent::Obstructed(const FVector &From, const FVector &To, const UCapsuleComponent &CollisionCapsule) const
@@ -153,7 +95,6 @@ bool UNavTileComponent::Obstructed(const FVector &From, const FVector &To, const
 	FCollisionQueryParams CQP;
 	CQP.AddIgnoredActor(CollisionCapsule.GetOwner());
 	CQP.TraceTag = "NavGridMovement";
-
 	return CollisionCapsule.GetWorld()->SweepSingleByChannel(OutHit, From, To, Rot, ECollisionChannel::ECC_Pawn, CollisionShape, CQP);
 }
 
@@ -162,11 +103,18 @@ void UNavTileComponent::GetUnobstructedNeighbours(const UCapsuleComponent &Colli
 	QUICK_SCOPE_CYCLE_COUNTER(STAT_UNavTileComponent_GetUnobstructedNeighbours);
 
 	OutNeighbours.Empty();
-	for (auto N : *GetNeighbours())
+	if (IsValid(Grid))
 	{
-		if (!N->Obstructed(PawnLocationOffset + GetComponentLocation(), CollisionCapsule))
+		FVector MyExtent = BoxExtent + FVector(Grid->TileSize * 0.75);
+		TArray<FHitResult> HitResults;
+		Grid->GetWorld()->SweepMultiByChannel(HitResults, GetComponentLocation(), GetComponentLocation() + FVector(0, 0, 1), GetComponentQuat(), Grid->ECC_NavGridWalkable, FCollisionShape::MakeBox(MyExtent));
+		for (FHitResult &Hit : HitResults)
 		{
-			OutNeighbours.Add(N);
+			UNavTileComponent *HitTile = Cast<UNavTileComponent>(Hit.GetComponent());
+			if (IsValid(HitTile) && HitTile != this && !HitTile->Obstructed(GetPawnLocation(), CollisionCapsule))
+			{
+				OutNeighbours.AddUnique(HitTile);
+			}
 		}
 	}
 }

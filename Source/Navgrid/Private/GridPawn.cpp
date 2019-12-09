@@ -113,11 +113,6 @@ void AGridPawn::OnAnyTurnStart(UTurnComponent *InTurnComponent)
 
 void AGridPawn::OnTurnStart()
 {
-	ANavGrid *Grid = MovementComponent->GetNavGrid();
-	if (IsValid(Grid) && Grid->EnableVirtualTiles)
-	{
-		GenerateVirtualTiles();
-	}
 	MovementComponent->ConsiderUpdateCurrentTile();
 	if (SnapToGrid)
 	{
@@ -227,7 +222,7 @@ bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
 		Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
 	{
 		TArray<UNavTileComponent *> InRange;
-		MovementComponent->GetNavGrid()->GetTilesInRange(this, true, InRange);
+		MovementComponent->GetNavGrid()->GetTilesInRange(this, InRange);
 		if (Tile.Distance <= MovementComponent->MovementRange)
 		{
 			return true;
@@ -240,21 +235,6 @@ void AGridPawn::MoveTo(const UNavTileComponent & Tile)
 {
 	MovementComponent->MoveTo(Tile);
 	MovementComponent->HidePath();
-}
-
-UNavTileComponent *AGridPawn::ConsiderGenerateVirtualTile()
-{
-	if (!IsValid(MovementComponent->GetTile()) && MovementComponent->GetNavGrid()->EnableVirtualTiles)
-	{
-		return MovementComponent->GetNavGrid()->ConsiderGenerateVirtualTile(GetActorLocation());
-	}
-	return MovementComponent->GetTile();
-}
-
-void AGridPawn::GenerateVirtualTiles()
-{
-	MovementComponent->GetNavGrid()->GenerateVirtualTiles(this);
-	MovementComponent->ConsiderUpdateCurrentTile();
 }
 
 void AGridPawn::Clicked(AActor *ClickedActor, FKey PressedKey)
@@ -316,9 +296,8 @@ void AGridPawn::UpdatePreviewTiles()
 		}
 	}
 
-	GenerateVirtualTiles();
 	TArray<UNavTileComponent *> Tiles;
-	PreviewGrid->GetTilesInRange(this, true, Tiles);
+	PreviewGrid->GetTilesInRange(this, Tiles);
 	for (UNavTileComponent *Tile : Tiles)
 	{
 		Tile->SetHighlight("Movable");

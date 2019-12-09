@@ -19,31 +19,13 @@ UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitial
 	MovementModes.Add(EGridMovementMode::ClimbingDown);
 }
 
-void UNavLadderComponent::UpdateBodySetup()
+void UNavLadderComponent::SetGrid(ANavGrid *InGrid)
 {
-	UBoxComponent::UpdateBodySetup();
+	Super::SetGrid(InGrid);
 
-	// Update NeighbourhoodExtent
-	FVector NeighbourhoodExtent = BoxExtent;
-	/* make the tile wider to increase the chance of it overlapping with regular tiles */
-	if (IsValid(Grid))
-	{
-		NeighbourhoodExtent.X = FMath::Max<float>(NeighbourhoodExtent.X, Grid->TileSize);
-		NeighbourhoodExtent.Y = FMath::Max<float>(NeighbourhoodExtent.Y, Grid->TileSize / 2);
-	}
-	/* Make the shape slightly larger than the actual tile so it will intersect its neighbours */
-	NeighbourhoodExtent += FVector(15);
-	NeighbourhoodShape = FCollisionShape::MakeBox(NeighbourhoodExtent);
-
-	// Update path points and PawnLocationOffset
 	PawnLocationOffset = GetComponentRotation().RotateVector(FVector(90, 0, 0));
-	if (IsValid(Grid))
-	{
-		BottomPathPoint->SetRelativeLocation(FVector(Grid->TileSize / 2, 0, 50 - BoxExtent.Z));
-		TopPathPoint->SetRelativeLocation(FVector(Grid->TileSize / 2, 0, BoxExtent.Z - 25));
-	}
-
-	FindNeighbours();
+	BottomPathPoint->SetRelativeLocation(FVector(Grid->TileSize * 0.75, 0, 50 - BoxExtent.Z));
+	TopPathPoint->SetRelativeLocation(FVector(Grid->TileSize * 0.75, 0, BoxExtent.Z - 25));
 }
 
 FVector UNavLadderComponent::GetPawnLocation() const
@@ -54,16 +36,32 @@ FVector UNavLadderComponent::GetPawnLocation() const
 void UNavLadderComponent::GetUnobstructedNeighbours(const UCapsuleComponent & CollisionCapsule, TArray<UNavTileComponent*>& OutNeighbours)
 {
 	OutNeighbours.Empty();
-	for (auto N : *GetNeighbours())
+	if (IsValid(Grid))
+	{
+		FCollisionShape Shape = FCollisionShape::MakeBox(BoxExtent + FVector(Grid->TileSize / 2));
+
+		TArray<FHitResult> HitResults;
+		Grid->GetWorld()->SweepMultiByChannel(HitResults, GetComponentLocation(), GetComponentLocation() + FVector(0, 0, 1), FQuat(), Grid->ECC_NavGridWalkable, Shape);
+		for (FHitResult &Hit : HitResults)
+		{
+			UNavTileComponent *HitTile = Cast<UNavTileComponent>(Hit.GetComponent());
+			if (IsValid(HitTile) && HitTile != this)
+			{
+				OutNeighbours.AddUnique(HitTile);
+			}
+		}
+	}
+
+	for (int32 Idx = OutNeighbours.Num() - 1; Idx >= 0; Idx--)
 	{
 		//Determine if we should trace from the top or bottom point
-		float TopDistance = (TopPathPoint->GetComponentLocation() - N->GetPawnLocation()).Size();
-		float BottomDistance = (BottomPathPoint->GetComponentLocation() - N->GetPawnLocation()).Size();
+		float TopDistance = (TopPathPoint->GetComponentLocation() - OutNeighbours[Idx]->GetPawnLocation()).Size();
+		float BottomDistance = (BottomPathPoint->GetComponentLocation() - OutNeighbours[Idx]->GetPawnLocation()).Size();
 		FVector TracePoint = TopDistance < BottomDistance ? TopPathPoint->GetComponentLocation() : BottomPathPoint->GetComponentLocation();
 
-		if (!N->Obstructed(TracePoint, CollisionCapsule))
+		if (OutNeighbours[Idx]->Obstructed(TracePoint, CollisionCapsule))
 		{
-			OutNeighbours.Add(N);
+			OutNeighbours.RemoveAt(Idx);
 		}
 	}
 }
@@ -75,14 +73,19 @@ bool UNavLadderComponent::Obstructed(const FVector & FromPos, const UCapsuleComp
 	float BottomDistance = (BottomPathPoint->GetComponentLocation() - FromPos).Size();
 	FVector TracePoint = TopDistance < BottomDistance ? TopPathPoint->GetComponentLocation() : BottomPathPoint->GetComponentLocation();
 
-	return UNavTileComponent::Obstructed(FromPos + CollisionCapsule.RelativeLocation, TracePoint + CollisionCapsule.RelativeLocation, CollisionCapsule);
+	FHitResult OutHit;
+	FCollisionShape CollisionShape = CollisionCapsule.GetCollisionShape();
+	FCollisionQueryParams CQP;
+	CQP.AddIgnoredActor(CollisionCapsule.GetOwner());
+	CQP.TraceTag = "NavGridMovement";
+	return CollisionCapsule.GetWorld()->SweepSingleByChannel(OutHit, FromPos + CollisionCapsule.RelativeLocation, TracePoint + CollisionCapsule.RelativeLocation,
+		GetComponentQuat(), ECollisionChannel::ECC_Pawn, CollisionShape, CQP);
 }
 
 bool UNavLadderComponent::Traversable(float MaxWalkAngle, const TSet<EGridMovementMode>& PawnMovementModes) const
 {
 	return MovementModes.Intersect(PawnMovementModes).Num() > 0;
 }
-
 
 void UNavLadderComponent::AddPathSegments(USplineComponent &OutSpline, TArray<FPathSegment> &OutPathSegments, bool EndTile) const
 {
