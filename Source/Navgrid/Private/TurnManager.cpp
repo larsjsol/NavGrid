@@ -82,11 +82,13 @@ void ATurnManager::Tick(float DeltaTime)
 
 void ATurnManager::RegisterTurnComponent(UTurnComponent *TurnComponent)
 {
+	UE_LOG(NavGrid, Verbose, TEXT("%s (team %i) registering"), *TurnComponent->GetName(), TurnComponent->TeamId().GetId());
 	Teams.AddUnique(TurnComponent->TeamId(), TurnComponent);
 }
 
 void ATurnManager::UnregisterTurnComponent(UTurnComponent * TurnComponent)
 {
+	UE_LOG(NavGrid, Verbose, TEXT("%s (team %i) unregistering"), *TurnComponent->GetName(), TurnComponent->TeamId().GetId());
 	Teams.RemoveSingle(TurnComponent->TeamId(), TurnComponent);
 	if (CurrentComponent == TurnComponent)
 	{

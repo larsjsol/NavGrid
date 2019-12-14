@@ -23,6 +23,15 @@ void UTurnComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	UnregisterWithTurnManager();
 }
 
+ATurnManager * UTurnComponent::GetTurnManager()
+{
+	if (!IsValid(TurnManager))
+	{
+		RegisterWithTurnManager();
+	}
+	return TurnManager;
+}
+
 void UTurnComponent::EndTurn()
 {
 	if (IsValid(TurnManager))
@@ -86,8 +95,12 @@ AActor *UTurnComponent::GetCurrentActor() const
 void UTurnComponent::RegisterWithTurnManager()
 {
 	UnregisterWithTurnManager();
-	TurnManager = GetWorld()->GetGameState<ANavGridGameState>()->GetTurnManager();
-	TurnManager->RegisterTurnComponent(this);
+	ANavGridGameState *GameState = GetWorld()->GetGameState<ANavGridGameState>();
+	if (IsValid(GameState))
+	{
+		TurnManager = GameState->GetTurnManager();
+		TurnManager->RegisterTurnComponent(this);
+	}
 }
 
 void UTurnComponent::UnregisterWithTurnManager()

@@ -19,7 +19,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
-	ATurnManager *GetTurnManager() { return TurnManager; }
+	ATurnManager *GetTurnManager();
 protected:
 	UPROPERTY()
 	ATurnManager *TurnManager;

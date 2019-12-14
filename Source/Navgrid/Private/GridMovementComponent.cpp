@@ -145,7 +145,10 @@ void UGridMovementComponent::StopMovementImmediately()
 	ChangeMovementMode(EGridMovementMode::Stationary);
 	MovementPhase = EGridMovementPhase::Done;
 	Distance = 0;
-	Spline->ClearSplinePoints();
+	if (IsValid(Spline))
+	{
+		Spline->ClearSplinePoints();
+	}
 }
 
 FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
@@ -254,15 +257,22 @@ void UGridMovementComponent::ConsiderUpdateCurrentTile()
 			CurrentTile = Tile;
 
 			ANavGridGameState *GameState = Cast<ANavGridGameState>(UGameplayStatics::GetGameState(GetOwner()));
-			AGridPawn *GridPawn = Cast<AGridPawn>(GetOwner());
-			GameState->OnPawnEnterTile().Broadcast(GridPawn, CurrentTile);
+			if (IsValid(GameState))
+			{
+				AGridPawn *GridPawn = Cast<AGridPawn>(GetOwner());
+				GameState->OnPawnEnterTile().Broadcast(GridPawn, CurrentTile);
+			}
 		}
 	}
 }
 
 void UGridMovementComponent::GetTilesInRange(TArray<UNavTileComponent *> &OutTiles)
 {
-	Grid->GetTilesInRange(Cast<AGridPawn>(GetOwner()), OutTiles);
+	if (IsValid(Grid))
+	{
+		ConsiderUpdateCurrentTile();
+		Grid->GetTilesInRange(Cast<AGridPawn>(GetOwner()), OutTiles);
+	}
 }
 
 UNavTileComponent *UGridMovementComponent::GetTile()

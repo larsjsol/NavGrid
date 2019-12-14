@@ -60,13 +60,16 @@ void AGridPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ATurnManager *TurnManager = GetWorld()->GetGameState<ANavGridGameState>()->GetTurnManager();
-	TurnManager->OnRoundStart().AddDynamic(this, &AGridPawn::OnRoundStart);
-	TurnManager->OnTurnStart().AddDynamic(this, &AGridPawn::OnAnyTurnStart);
-	TurnManager->OnTurnEnd().AddDynamic(this, &AGridPawn::OnAnyTurnEnd);
-	TurnManager->OnTeamTurnStart().AddDynamic(this, &AGridPawn::OnAnyTeamTurnStart);
-	TurnManager->OnTeamTurnEnd().AddDynamic(this, &AGridPawn::OnAnyTeamTurnEnd);
-	TurnManager->OnReadyForInput().AddDynamic(this, &AGridPawn::OnAnyPawnReadyForInput);
+	ATurnManager *TurnManager =TurnComponent->GetTurnManager();
+	if (IsValid(TurnManager))
+	{
+		TurnManager->OnRoundStart().AddDynamic(this, &AGridPawn::OnRoundStart);
+		TurnManager->OnTurnStart().AddDynamic(this, &AGridPawn::OnAnyTurnStart);
+		TurnManager->OnTurnEnd().AddDynamic(this, &AGridPawn::OnAnyTurnEnd);
+		TurnManager->OnTeamTurnStart().AddDynamic(this, &AGridPawn::OnAnyTeamTurnStart);
+		TurnManager->OnTeamTurnEnd().AddDynamic(this, &AGridPawn::OnAnyTeamTurnEnd);
+		TurnManager->OnReadyForInput().AddDynamic(this, &AGridPawn::OnAnyPawnReadyForInput);
+	}
 
 	SetGenericTeamId(TeamId);
 
@@ -93,14 +96,10 @@ void AGridPawn::OnConstruction(const FTransform & Transform)
 
 void AGridPawn::SetGenericTeamId(const FGenericTeamId & InTeamId)
 {
-	ANavGridGameState *State = GetWorld()->GetGameState<ANavGridGameState>();
-	ATurnManager *NewTM = State->GetTurnManager();
-	if (IsValid(NewTM))
-	{
-		NewTM->RegisterTurnComponent(TurnComponent);
-	}
-
+	// we must unregister before we change the team id
+	TurnComponent->UnregisterWithTurnManager();
 	TeamId = InTeamId;
+	TurnComponent->RegisterWithTurnManager();
 }
 
 void AGridPawn::OnAnyTurnStart(UTurnComponent *InTurnComponent)
@@ -113,7 +112,6 @@ void AGridPawn::OnAnyTurnStart(UTurnComponent *InTurnComponent)
 
 void AGridPawn::OnTurnStart()
 {
-	MovementComponent->ConsiderUpdateCurrentTile();
 	if (SnapToGrid)
 	{
 		MovementComponent->SnapToGrid();
