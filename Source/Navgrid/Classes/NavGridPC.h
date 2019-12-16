@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/PlayerController.h"
+#include "GenericTeamAgentInterface.h"
 #include "NavGridPC.generated.h"
 
 class ANavGrid;
@@ -39,6 +40,9 @@ public:
 	/* Called when a turn ends */
 	UFUNCTION()
 	virtual void OnTurnEnd(UTurnComponent *Component);
+	/* Called at the start of each team turn */
+	UFUNCTION()
+	virtual void OnTeamTurnStart(const FGenericTeamId &TeamId) {}
 
 	virtual void SetTurnManager(ATurnManager * InTurnManager);
 	virtual void SetGrid(ANavGrid * InGrid);

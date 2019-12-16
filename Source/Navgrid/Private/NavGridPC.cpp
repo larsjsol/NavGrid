@@ -84,12 +84,14 @@ void ANavGridPC::SetTurnManager(ATurnManager * InTurnManager)
 		TurnManager->OnRoundStart().RemoveDynamic(this, &ANavGridPC::OnRoundStart);
 		TurnManager->OnTurnStart().RemoveDynamic(this, &ANavGridPC::OnTurnStart);
 		TurnManager->OnTurnEnd().RemoveDynamic(this, &ANavGridPC::OnTurnEnd);
+		TurnManager->OnTeamTurnStart().RemoveDynamic(this, &ANavGridPC::OnTeamTurnStart);
 	}
 
 	TurnManager = InTurnManager;
 	TurnManager->OnRoundStart().AddDynamic(this, &ANavGridPC::OnRoundStart);
 	TurnManager->OnTurnStart().AddDynamic(this, &ANavGridPC::OnTurnStart);
 	TurnManager->OnTurnEnd().AddDynamic(this, &ANavGridPC::OnTurnEnd);
+	TurnManager->OnTeamTurnStart().AddDynamic(this, &ANavGridPC::OnTeamTurnStart);
 }
 
 void ANavGridPC::SetGrid(ANavGrid * InGrid)
