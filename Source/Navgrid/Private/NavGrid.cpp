@@ -282,7 +282,7 @@ void ANavGrid::ClearTiles()
 	GetEveryTile(AllTiles, GetWorld());
 	for (auto *T : AllTiles)
 	{
-		T->ResetPath();
+		T->Reset();
 	}
 
 	ClearTileHighlights();

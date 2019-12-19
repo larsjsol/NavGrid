@@ -386,7 +386,7 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 		}
 	}
 
-	return false; // no path to Target
+	return false; // no path to TargetTile
 }
 
 bool UGridMovementComponent::MoveTo(const UNavTileComponent &Target)

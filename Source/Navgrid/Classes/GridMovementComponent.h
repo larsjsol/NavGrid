@@ -138,7 +138,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Visualization")
 	float HorizontalOffset = 87.5;
 
-	/* Create a path to Target, return false if no path is found */
+	/* Create a path to TargetTile, return false if no path is found */
 	bool CreatePath(const UNavTileComponent &Target);
 	/* Create a path and follow it if it exists */
 	bool MoveTo(const UNavTileComponent &Target);

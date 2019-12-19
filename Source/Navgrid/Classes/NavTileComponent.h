@@ -38,8 +38,8 @@ public:
 	UNavTileComponent *Backpointer;
 	/* Is this node in the 'visited' set? - Helper var for pathfinding */
 	bool Visited;
-	/* Reset variables used in pathfinding */
-	virtual void ResetPath();
+	/* Rest temporary data (like distance and other vars used in pathfinding) */
+	virtual void Reset();
 
 	/* movement modes that are legal (or make sense) for this tile */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite)

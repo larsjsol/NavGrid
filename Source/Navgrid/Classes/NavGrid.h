@@ -90,7 +90,7 @@ public:
 	/* Find all tiles in range. Call CalculateTilesInRange if neccecary */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void GetTilesInRange(AGridPawn *Pawn, TArray<UNavTileComponent *> &OutTiles);
-	/* Reset all pathfinding information in tiles */
+	/* Reset all temporary data in all tiles in the world */
 	UFUNCTION(BlueprintCallable, Category = "Pathfinding")
 	void ClearTiles();
 protected:

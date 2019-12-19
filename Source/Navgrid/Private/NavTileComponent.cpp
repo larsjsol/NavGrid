@@ -31,7 +31,7 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 
 	ShapeColor = FColor::Magenta;
 
-	ResetPath();
+	Reset();
 }
 
 bool UNavTileComponent::Traversable(float MaxWalkAngle, const TSet<EGridMovementMode>& PawnMovementModes) const
@@ -75,7 +75,7 @@ ANavGrid * UNavTileComponent::GetGrid() const
 	return Grid;
 }
 
-void UNavTileComponent::ResetPath()
+void UNavTileComponent::Reset()
 {
 	Distance = std::numeric_limits<float>::infinity();
 	Backpointer = NULL;
