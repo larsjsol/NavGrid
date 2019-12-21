@@ -5,9 +5,6 @@
 UNavLadderComponent::UNavLadderComponent()
 	:Super()
 {
-	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
-	ArrowComponent->SetupAttachment(this);
-
 	MovementModes.Empty();
 	MovementModes.Add(EGridMovementMode::ClimbingUp);
 	MovementModes.Add(EGridMovementMode::ClimbingDown);

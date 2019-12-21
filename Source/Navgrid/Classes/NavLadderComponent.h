@@ -19,9 +19,6 @@ public:
 	virtual bool Traversable(float MaxWalkAngle, const TSet<EGridMovementMode> &PawnMovementModes) const override;
 	virtual void AddPathSegments(USplineComponent &OutSpline, TArray<FPathSegment> &OutPathSegments, bool EndTile) const override;
 
-	UPROPERTY(BlueprintReadWrite)
-	UArrowComponent *ArrowComponent;
-
 	virtual FVector GetSplineMeshUpVector() override;
 protected:
 	// local copy of tile ANavGrid::TileSize, value is set in SetGrid()
