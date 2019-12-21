@@ -29,8 +29,7 @@ public:
 	ANavGrid();
 
 	/* Collision channel used when tracing for tiles */
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
-	TEnumAsByte<ECollisionChannel> ECC_NavGridWalkable = ECollisionChannel::ECC_GameTraceChannel1;
+	static TEnumAsByte<ECollisionChannel> ECC_NavGridWalkable;
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
 	float TileSize = 200;
 	/* Z-Offset for UI elements */

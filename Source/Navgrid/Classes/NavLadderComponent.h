@@ -10,7 +10,7 @@ class NAVGRID_API UNavLadderComponent : public UNavTileComponent
 {
 	GENERATED_BODY()
 public:
-	UNavLadderComponent(const FObjectInitializer &ObjectInitializer);
+	UNavLadderComponent();
 
 	virtual void SetGrid(ANavGrid *InGrid) override;
 	virtual FVector GetPawnLocation() const override { return ToWorldSpace(FVector(TileSize / 2, 0, 25)); }

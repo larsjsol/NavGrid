@@ -2,8 +2,8 @@
 
 #include "NavGridPrivatePCH.h"
 
-UNavLadderComponent::UNavLadderComponent(const FObjectInitializer &ObjectInitializer)
-	:Super(ObjectInitializer)
+UNavLadderComponent::UNavLadderComponent()
+	:Super()
 {
 	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
 	ArrowComponent->SetupAttachment(this);

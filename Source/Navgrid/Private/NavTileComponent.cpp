@@ -5,8 +5,8 @@
 #include "Components/CapsuleComponent.h"
 #include "DrawDebugHelpers.h"
 
-UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer)
-	:Super(ObjectInitializer)
+UNavTileComponent::UNavTileComponent()
+	:Super()
 {
 	PawnLocationOffset = FVector::ZeroVector;
 	SetComponentTickEnabled(false);
@@ -24,6 +24,7 @@ UNavTileComponent::UNavTileComponent(const FObjectInitializer &ObjectInitializer
 	SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block); // So we get mouse over events
 	SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Block); // So we get mouse over events
+	SetCollisionResponseToChannel(ANavGrid::ECC_NavGridWalkable, ECollisionResponse::ECR_Overlap); // So we can find the floor with a line trace
 
 	MovementModes.Add(EGridMovementMode::Stationary);
 	MovementModes.Add(EGridMovementMode::Walking);
@@ -67,7 +68,6 @@ void UNavTileComponent::SetPawnLocationOffset(const FVector &Offset)
 void UNavTileComponent::SetGrid(ANavGrid * InGrid)
 {
 	Grid = InGrid;
-	SetCollisionResponseToChannel(Grid->ECC_NavGridWalkable, ECollisionResponse::ECR_Overlap); // So we can find the floor with a line trace
 }
 
 ANavGrid * UNavTileComponent::GetGrid() const

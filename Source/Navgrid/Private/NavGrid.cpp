@@ -7,6 +7,8 @@
 
 DEFINE_LOG_CATEGORY(NavGrid);
 
+TEnumAsByte<ECollisionChannel> ANavGrid::ECC_NavGridWalkable = ECollisionChannel::ECC_GameTraceChannel1;
+
 // Sets default values
 ANavGrid::ANavGrid()
 {
