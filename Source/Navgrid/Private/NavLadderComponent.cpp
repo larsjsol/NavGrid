@@ -66,7 +66,7 @@ bool UNavLadderComponent::Obstructed(const FVector & FromPos, const UCapsuleComp
 	FCollisionQueryParams CQP;
 	CQP.AddIgnoredActor(CollisionCapsule.GetOwner());
 	CQP.TraceTag = "NavGridMovement";
-	return CollisionCapsule.GetWorld()->SweepSingleByChannel(OutHit, FromPos + CollisionCapsule.RelativeLocation, TracePoint + CollisionCapsule.RelativeLocation,
+	return CollisionCapsule.GetWorld()->SweepSingleByChannel(OutHit, FromPos + CollisionCapsule.GetRelativeLocation(), TracePoint + CollisionCapsule.GetRelativeLocation(),
 		GetComponentQuat(), ECollisionChannel::ECC_Pawn, CollisionShape, CQP);
 }
 

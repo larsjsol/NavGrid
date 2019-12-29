@@ -15,7 +15,7 @@ AExampleGridPawn::AExampleGridPawn()
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
 	UStaticMesh *Mesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Engine/BasicShapes/Cone.Cone'")).Object;
 	StaticMesh->SetStaticMesh(Mesh);
-	StaticMesh->SetRelativeLocation(-MovementCollisionCapsule->RelativeLocation + FVector(0, 0, 50));
+	StaticMesh->SetRelativeLocation(-MovementCollisionCapsule->GetRelativeLocation() + FVector(0, 0, 50));
 	StaticMesh->SetupAttachment(GetRootComponent());
 
 	/* Show the arrow in-game so we can which way the pawn is facing */

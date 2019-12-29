@@ -47,17 +47,15 @@ void UGridMovementComponent::BeginPlay()
 	}
 
 	/* Grab a reference to (a) AnimInstace */
-	for (UActorComponent *Comp : GetOwner()->GetComponentsByClass(USkeletalMeshComponent::StaticClass()))
+	TArray<USkeletalMeshComponent*> SkeletalMeshComponents;
+	GetOwner()->GetComponents(SkeletalMeshComponents);
+	for (USkeletalMeshComponent* Comp : SkeletalMeshComponents)
 	{
-		USkeletalMeshComponent *Mesh = Cast<USkeletalMeshComponent>(Comp);
-		if (Mesh)
+		MeshRotation = Comp->GetRelativeTransform().Rotator();
+		AnimInstance = Comp->GetAnimInstance();
+		if (AnimInstance)
 		{
-			MeshRotation = Mesh->GetRelativeTransform().Rotator();
-			AnimInstance = Mesh->GetAnimInstance();
-			if (AnimInstance)
-			{
-				break;
-			}
+			break;
 		}
 	}
 	if (!AnimInstance)
@@ -306,7 +304,7 @@ void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath
 			// keep points needed to get around chasms and obstacles
 			FVector Delta = InPath[Idx]->GetPawnLocation() - InPath[CurrentIdx]->GetPawnLocation();
 			if (FMath::Abs(Delta.Rotation().Pitch) > MaxWalkAngle ||
-				FMath::Abs(Delta.Z) > Capsule.RelativeLocation.Z - Capsule.GetScaledCapsuleHalfHeight() ||
+				FMath::Abs(Delta.Z) > Capsule.GetRelativeLocation().Z - Capsule.GetScaledCapsuleHalfHeight() ||
 				InPath[Idx]->Obstructed(InPath[CurrentIdx]->GetPawnLocation(), Capsule))
 			{
 				OutPath.AddUnique(InPath[Idx - 1]);

@@ -84,7 +84,7 @@ void UNavTileComponent::Reset()
 
 bool UNavTileComponent::Obstructed(const FVector &FromPos, const UCapsuleComponent &CollisionCapsule) const
 {
-	return Obstructed(FromPos + CollisionCapsule.RelativeLocation, GetPawnLocation() + CollisionCapsule.RelativeLocation, CollisionCapsule);
+	return Obstructed(FromPos + CollisionCapsule.GetRelativeLocation(), GetPawnLocation() + CollisionCapsule.GetRelativeLocation(), CollisionCapsule);
 }
 
 bool UNavTileComponent::Obstructed(const FVector &From, const FVector &To, const UCapsuleComponent &CollisionCapsule) const
@@ -188,7 +188,7 @@ void UNavTileComponent::SetHighlight(FName NewHighlightType)
 
 void UNavTileComponent::DrawDebug(UCapsuleComponent *CollisionCapsule, bool bPersistentLines, float LifeTime, float Thickness)
 {
-	DrawDebugCapsule(GetWorld(), GetPawnLocation() + CollisionCapsule->RelativeLocation, CollisionCapsule->GetScaledCapsuleHalfHeight(), CollisionCapsule->GetScaledCapsuleRadius(),
+	DrawDebugCapsule(GetWorld(), GetPawnLocation() + CollisionCapsule->GetRelativeLocation(), CollisionCapsule->GetScaledCapsuleHalfHeight(), CollisionCapsule->GetScaledCapsuleRadius(),
 		CollisionCapsule->GetComponentQuat(), FColor::Cyan, bPersistentLines, LifeTime, 0, Thickness);
 	DrawDebugBox(GetWorld(), GetComponentLocation(), BoxExtent, GetComponentQuat(), FColor::Cyan, bPersistentLines, LifeTime, 0, Thickness);
 	if (IsValid(Grid))
@@ -199,10 +199,10 @@ void UNavTileComponent::DrawDebug(UCapsuleComponent *CollisionCapsule, bool bPer
 	GetNeighbours(*CollisionCapsule, UnObstructed, Obstructed);
 	for (UNavTileComponent *Tile : UnObstructed)
 	{
-		DrawDebugLine(GetWorld(), GetPawnLocation() + CollisionCapsule->RelativeLocation, CollisionCapsule->RelativeLocation + ((GetPawnLocation() + Tile->GetPawnLocation()) / 2), FColor::Green, bPersistentLines, LifeTime, 0, Thickness);
+		DrawDebugLine(GetWorld(), GetPawnLocation() + CollisionCapsule->GetRelativeLocation(), CollisionCapsule->GetRelativeLocation() + ((GetPawnLocation() + Tile->GetPawnLocation()) / 2), FColor::Green, bPersistentLines, LifeTime, 0, Thickness);
 	}
 	for (UNavTileComponent *Tile : Obstructed)
 	{
-		DrawDebugLine(GetWorld(), GetPawnLocation() + CollisionCapsule->RelativeLocation, CollisionCapsule->RelativeLocation + ((GetPawnLocation() + Tile->GetPawnLocation()) / 2), FColor::Red, bPersistentLines, LifeTime, 0, Thickness);
+		DrawDebugLine(GetWorld(), GetPawnLocation() + CollisionCapsule->GetRelativeLocation(), CollisionCapsule->GetRelativeLocation() + ((GetPawnLocation() + Tile->GetPawnLocation()) / 2), FColor::Red, bPersistentLines, LifeTime, 0, Thickness);
 	}
 }
