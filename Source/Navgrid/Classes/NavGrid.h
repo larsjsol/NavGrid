@@ -38,6 +38,13 @@ public:
 	/* Should virtual tiles be placed on empty areas */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
 	bool EnableVirtualTiles = false;
+
+	// Do not place virtual tiles on actors with this tag
+	static FName DisableVirtualTilesTag;
+	// getter for blueprints
+	UFUNCTION(BlueprintPure, Category = "NavGrid")
+	FName GetDisableVirtualTilesTag() { return DisableVirtualTilesTag; }
+
 	/* Class used for virtual tiles */
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "NavGrid")
 	TSubclassOf<UNavTileComponent> TileClass;

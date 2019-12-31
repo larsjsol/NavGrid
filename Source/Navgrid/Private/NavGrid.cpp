@@ -8,6 +8,7 @@
 DEFINE_LOG_CATEGORY(NavGrid);
 
 TEnumAsByte<ECollisionChannel> ANavGrid::ECC_NavGridWalkable = ECollisionChannel::ECC_GameTraceChannel1;
+FName ANavGrid::DisableVirtualTilesTag = "NavGrid:DisableVirtualTiles";
 
 // Sets default values
 ANavGrid::ANavGrid()
@@ -298,10 +299,16 @@ bool ANavGrid::TraceTileLocation(const FVector & TraceStart, const FVector & Tra
 	CQP.TraceTag = "NavGridTilePlacement";
 	FHitResult HitResult;
 
-	bool BlockingHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Pawn, CQP);
+	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Pawn, CQP);
+	bool bHasDisableTileTag = false;
+	if (HitResult.Actor.IsValid())
+	{
+		bHasDisableTileTag = HitResult.Actor->ActorHasTag(DisableVirtualTilesTag);
+	}
+
 	OutTilePos = HitResult.ImpactPoint;
-	// return true if we hit the 'outside' of something that is not a gridpawn
-	return HitResult.bBlockingHit && !HitResult.bStartPenetrating &&  !Cast<AGridPawn>(HitResult.Actor);
+	// return true if we hit the 'outside' of something that does not have the disabletile-tag
+	return HitResult.bBlockingHit && !HitResult.bStartPenetrating && !bHasDisableTileTag;
 }
 
 UNavTileComponent * ANavGrid::PlaceTile(const FVector & Location, AActor * TileOwner)
@@ -330,9 +337,9 @@ UNavTileComponent * ANavGrid::ConsiderPlaceTile(const FVector &TraceStart, const
 	}
 
 	FVector TileLocation;
-	bool FoundGround = TraceTileLocation(TraceStart, TraceEnd, TileLocation);
+	bool FoundGoodLocation = TraceTileLocation(TraceStart, TraceEnd, TileLocation);
 	UNavTileComponent *ExistingTile = LineTraceTile(TraceStart, TraceEnd);
-	if (FoundGround && !IsValid(ExistingTile))
+	if (FoundGoodLocation && !IsValid(ExistingTile))
 	{
 		return PlaceTile(TileLocation, TileOwner);
 	}
