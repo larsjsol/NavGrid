@@ -173,8 +173,9 @@ void UNavTileComponent::SetHighlight(FName NewHighlightType)
 	if (HighlightComponent)
 	{
 		FVector MeshSize = HighlightComponent->GetStaticMesh()->GetBoundingBox().GetSize();
+		FVector TileSize = GetScaledBoxExtent() * 2;
 		FTransform Transform = GetComponentTransform();
-		Transform.SetScale3D(FVector(Grid->TileSize / MeshSize.X, Grid->TileSize / MeshSize.Y, 1));
+		Transform.SetScale3D(FVector(TileSize.X / MeshSize.X, TileSize.Y / MeshSize.Y, 1));
 		HighlightComponent->AddInstanceWorldSpace(Transform);
 	}
 }
