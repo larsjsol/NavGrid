@@ -54,6 +54,9 @@ AGridPawn::AGridPawn()
 #if WITH_EDITORONLY_DATA
 	USelection::SelectObjectEvent.AddUObject(this, &AGridPawn::OnObjectSelectedInEditor);
 #endif
+
+	// dont place tiles on top of pawns
+	Tags.AddUnique(ANavGrid::DisableVirtualTilesTag);
 }
 
 void AGridPawn::BeginPlay()
@@ -217,7 +220,7 @@ bool AGridPawn::CanBeSelected()
 bool AGridPawn::CanMoveTo(const UNavTileComponent & Tile)
 {
 	if (MovementComponent->GetTile() != &Tile &&
-		Tile.LegalPositionAtEndOfTurn(MovementComponent->MaxWalkAngle, MovementComponent->AvailableMovementModes))
+		Tile.LegalPositionAtEndOfTurn(MovementComponent->AvailableMovementModes))
 	{
 		TArray<UNavTileComponent *> InRange;
 		MovementComponent->GetNavGrid()->GetTilesInRange(this, InRange);

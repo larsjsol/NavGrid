@@ -88,9 +88,6 @@ public:
 	/* How fast can the actor turn */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement")
 	float MaxRotationSpeed = 720;
-	/* Steepest slope the actor can walk up or down */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Movement")
-	float MaxWalkAngle = 45;
 	/* MovementModes usable for this Pawn */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement")
 	TSet<EGridMovementMode> AvailableMovementModes;

@@ -70,11 +70,6 @@ bool UNavLadderComponent::Obstructed(const FVector & FromPos, const UCapsuleComp
 		GetComponentQuat(), ECollisionChannel::ECC_Pawn, CollisionShape, CQP);
 }
 
-bool UNavLadderComponent::Traversable(float MaxWalkAngle, const TSet<EGridMovementMode>& PawnMovementModes) const
-{
-	return MovementModes.Intersect(PawnMovementModes).Num() > 0;
-}
-
 void UNavLadderComponent::AddPathSegments(USplineComponent &OutSpline, TArray<FPathSegment> &OutPathSegments, bool EndTile) const
 {
 	FVector EntryPoint = OutSpline.GetLocationAtSplinePoint(OutSpline.GetNumberOfSplinePoints() - 1, ESplineCoordinateSpace::Local);

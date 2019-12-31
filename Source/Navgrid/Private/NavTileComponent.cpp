@@ -35,24 +35,14 @@ UNavTileComponent::UNavTileComponent()
 	Reset();
 }
 
-bool UNavTileComponent::Traversable(float MaxWalkAngle, const TSet<EGridMovementMode>& PawnMovementModes) const
+bool UNavTileComponent::Traversable(const TSet<EGridMovementMode>& PawnMovementModes) const
 {
-	FRotator TileRot = GetComponentRotation();
-	float MaxAngle = FMath::Max3<float>(TileRot.Pitch, TileRot.Yaw, TileRot.Roll);
-	float MinAngle = FMath::Min3<float>(TileRot.Pitch, TileRot.Yaw, TileRot.Roll);
-	if (MaxAngle < MaxWalkAngle && MinAngle > -MaxWalkAngle)
-	{
-		return MovementModes.Intersect(PawnMovementModes).Num() > 0;
-	}
-	else
-	{
-		return false;
-	}
+	return MovementModes.Intersect(PawnMovementModes).Num() > 0;
 }
 
-bool UNavTileComponent::LegalPositionAtEndOfTurn(float MaxWalkAngle, const TSet<EGridMovementMode> &PawnMovementModes) const
+bool UNavTileComponent::LegalPositionAtEndOfTurn(const TSet<EGridMovementMode> &PawnMovementModes) const
 {
-	return Traversable(MaxWalkAngle, PawnMovementModes) && MovementModes.Contains(EGridMovementMode::Stationary);
+	return MovementModes.Contains(EGridMovementMode::Stationary);
 }
 
 FVector UNavTileComponent::GetPawnLocation() const
@@ -113,13 +103,16 @@ void UNavTileComponent::GetNeighbours(const UCapsuleComponent & CollisionCapsule
 		for (FHitResult &Hit : HitResults)
 		{
 			UNavTileComponent *HitTile = Cast<UNavTileComponent>(Hit.GetComponent());
-			if (IsValid(HitTile) && HitTile != this && !HitTile->Obstructed(GetPawnLocation(), CollisionCapsule))
+			if (IsValid(HitTile))
 			{
-				OutUnObstructed.AddUnique(HitTile);
-			}
-			else
-			{
-				OutObstructed.AddUnique(HitTile);
+				if (HitTile != this && !HitTile->Obstructed(GetPawnLocation(), CollisionCapsule))
+				{
+					OutUnObstructed.AddUnique(HitTile);
+				}
+				else
+				{
+					OutObstructed.AddUnique(HitTile);
+				}
 			}
 		}
 	}

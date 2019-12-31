@@ -216,7 +216,7 @@ void ANavGrid::CalculateTilesInRange(AGridPawn *Pawn)
 		Current->GetUnobstructedNeighbours(*Pawn->MovementCollisionCapsule, NeighbouringTiles);
 		for (UNavTileComponent *N : NeighbouringTiles)
 		{
-			if (!N->Traversable(Pawn->MovementComponent->MaxWalkAngle, Pawn->MovementComponent->AvailableMovementModes))
+			if (!N->Traversable(Pawn->MovementComponent->AvailableMovementModes))
 			{
 				continue;
 			}

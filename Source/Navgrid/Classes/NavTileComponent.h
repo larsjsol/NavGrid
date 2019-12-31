@@ -53,13 +53,11 @@ public:
 	/* Return the neighbours that are not Obstructed() */
 	void GetUnobstructedNeighbours(const UCapsuleComponent &CollisionCapsule, TArray<UNavTileComponent *> &OutNeighbours);
 	/* Can a pawn traverse this tile?
-	*
-	* MaxWalkAngle: the pawns MaxWalkAngle
 	* PawnMovementModes: movement modes availabe for the pawn
 	*/
-	virtual bool Traversable(float MaxWalkAngle, const TSet<EGridMovementMode> &PawnMovementModes) const;
+	virtual bool Traversable(const TSet<EGridMovementMode> &PawnMovementModes) const;
 	/* Can a pawn end its turn on this tile?*/
-	virtual bool LegalPositionAtEndOfTurn(float MaxWalkAngle, const TSet<EGridMovementMode> &PawnMovementModes) const;
+	virtual bool LegalPositionAtEndOfTurn(const TSet<EGridMovementMode> &PawnMovementModes) const;
 
 	/* Placement for pawn occupying this tile in world space */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Default")
