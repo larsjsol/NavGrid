@@ -2,35 +2,42 @@
 
 #include "NavGridPrivatePCH.h"
 
-void ANavGridGameState::HandleBeginPlay()
+ANavGrid* ANavGridGameState::GetNavGrid()
 {
-	//spawn turn manager
-	TurnManager = SpawnTurnManager();
-
-	// if a navgrid exists in the game world, grab it
-	TActorIterator<ANavGrid> GridItr(GetWorld());
-	if (GridItr)
+	if (!IsValid(Grid))
 	{
-		Grid = *GridItr;
-	}
-	else
-	{
-		Grid = SpawnNavGrid();
-	}
-
-	// make sure that every tile belongs to a grid
-	TArray<UNavTileComponent *> AllTiles;
-	Grid->GetEveryTile(AllTiles, GetWorld());
-	for (UNavTileComponent *Tile : AllTiles)
-	{
-		if (!Tile->GetGrid())
+		// if a navgrid exists in the game world, grab it
+		TActorIterator<ANavGrid> GridItr(GetWorld());
+		if (GridItr)
 		{
-			Tile->SetGrid(Grid);
+			Grid = *GridItr;
+		}
+		else
+		{
+			Grid = SpawnNavGrid();
+		}
+
+		// make sure that every tile belongs to a grid
+		TArray<UNavTileComponent*> AllTiles;
+		Grid->GetEveryTile(AllTiles, GetWorld());
+		for (UNavTileComponent* Tile : AllTiles)
+		{
+			if (!Tile->GetGrid())
+			{
+				Tile->SetGrid(Grid);
+			}
 		}
 	}
+	return Grid;
+}
 
-	// with the essentials in place, continue with begin play
-	Super::HandleBeginPlay();
+ATurnManager* ANavGridGameState::GetTurnManager()
+{
+	if (!IsValid(TurnManager))
+	{
+		TurnManager = SpawnTurnManager();
+	}
+	return TurnManager;
 }
 
 ATurnManager * ANavGridGameState::SpawnTurnManager()

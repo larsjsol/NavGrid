@@ -284,7 +284,6 @@ ANavGrid * UGridMovementComponent::GetNavGrid()
 	{
 		Grid = ANavGrid::GetNavGrid(GetOwner());
 	}
-	check(Grid);
 	return Grid;
 }
 
@@ -374,7 +373,7 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 
 			for (int32 Idx = 1; Idx < Path.Num(); Idx++)
 			{
-				if (Grid->GetTile(ActorLocation) != Path[Idx] && Owner->GetTile() != Path[Idx])
+				if (Grid->GetTile(ActorLocation) != Path[Idx] && CurrentTile != Path[Idx])
 				{
 					Path[Idx]->AddPathSegments(*Spline, PathSegments, Idx == Path.Num() - 1);
 				}

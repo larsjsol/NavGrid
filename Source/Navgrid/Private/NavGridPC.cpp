@@ -18,7 +18,7 @@ void ANavGridPC::BeginPlay()
 	// grab turn manager and grid from the game state
 	auto *State = GetWorld()->GetGameState<ANavGridGameState>();
 	SetTurnManager(State->GetTurnManager());
-	SetGrid(State->Grid);
+	SetGrid(State->GetNavGrid());
 }
 
 void ANavGridPC::OnTileClicked(const UNavTileComponent *Tile)

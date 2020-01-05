@@ -78,6 +78,7 @@ UInstancedStaticMeshComponent * ANavGrid::GetHighlightComponent(FName Type)
 		Comp->SetMaterial(0, Material);
 		Comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		Comp->RegisterComponent();
+		Comp->bOnlyOwnerSee = true;
 		TileHighlights.Add(Type, Comp);
 	}
 	/* we *should* now have the object we need*/
@@ -98,15 +99,15 @@ ANavGrid *ANavGrid::GetNavGrid(AActor *ActorInWorld)
 
 ANavGrid * ANavGrid::GetNavGrid(UWorld *World)
 {
-	if (World)
+	ANavGridGameState* GameState = World->GetGameState<ANavGridGameState>();
+	if (IsValid(GameState))
 	{
-		TActorIterator<ANavGrid> Itr(World, ANavGrid::StaticClass());
-		if (Itr)
-		{
-			return *Itr;
-		}
+		return GameState->GetNavGrid();
 	}
-	return NULL;
+	else
+	{
+		return nullptr;
+	}
 }
 
 UNavTileComponent *ANavGrid::GetTile(const FVector &WorldLocation, bool FindFloor/*= true*/, float UpwardTraceLength/* = 100*/, float DownwardTraceLength/* = 100*/)

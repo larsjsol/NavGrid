@@ -201,17 +201,34 @@ EGridPawnState AGridPawn::GetState() const
   *  1) It must be the pawns teams turn
   *  2) It must be in the WaitingForTurn state
   *  3) The pawn currently in its turn must be idle
+  *  4) It must not have used all its action points
 */
 bool AGridPawn::CanBeSelected()
 {
 	ANavGridGameState *GameState = Cast<ANavGridGameState>(GetWorld()->GetGameState());
-	if (GameState)
+	if (IsValid(GameState))
 	{
 		ATurnManager *TurnManager = GameState->GetTurnManager();
-		if (TurnManager && TurnManager->GetCurrentTeam() == TeamId && GetState() == EGridPawnState::WaitingForTurn)
+		if (IsValid(TurnManager))
 		{
-			AGridPawn *CurrentPawn = Cast<AGridPawn>(TurnManager->GetCurrentComponent()->GetOwner());
-			return CurrentPawn->GetState() != EGridPawnState::Busy;
+			// 1) It must be the pawns teams turn
+			if (TurnManager->GetCurrentTeam() != TeamId)
+			{
+				return false;
+			}
+			// 2) It must be in the WaitingForTurn state
+			if (GetState() != EGridPawnState::WaitingForTurn)
+			{
+				return false;
+			}
+			// 3) The pawn currently in its turn must be idle
+			AGridPawn* CurrentPawn = Cast<AGridPawn>(TurnManager->GetCurrentComponent()->GetOwner());
+			if (!IsValid(CurrentPawn) || CurrentPawn->GetState() == EGridPawnState::Busy)
+			{
+				return false;
+			}
+			// 4) It must action points remaining
+			return TurnComponent->RemainingActionPoints > 0;
 		}
 	}
 	return false;
