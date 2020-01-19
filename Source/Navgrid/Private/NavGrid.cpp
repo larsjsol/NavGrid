@@ -339,13 +339,32 @@ UNavTileComponent * ANavGrid::ConsiderPlaceTile(const FVector &TraceStart, const
 
 	FVector TileLocation;
 	bool FoundGoodLocation = TraceTileLocation(TraceStart, TraceEnd, TileLocation);
-	UNavTileComponent *ExistingTile = LineTraceTile(TraceStart, TraceEnd);
-	if (FoundGoodLocation && !IsValid(ExistingTile))
+	if (FoundGoodLocation)
 	{
-		return PlaceTile(TileLocation, TileOwner);
+		// check if we a new tile will overlap any existing tiles
+		// use a mutlisweep as tiles returs overlap responses to this channel
+		TArray<FHitResult> HitResults;
+		FCollisionShape TileShape = FCollisionShape::MakeBox(FVector(TileSize / 3, TileSize / 3, 25));
+		GetWorld()->SweepMultiByChannel(HitResults, TileLocation, TileLocation - FVector(0, 0, 1), FQuat::Identity, ECC_NavGridWalkable, TileShape);
+
+		UNavTileComponent* ExistingTile = nullptr;
+		for (FHitResult& HitResult : HitResults)
+		{
+			if (IsValid(ExistingTile = Cast<UNavTileComponent>(HitResult.Component.Get())))
+			{
+				break;
+			}
+		}
+
+		//UNavTileComponent* ExistingTile = LineTraceTile(TraceStart, TraceEnd);
+		if (!IsValid(ExistingTile))
+		{
+			return PlaceTile(TileLocation, TileOwner);
+		}
 	}
 
-	return NULL;
+
+	return nullptr;
 }
 
 FVector ANavGrid::AdjustToTileLocation(const FVector &Location)
