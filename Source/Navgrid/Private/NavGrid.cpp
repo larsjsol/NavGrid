@@ -356,7 +356,6 @@ UNavTileComponent * ANavGrid::ConsiderPlaceTile(const FVector &TraceStart, const
 			}
 		}
 
-		//UNavTileComponent* ExistingTile = LineTraceTile(TraceStart, TraceEnd);
 		if (!IsValid(ExistingTile))
 		{
 			return PlaceTile(TileLocation, TileOwner);
