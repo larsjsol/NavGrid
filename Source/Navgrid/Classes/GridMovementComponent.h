@@ -191,10 +191,12 @@ protected:
 	/* How far along the spline are we */
 	float Distance = 0;
 
-	/* the grid we're currently on */
+private:
+	/* the grid we're currently on. You should get this via GetNavGrid() and avoid using it directly */
 	UPROPERTY()
-	ANavGrid *Grid = NULL;
+	ANavGrid *CachedNavGrid = NULL;
 
+protected:
 	UPROPERTY()
 	UAnimInstance *AnimInstance;
 

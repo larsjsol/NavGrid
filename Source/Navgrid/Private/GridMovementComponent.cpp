@@ -40,7 +40,7 @@ void UGridMovementComponent::BeginPlay()
 		check(Spline);
 	}
 
-	Grid = ANavGrid::GetNavGrid(GetWorld());
+	ANavGrid* Grid = GetNavGrid();
 	if (!Grid)
 	{
 		UE_LOG(NavGrid, Error, TEXT("%s was unable to find a NavGrid in level"), *this->GetName());
@@ -239,6 +239,7 @@ void UGridMovementComponent::ConsiderUpdateCurrentTile()
 {
 	// try to grab the tile we're on and store it in CurrentTile. Take care to not overwrite a pointer to an
 	// actual tile with NULL as that would mean we have moved off the grid
+	ANavGrid* Grid = GetNavGrid();
 	if (IsValid(Grid))
 	{
 
@@ -266,6 +267,7 @@ void UGridMovementComponent::ConsiderUpdateCurrentTile()
 
 void UGridMovementComponent::GetTilesInRange(TArray<UNavTileComponent *> &OutTiles)
 {
+	ANavGrid *Grid = GetNavGrid();
 	if (IsValid(Grid))
 	{
 		ConsiderUpdateCurrentTile();
@@ -280,11 +282,11 @@ UNavTileComponent *UGridMovementComponent::GetTile()
 
 ANavGrid * UGridMovementComponent::GetNavGrid()
 {
-	if (!IsValid(Grid))
+	if (!IsValid(CachedNavGrid))
 	{
-		Grid = ANavGrid::GetNavGrid(GetOwner());
+		CachedNavGrid = ANavGrid::GetNavGrid(GetOwner());
 	}
-	return Grid;
+	return CachedNavGrid;
 }
 
 void UGridMovementComponent::StringPull(TArray<const UNavTileComponent*>& InPath, TArray<const UNavTileComponent*>& OutPath)
@@ -341,6 +343,7 @@ bool UGridMovementComponent::CreatePath(const UNavTileComponent &Target)
 		return false;
 	}
 
+	ANavGrid* Grid = GetNavGrid();
 	TArray<UNavTileComponent *> InRange;
 	Grid->GetTilesInRange(Cast<AGridPawn>(GetOwner()), InRange);
 	if (InRange.Contains(&Target))
@@ -523,6 +526,8 @@ FVector UGridMovementComponent::GetForwardLocation(float ForwardDistance)
 
 void UGridMovementComponent::AddSplineMesh(float From, float To)
 {
+	ANavGrid* Grid = GetNavGrid();
+
 	float TanScale = 25;
 	FVector StartPos = Spline->GetLocationAtDistanceAlongSpline(From, ESplineCoordinateSpace::Local);
 	StartPos.Z += Grid->UIOffset;
