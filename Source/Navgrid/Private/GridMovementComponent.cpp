@@ -277,6 +277,10 @@ void UGridMovementComponent::GetTilesInRange(TArray<UNavTileComponent *> &OutTil
 
 UNavTileComponent *UGridMovementComponent::GetTile()
 {
+	if (!IsValid(CurrentTile))
+	{
+		ConsiderUpdateCurrentTile();
+	}
 	return CurrentTile;
 }
 
