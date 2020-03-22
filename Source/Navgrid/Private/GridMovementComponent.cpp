@@ -225,6 +225,7 @@ FTransform UGridMovementComponent::TransformFromRotation(float DeltaTime)
 	FTransform NewTransform = Owner->GetActorTransform();
 	if (Owner->GetActorRotation().Equals(DesiredForwardRotation))
 	{
+		Owner->SetActorRotation(DesiredForwardRotation);
 		ChangeMovementMode(EGridMovementMode::Stationary);
 	}
 	else
