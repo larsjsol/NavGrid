@@ -111,11 +111,11 @@ void ATurnManager::EndTurn(UTurnComponent *Ender)
 	{
 		if (IsValid(CurrentComponent))
 		{
-			UE_LOG(NavGrid, Warning, TEXT("ATurnManager::EndTurn(%s): CurrentComopnent: %s"), *Ender->GetOwner()->GetName(), *CurrentComponent->GetOwner()->GetName());
+			UE_LOG(NavGrid, Warning, TEXT("ATurnManager::EndTurn(%s): CurrentComponent: %s"), *Ender->GetOwner()->GetName(), *CurrentComponent->GetOwner()->GetName());
 		}
 		else
 		{
-			UE_LOG(NavGrid, Warning, TEXT("ATurnManager::EndTurn(%s): CurrentComonent: null"), *Ender->GetOwner()->GetName());
+			UE_LOG(NavGrid, Warning, TEXT("ATurnManager::EndTurn(%s): CurrentComponent: null"), *Ender->GetOwner()->GetName());
 		}
 	}
 }
