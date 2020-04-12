@@ -26,7 +26,6 @@ UGridMovementComponent::UGridMovementComponent(const FObjectInitializer &ObjectI
 
 	Distance = 0;
 	MovementMode = EGridMovementMode::Stationary;
-	MovementPhase = EGridMovementPhase::Done;
 }
 
 void UGridMovementComponent::BeginPlay()
@@ -39,6 +38,7 @@ void UGridMovementComponent::BeginPlay()
 		Spline = NewObject<USplineComponent>(this, "PathSpline");
 		check(Spline);
 	}
+	Spline->ClearSplinePoints();
 
 	ANavGrid* Grid = GetNavGrid();
 	if (!Grid)
@@ -46,7 +46,7 @@ void UGridMovementComponent::BeginPlay()
 		UE_LOG(NavGrid, Error, TEXT("%s was unable to find a NavGrid in level"), *this->GetName());
 	}
 
-	/* Grab a reference to (a) AnimInstace */
+	/* Grab a reference to the first AnimInstace we find */
 	TArray<USkeletalMeshComponent*> SkeletalMeshComponents;
 	GetOwner()->GetComponents(SkeletalMeshComponents);
 	for (USkeletalMeshComponent* Comp : SkeletalMeshComponents)
@@ -95,13 +95,12 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	{
 	default:
 	case EGridMovementMode::Stationary:
-		if (bAlwaysUseRootMotion && MovementPhase != EGridMovementPhase::Ending)
+		if (bAlwaysUseRootMotion)
 		{
 			FTransform RootMotion = ConsumeRootMotion();
 			NewTransform.SetRotation(NewTransform.GetRotation() * RootMotion.GetRotation());
 			FRotator AnimToWorld = Owner->GetActorRotation() + MeshRotation;
 			NewTransform.SetLocation(NewTransform.GetLocation() + AnimToWorld.RotateVector(RootMotion.GetLocation()));
-
 		}
 		break; //nothing to do
 	case EGridMovementMode::InPlaceTurn:
@@ -126,27 +125,11 @@ void UGridMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	UpdateComponentVelocity();
 	// actually move the the actor
 	Owner->SetActorTransform(NewTransform);
-
-	if (MovementPhase == EGridMovementPhase::Beginning)
-	{
-		MovementPhase = EGridMovementPhase::Middle;
-	}
-	else if (MovementPhase == EGridMovementPhase::Ending && Velocity.Size() < 25)
-	{
-		OnMovementEndEvent.Broadcast();
-		MovementPhase = EGridMovementPhase::Done;
-	}
 }
 
 void UGridMovementComponent::StopMovementImmediately()
 {
-	ChangeMovementMode(EGridMovementMode::Stationary);
-	MovementPhase = EGridMovementPhase::Done;
-	Distance = 0;
-	if (IsValid(Spline))
-	{
-		Spline->ClearSplinePoints();
-	}
+	FinishMovement();
 }
 
 FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
@@ -157,12 +140,6 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 	{
 		FTransform RootMotion = ConsumeRootMotion();
 		CurrentSpeed = RootMotion.GetLocation().Size();
-
-		/* adjust the speed if we know the length and root motion in the ending animation */
-		if (StoppingDistance > 0 && StoppingTime > 0 && EGridMovementPhase::Ending == MovementPhase)
-		{
-			CurrentSpeed = FMath::Max(DeltaTime * StoppingDistance / StoppingTime, CurrentSpeed);
-		}
 	}
 
 	if (CurrentSpeed < 25 * DeltaTime)
@@ -202,18 +179,10 @@ FTransform UGridMovementComponent::TransformFromPath(float DeltaTime)
 	FRotator NewRotation = LimitRotation(OldTransform.GetRotation().Rotator(), DesiredRotation, DeltaTime);
 	NewTransform.SetRotation(NewRotation.Quaternion());
 
-	/* Check if we are in the end phase of this movement mode */
-	if (Distance + StoppingDistance >= Spline->GetSplineLength())
+	// check if we are done
+	if (Distance >= Spline->GetSplineLength())
 	{
-		MovementPhase = EGridMovementPhase::Ending;
-	}
-	/* clear path if we have traversed it all (we might not get here if StoppingDistance is set) */
-	if (CurrentSpeed == 0 || Distance >= Spline->GetSplineLength())
-	{
-		ChangeMovementMode(EGridMovementMode::Stationary);
-		MovementPhase = EGridMovementPhase::Done;
-		Distance = 0;
-		Spline->ClearSplinePoints();
+		FinishMovement();
 	}
 
 	return NewTransform;
@@ -426,6 +395,36 @@ void UGridMovementComponent::SnapToGrid()
 	}
 }
 
+void UGridMovementComponent::AdvanceAlongPath(float InDistance)
+{
+	if (Spline->GetNumberOfSplinePoints() > 0)
+	{
+		Distance = FMath::Min(Spline->GetSplineLength(), Distance + InDistance);
+		FTransform NewTransform = Spline->GetTransformAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::Local);
+
+		FRotator DesiredRotation;
+		/* Restrain rotation axis if we're walking */
+		if (MovementMode == EGridMovementMode::Walking)
+		{
+			DesiredRotation = NewTransform.Rotator();
+		}
+		/* Use the rotation from the ladder if we're climbing */
+		else if (MovementMode == EGridMovementMode::ClimbingUp || MovementMode == EGridMovementMode::ClimbingDown)
+		{
+			DesiredRotation = CurrentPathSegment.PawnRotationHint;
+		}
+		DesiredRotation = ApplyRotationLocks(DesiredRotation);
+
+		NewTransform.SetRotation(DesiredForwardRotation.Quaternion());
+
+		/* never change the scale */
+		NewTransform.SetScale3D(GetOwner()->GetActorScale3D());
+
+		GetOwner()->SetActorTransform(NewTransform);
+		ConsiderUpdateCurrentTile();
+	}
+}
+
 float UGridMovementComponent::GetRemainingDistance()
 {
 	return FMath::Max(Spline->GetSplineLength() - Distance, 0.0f);
@@ -479,7 +478,6 @@ FTransform UGridMovementComponent::ConsumeRootMotion()
 	return RootMotionParams.GetRootMotionTransform();
 }
 
-
 void UGridMovementComponent::ConsiderUpdateMovementMode()
 {
 	// only consider changing mode when we are moving
@@ -516,11 +514,18 @@ void UGridMovementComponent::ChangeMovementMode(EGridMovementMode NewMode)
 	{
 		OnMovementModeChangedEvent.Broadcast(MovementMode, NewMode);
 		MovementMode = NewMode;
-		if (MovementMode != EGridMovementMode::Stationary)
-		{
-			MovementPhase = EGridMovementPhase::Beginning;
-		}
 	}
+}
+
+void UGridMovementComponent::FinishMovement()
+{
+	Distance = 0;
+	if (IsValid(Spline))
+	{
+		Spline->ClearSplinePoints();
+	}
+	ChangeMovementMode(EGridMovementMode::Stationary);
+	OnMovementEndEvent.Broadcast();
 }
 
 FVector UGridMovementComponent::GetForwardLocation(float ForwardDistance)

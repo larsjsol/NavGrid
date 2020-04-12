@@ -21,15 +21,6 @@ enum class EGridMovementMode : uint8
 	InPlaceTurn     UMETA(DisplayName = "Turn in place"),
 };
 
-UENUM(BlueprintType)
-enum class EGridMovementPhase : uint8
-{
-	Beginning		UMETA(DisplayName = "Beginning"),
-	Middle			UMETA(DisplayName = "Middle"),
-	Ending			UMETA(DisplayName = "Ending"),
-	Done			UMETA(DisplayName = "Done")
-};
-
 USTRUCT()
 struct FPathSegment
 {
@@ -106,15 +97,6 @@ public:
 	/* Should we extract root motion for speed and rotation even if we are not moving*/
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Movement")
 	bool bAlwaysUseRootMotion = false;
-	/* Set this to stop moving a certain distance from the path end point, useful if
-	you bAlwaysUseRootMotion and have a walk-end animation that contains some movement */
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Movement")
-	float StoppingDistance = 0;
-	/* Set this to the length of the stopping animation if you want the component to adjust
-	the movent speed during the movement end-phase in order to excately stop at the path enpoint.
-	Useful if you are not able to find an exact number for StoppingDistance */
-	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Movement")
-	float StoppingTime = 0;
 
 	/* Should we straighten out the path to avoid zigzaging */
 	UPROPERTY(BlueprintReadWrite, EditAnyWhere, Category = "Movement")
@@ -143,6 +125,8 @@ public:
 	void TurnTo(const FRotator &Forward);
 	/* Snap actor the grid */
 	void SnapToGrid();
+	/* Advance a given distance along the path */
+	void AdvanceAlongPath(float InDistance);
 	/* Get the remaining distance of the current path (zero if the pawn is currently not moving) */
 	float GetRemainingDistance();
 	/* Use actor rotation for components where we have an rotation locks, use InRotation for the rest */
@@ -158,12 +142,11 @@ public:
 	FTransform ConsumeRootMotion();
 
 	EGridMovementMode GetMovementMode() { return MovementMode; }
-	EGridMovementPhase GetMovementPhase() { return MovementPhase; }
 protected:
 	EGridMovementMode MovementMode;
 	void ConsiderUpdateMovementMode();
 	void ChangeMovementMode(EGridMovementMode NewMode);
-	EGridMovementPhase MovementPhase;
+	void FinishMovement();
 public:
 	/* Return the point the the pawn will reach if it continues moving for ForwardDistance */
 	FVector GetForwardLocation(float ForwardDistance);
