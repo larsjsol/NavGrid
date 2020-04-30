@@ -58,9 +58,9 @@ void UGridMovementComponent::BeginPlay()
 			break;
 		}
 	}
-	if (!AnimInstance)
+	if (!AnimInstance && (bUseRootMotion || bAlwaysUseRootMotion))
 	{
-		UE_LOG(NavGrid, Error, TEXT("%s: Unable to get reference to AnimInstance"), *GetName());
+		UE_LOG(NavGrid, Error, TEXT("%s: Unable to get reference to AnimInstance. Root motion extraction disabled"), *GetName());
 		bUseRootMotion = false;
 		bAlwaysUseRootMotion = false;
 	}
