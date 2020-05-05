@@ -16,9 +16,8 @@ AGridPawn::AGridPawn()
 	SetRootComponent(SceneRoot);
 
 	BoundsCapsule = CreateDefaultSubobject<UCapsuleComponent>("Capsule");
-	BoundsCapsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	BoundsCapsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block); // So we get mouse over events
-	BoundsCapsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Block); // So we get mouse over events
+	BoundsCapsule->SetCollisionProfileName("Pawn");
+	BoundsCapsule->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	BoundsCapsule->ShapeColor = FColor::Magenta;
 	BoundsCapsule->SetupAttachment(SceneRoot);
 
