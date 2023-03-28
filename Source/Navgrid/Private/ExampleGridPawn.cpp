@@ -1,10 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "NavGridPrivatePCH.h"
 #include "ExampleGridPawn.h"
 
+#include "Engine.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/ArrowComponent.h"
+#include "Components/CapsuleComponent.h"
 
 AExampleGridPawn::AExampleGridPawn()
 	:Super()

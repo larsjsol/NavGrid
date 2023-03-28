@@ -1,5 +1,5 @@
-#include "NavGridPrivatePCH.h"
 #include "NavLadderActor.h"
+
 
 ANavLadderActor::ANavLadderActor(const FObjectInitializer &ObjectInitializer)
 	: Super(ObjectInitializer)

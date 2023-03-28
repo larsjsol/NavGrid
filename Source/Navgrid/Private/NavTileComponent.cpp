@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "NavGridPrivatePCH.h"
+#include "NavTileComponent.h"
 #include <limits>
 #include "Components/CapsuleComponent.h"
 #include "DrawDebugHelpers.h"

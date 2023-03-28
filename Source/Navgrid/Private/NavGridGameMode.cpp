@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "NavGridPrivatePCH.h"
+#include "NavGridGameMode.h"
+#include "NavGridPC.h"
 
 ANavGridGameMode::ANavGridGameMode()
 	:Super()
