@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "NavGridPrivatePCH.h"
+#include "GridPawn.h"
+
 #if WITH_EDITORONLY_DATA
 #include "Editor.h"
 #endif

@@ -5,7 +5,6 @@ public class NavGrid : ModuleRules
 {
     public NavGrid(ReadOnlyTargetRules TargetRules) : base(TargetRules) {
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AIModule" });
-        PrivatePCHHeaderFile = "Private/NavGridPrivatePCH.h";
 
         if (TargetRules.bBuildEditor)
         {
